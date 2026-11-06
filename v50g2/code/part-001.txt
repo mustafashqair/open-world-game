@@ -397,7 +397,7 @@ function makeWorkers() {                        // Web Worker من Blob؛ عند
     const n = Math.min(3, Math.max(1, (navigator.hardwareConcurrency || 4) - 2));
     for (let i = 0; i < n; i++) {
       const w = new Worker(url); w.busy = false; w.postMessage({ world: WORLD });     // حقول العالم تُمرَّر مرة واحدة
-      w.onmessage = e => { w.busy = false; CT.n++; CT.ms += performance.now() - w.t0; if (CT.n === 80) console.info('[أداء] متوسط زمن توليد القطعة (Worker): ' + (CT.ms / CT.n).toFixed(1) + ' م.ث'); addChunk(e.data.cx, e.data.cz, e.data.res, e.data.r, e.data.gr); };
+      w.onmessage = e => { w.busy = false; CT.n++; CT.ms += performance.now() - w.t0; if (CT.n === 80) console.info('[أداء] متوسط زمن توليد القطعة (Worker): ' + (CT.ms / CT.n).toFixed(1) + ' م.ث'); const d = e.data; G4UPLOAD.add(() => addChunk(d.cx, d.cz, d.res, d.r, d.gr), Object.values(d.r).reduce((n, a) => n + (a?.byteLength || 0), 0)); };
       w.onerror = () => { useWorker = false; w.busy = false; };
       workers.push(w);
     }
@@ -4364,7 +4364,7 @@ const VWORK = (() => {
   api.preload = () => load();   // v50g
   // للفحص: VWORK.test('man','W_Chop', x, z, yaw)
   function test(c, clip, x, z, yaw) { const v = (window.__dbg && __dbg.VILLAGES || []).find(q => isTarget(q) && q.live); if (!v) return 'no village'; const R = actor(v.live, v, c, clip, x, z, yaw || 0, { t0: 0 }); return R ? 'ok' : 'fail'; }
-  Object.assign(api, { near, line, strike, build, tick, test, actors, MD, AN, CH, ATT, FIX, applyFix, T: THREE, sk: skClone }); window.VWORK = api; return api;
+  Object.assign(api, { warmHem: o => { if (!NOE && o.isSkinnedMesh) hemMat({ sks: [o], yaw: 0 }); }, near, line, strike, build, tick, test, actors, MD, AN, CH, ATT, FIX, applyFix, T: THREE, sk: skClone }); window.VWORK = api; return api;
 })();
 
 /* ═══ v50 EST50: القصر ثلاثي الأبعاد v13 + حديقة v15 مكان تل القصر (داخل الملحق الملكي) — نسخة خفيفة على الموبايل، ?pal_hi للكاملة؛ ?palace3d=0 يطفئه ═══ */
