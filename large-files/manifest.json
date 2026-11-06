@@ -1,0 +1,273 @@
+{
+ "npcs/vwork/city-man-new-v3f.glb": {
+  "size": 3849216,
+  "sha256": "d588671f4f056098fb9e6b093deb3e48b5b973473ddc98b1274b4bd35e823959",
+  "parts": [
+   "large-files/npcs/vwork/city-man-new-v3f.glb.part000",
+   "large-files/npcs/vwork/city-man-new-v3f.glb.part001"
+  ]
+ },
+ "npcs/vwork/village-girl-new-v9.glb": {
+  "size": 4887784,
+  "sha256": "e26294083188531cc989beab2c7f6d09a3106c517dce92943f925ab9a7122b23",
+  "parts": [
+   "large-files/npcs/vwork/village-girl-new-v9.glb.part000",
+   "large-files/npcs/vwork/village-girl-new-v9.glb.part001"
+  ]
+ },
+ "palace3d/palace-garden-v15-lite.glb": {
+  "size": 4176340,
+  "sha256": "7f55f0b2a07571b291a3c802a418e11d17099fcf8932dd0a0502e7008f838149",
+  "parts": [
+   "large-files/palace3d/palace-garden-v15-lite.glb.part000",
+   "large-files/palace3d/palace-garden-v15-lite.glb.part001"
+  ]
+ },
+ "palace3d/palace-garden-v15.glb": {
+  "size": 20927744,
+  "sha256": "05ac87ef75a8c8c52ebcc3f6673a75a84472202b30a4f0769684aa9ca751da8d",
+  "parts": [
+   "large-files/palace3d/palace-garden-v15.glb.part000",
+   "large-files/palace3d/palace-garden-v15.glb.part001",
+   "large-files/palace3d/palace-garden-v15.glb.part002",
+   "large-files/palace3d/palace-garden-v15.glb.part003",
+   "large-files/palace3d/palace-garden-v15.glb.part004",
+   "large-files/palace3d/palace-garden-v15.glb.part005",
+   "large-files/palace3d/palace-garden-v15.glb.part006",
+   "large-files/palace3d/palace-garden-v15.glb.part007"
+  ]
+ },
+ "palace3d/palace-v13-lite.glb": {
+  "size": 24073464,
+  "sha256": "0a781359504c38dcc531704cb5508e21a616f682922953d01b5a91c4ec8ab4f3",
+  "parts": [
+   "large-files/palace3d/palace-v13-lite.glb.part000",
+   "large-files/palace3d/palace-v13-lite.glb.part001",
+   "large-files/palace3d/palace-v13-lite.glb.part002",
+   "large-files/palace3d/palace-v13-lite.glb.part003",
+   "large-files/palace3d/palace-v13-lite.glb.part004",
+   "large-files/palace3d/palace-v13-lite.glb.part005",
+   "large-files/palace3d/palace-v13-lite.glb.part006",
+   "large-files/palace3d/palace-v13-lite.glb.part007",
+   "large-files/palace3d/palace-v13-lite.glb.part008"
+  ]
+ },
+ "palace3d/palace-v13.glb": {
+  "size": 29283480,
+  "sha256": "b1b77c2bb204d12031ffc95ed99c3182ad901abce04641e5d19b8ddd6aff58bc",
+  "parts": [
+   "large-files/palace3d/palace-v13.glb.part000",
+   "large-files/palace3d/palace-v13.glb.part001",
+   "large-files/palace3d/palace-v13.glb.part002",
+   "large-files/palace3d/palace-v13.glb.part003",
+   "large-files/palace3d/palace-v13.glb.part004",
+   "large-files/palace3d/palace-v13.glb.part005",
+   "large-files/palace3d/palace-v13.glb.part006",
+   "large-files/palace3d/palace-v13.glb.part007",
+   "large-files/palace3d/palace-v13.glb.part008",
+   "large-files/palace3d/palace-v13.glb.part009",
+   "large-files/palace3d/palace-v13.glb.part010"
+  ]
+ },
+ "v41/atmo/higher_order_scattering.exr": {
+  "size": 3583044,
+  "sha256": "ba8a7e76db3f3f2f2bfc655a9bb986e85b1ef2e001085adc9db686ac368a4f5e",
+  "parts": [
+   "large-files/v41/atmo/higher_order_scattering.exr.part000",
+   "large-files/v41/atmo/higher_order_scattering.exr.part001"
+  ]
+ },
+ "v41/atmo/scattering.exr": {
+  "size": 4094331,
+  "sha256": "6e6331c196f3d6c524543062bfe9d5fcf52201ac3d62cd443dfedfe58a53b2ce",
+  "parts": [
+   "large-files/v41/atmo/scattering.exr.part000",
+   "large-files/v41/atmo/scattering.exr.part001"
+  ]
+ },
+ "village/v4/gate-v5.glb": {
+  "size": 3476912,
+  "sha256": "57cf65b024a4758cc2b4f8e05c494b48893f817a0c3fadcfc68d876e0cecb991",
+  "parts": [
+   "large-files/village/v4/gate-v5.glb.part000",
+   "large-files/village/v4/gate-v5.glb.part001"
+  ]
+ },
+ "village/v4/gravel.webp": {
+  "size": 5588620,
+  "sha256": "5e138389b03033497843575ab9031f57983c4c368cd8da38207e4db7bc24ae01",
+  "parts": [
+   "large-files/village/v4/gravel.webp.part000",
+   "large-files/village/v4/gravel.webp.part001"
+  ]
+ },
+ "village/v4/house-w1.glb": {
+  "size": 3514760,
+  "sha256": "1e70bd8fdb4f05647610819fe992463b881f0feecc5031babc5365d950697122",
+  "parts": [
+   "large-files/village/v4/house-w1.glb.part000",
+   "large-files/village/v4/house-w1.glb.part001"
+  ]
+ },
+ "village/v4/house-w3.glb": {
+  "size": 3581832,
+  "sha256": "61f2ea332199b5b39f8536a1013593cbd82b317060054adb6c6548b929bc498f",
+  "parts": [
+   "large-files/village/v4/house-w3.glb.part000",
+   "large-files/village/v4/house-w3.glb.part001"
+  ]
+ },
+ "village/v4/house-w4.glb": {
+  "size": 3652452,
+  "sha256": "6f7d338c4afdb6d7e5b5a1b782a82ec8660c76aa45ce1d81dabf73db2e54b453",
+  "parts": [
+   "large-files/village/v4/house-w4.glb.part000",
+   "large-files/village/v4/house-w4.glb.part001"
+  ]
+ },
+ "village/village-kiosk-1-v2.glb": {
+  "size": 3995320,
+  "sha256": "ceb8c96a9f647a2202892213094f86ca0293c05a058818cbbb71a84972a51356",
+  "parts": [
+   "large-files/village/village-kiosk-1-v2.glb.part000",
+   "large-files/village/village-kiosk-1-v2.glb.part001"
+  ]
+ },
+ "village/village-kiosk-1-v3.glb": {
+  "size": 4658784,
+  "sha256": "6de196a3485b61cf54d9e083e1bede63e99faa602fb9acad6da5e7fa295f93fc",
+  "parts": [
+   "large-files/village/village-kiosk-1-v3.glb.part000",
+   "large-files/village/village-kiosk-1-v3.glb.part001"
+  ]
+ },
+ "village/village-kiosk-1-v4.glb": {
+  "size": 4356336,
+  "sha256": "e133ccdee47c690b34a7bce02b0d885079bda4feb520a723fc6f55a60e678926",
+  "parts": [
+   "large-files/village/village-kiosk-1-v4.glb.part000",
+   "large-files/village/village-kiosk-1-v4.glb.part001"
+  ]
+ },
+ "village/village-kiosk-1-v5.glb": {
+  "size": 4348124,
+  "sha256": "0c57310eae73a5aed1c6db90a19beca8149521e0f1bef769294108e2676d52db",
+  "parts": [
+   "large-files/village/village-kiosk-1-v5.glb.part000",
+   "large-files/village/village-kiosk-1-v5.glb.part001"
+  ]
+ },
+ "village/village-kiosk-2-v2.glb": {
+  "size": 4187732,
+  "sha256": "ea69a747aaac25b92db516d0ac6179b4398e99a6120bec4d67a90cf7719b3937",
+  "parts": [
+   "large-files/village/village-kiosk-2-v2.glb.part000",
+   "large-files/village/village-kiosk-2-v2.glb.part001"
+  ]
+ },
+ "village/village-kiosk-2-v3.glb": {
+  "size": 4350232,
+  "sha256": "1e9e39c604d34a33f148620a3126fe7d897c707cd0346df621da0a579b8cfe82",
+  "parts": [
+   "large-files/village/village-kiosk-2-v3.glb.part000",
+   "large-files/village/village-kiosk-2-v3.glb.part001"
+  ]
+ },
+ "village/village-kiosk-2-v4.glb": {
+  "size": 4219160,
+  "sha256": "a8e2fe1df91ad72197a8b5853d6ffb2631f87ade6e2ab53a2b3e0bcb346a4b09",
+  "parts": [
+   "large-files/village/village-kiosk-2-v4.glb.part000",
+   "large-files/village/village-kiosk-2-v4.glb.part001"
+  ]
+ },
+ "village/village-kiosk-2-v5.glb": {
+  "size": 4173216,
+  "sha256": "6a99ad5c0b5f762215424dcbaffc86f3dd81e2256706ea7b8e85e05a9f731117",
+  "parts": [
+   "large-files/village/village-kiosk-2-v5.glb.part000",
+   "large-files/village/village-kiosk-2-v5.glb.part001"
+  ]
+ },
+ "village/village-kiosk-3-v2.glb": {
+  "size": 3280144,
+  "sha256": "305ef79751958be8d8e48ee47bdfc742e471bd303a75633159881316e582d862",
+  "parts": [
+   "large-files/village/village-kiosk-3-v2.glb.part000",
+   "large-files/village/village-kiosk-3-v2.glb.part001"
+  ]
+ },
+ "village/village-kiosk-3-v3.glb": {
+  "size": 4020696,
+  "sha256": "e33c92fcf356c452fada886ef95f4a61facafb1d072b9cb46361ee92f111a62c",
+  "parts": [
+   "large-files/village/village-kiosk-3-v3.glb.part000",
+   "large-files/village/village-kiosk-3-v3.glb.part001"
+  ]
+ },
+ "village/village-kiosk-3-v4.glb": {
+  "size": 3873544,
+  "sha256": "2c77baf8a2de44bac57fd21738e2ad252d0eebeb3cc4aaec97b4e7e405250ba2",
+  "parts": [
+   "large-files/village/village-kiosk-3-v4.glb.part000",
+   "large-files/village/village-kiosk-3-v4.glb.part001"
+  ]
+ },
+ "village/village-kiosk-3-v5.glb": {
+  "size": 3858032,
+  "sha256": "bcfc221c15439ced4b5007a1f43ee2263a1f93c5afc742072865208c07f71617",
+  "parts": [
+   "large-files/village/village-kiosk-3-v5.glb.part000",
+   "large-files/village/village-kiosk-3-v5.glb.part001"
+  ]
+ },
+ "village/village-kiosk-4-v2.glb": {
+  "size": 3990844,
+  "sha256": "d9c8439ecbdb27311fc59ab71270e91fceff6ab15e3a5167f7c712f81fca310a",
+  "parts": [
+   "large-files/village/village-kiosk-4-v2.glb.part000",
+   "large-files/village/village-kiosk-4-v2.glb.part001"
+  ]
+ },
+ "village/village-kiosk-4-v3.glb": {
+  "size": 4869264,
+  "sha256": "9165e6f2bb432dfafd343d0cea21386cdb68d85eff0082235b05dbb5eba14a20",
+  "parts": [
+   "large-files/village/village-kiosk-4-v3.glb.part000",
+   "large-files/village/village-kiosk-4-v3.glb.part001"
+  ]
+ },
+ "village/village-kiosk-4-v4.glb": {
+  "size": 4686640,
+  "sha256": "b5b22cdf268b02374ef4d8fbd9f6d36b0bbca9976929d2198966b7a0233fe738",
+  "parts": [
+   "large-files/village/village-kiosk-4-v4.glb.part000",
+   "large-files/village/village-kiosk-4-v4.glb.part001"
+  ]
+ },
+ "village/village-kiosk-4-v5.glb": {
+  "size": 4687744,
+  "sha256": "93e44aac92d067e688a121cf2ca716a850413ac7880d673aba93f3f5a68fa723",
+  "parts": [
+   "large-files/village/village-kiosk-4-v5.glb.part000",
+   "large-files/village/village-kiosk-4-v5.glb.part001"
+  ]
+ },
+ "village/village-kiosk-4.glb": {
+  "size": 3095568,
+  "sha256": "bf57b9b350c0cc50724e26c159c915a71bb2cf12f00ecbc0aa9f8a237a5a42db",
+  "parts": [
+   "large-files/village/village-kiosk-4.glb.part000",
+   "large-files/village/village-kiosk-4.glb.part001"
+  ]
+ },
+ "vlow4/palace3d/palace-v13-lite.glb": {
+  "size": 6108180,
+  "sha256": "7c610ec03a5a88fdcb7fdf85b4036f328295f47b330ba24ac4add8f84916927f",
+  "parts": [
+   "large-files/vlow4/palace3d/palace-v13-lite.glb.part000",
+   "large-files/vlow4/palace3d/palace-v13-lite.glb.part001",
+   "large-files/vlow4/palace3d/palace-v13-lite.glb.part002"
+  ]
+ }
+}

@@ -1,0 +1,8 @@
+العالم المفتوح — شكر وحقوق / Credits
+
+Motion capture: 100STYLE dataset by Ian Mason et al. (CC BY 4.0), via KinemIQ.
+  The 100STYLE Dataset — Ian Mason, Sebastian Starke, Taku Komura (2022). License: https://creativecommons.org/licenses/by/4.0/
+  Used for the villagers' walk and standing idles; changes: one gait cycle cut and made in place, loop closed, retargeted onto the game's characters.
+
+Villager work animations (digging, hammering, picking, carrying, talking) and their tools: Kevin Iglesias — Human Basic Motions FREE / Human Crafting Animations FREE (Unity Asset Store EULA).
+Village materials: Poly Haven (CC0).

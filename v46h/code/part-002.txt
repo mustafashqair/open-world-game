@@ -1,0 +1,1609 @@
+hw, z0: cz - hh, z1: cz + hh, X: x => (x - cx) * s + W / 2, Y: z => (z - cz) * s + H / 2 };
+  }
+
+  /* ── (٥) الخريطة المصغّرة: لوحة جاهزة حول اللاعب لكل مستوى تكبير، تُبنى على مراحل وتُنسخ كل ١٠٠م.ث مع العلامات ── */
+  const MB = { tile: null, bx: 0, bz: 0, H: 0, zi: -1, cw: 0, ver: 0, gen: null, ovl: null, ovW: 0 };
+  function* mmGen(cw, zi, bx, bz) {
+    const R = MMP_ZOOM[zi], H = R * 1.35, s = cw / (2 * R), N = Math.ceil(2 * H * s), dpr = MMP.dpr || 1, ver = M.ver;
+    const cv = document.createElement('canvas'); cv.width = cv.height = N; const g = cv.getContext('2d');
+    const P = view(N, N, dpr, bx, bz, s, true); P.clipLab = false; P.lab = 0.95;
+    if (!(M.L0 && M.L0.ready)) { const q = 64, J = terrNew(bx - H, bz - H, 2 * H / q, q, q, 2.4, 0); terrRun(J, Infinity); P.quick = { cv: toCanvas(J), x0: bx - H, z0: bz - H, w: 2 * H }; }
+    yield;
+    let trees = null;
+    if (zi <= 1) { trees = treesExact(bx - H, bz - H, bx + H, bz + H); yield; }
+    else if (M.TD) trees = treesIndexed(P);
+    drawWorld(g, P, trees);
+    return { tile: cv, bx, bz, H, zi, cw, ver };
+  }
+  function mmEnsure(tEnd) {
+    const cv = $('mmC'); if (!cv || !cv.width) return;
+    const cw = cv.width, zi = MMP.zi, H = MMP_ZOOM[zi] * 1.35;
+    const need = !MB.tile || MB.zi !== zi || MB.cw !== cw || Math.hypot(PL.x - MB.bx, PL.z - MB.bz) > H * 0.22 || (MB.ver !== M.ver && !MB.gen);
+    if (need && !MB.gen) MB.gen = mmGen(cw, zi, PL.x, PL.z);
+    if (MB.gen) {
+      const sync = !MB.tile || MB.zi !== zi || MB.cw !== cw;     // أول بناء أو تغيّر التكبير: يُكمل فوراً
+      for (;;) { const r = MB.gen.next(); if (r.done) { Object.assign(MB, r.value); MB.gen = null; break; } if (!sync && now() > tEnd) break; }
+    }
+  }
+  function mmOverlay(W, dpr) {
+    if (MB.ovl && MB.ovW === W) return MB.ovl;
+    const cv = document.createElement('canvas'); cv.width = cv.height = W; const g = cv.getContext('2d'), c = W / 2;
+    const gr = g.createRadialGradient(c, c, c * 0.62, c, c, c); gr.addColorStop(0, 'rgba(14,27,51,0)'); gr.addColorStop(0.85, 'rgba(14,27,51,.18)'); gr.addColorStop(1, 'rgba(14,27,51,.62)');
+    g.fillStyle = gr; g.beginPath(); g.arc(c, c, c, 0, TAU); g.fill();
+    g.beginPath(); g.arc(c, c, c - 1.2 * dpr, 0, TAU); g.strokeStyle = 'rgba(240,207,120,.85)'; g.lineWidth = 1.6 * dpr; g.stroke();
+    g.font = '700 ' + Math.round(11 * dpr) + 'px ' + FONT; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.lineWidth = 3 * dpr; g.strokeStyle = 'rgba(14,27,51,.9)'; g.strokeText('ش', c, 12 * dpr); g.fillStyle = GOLD_L; g.fillText('ش', c, 12 * dpr);
+    MB.ovl = cv; MB.ovW = W; return cv;
+  }
+  function ownedHorse() { try { const L = window.V19 && V19.H && V19.H.list; return L ? L.find(m => m.owned) || null : null; } catch (e) { return null; } }
+  function playerArrow(g, x, y, k, dpr) {
+    const ang = Math.atan2(-Math.cos(PL.face), -Math.sin(PL.face));
+    g.beginPath(); g.arc(x, y, 11 * k * dpr, 0, TAU); g.fillStyle = 'rgba(255,248,226,.28)'; g.fill();
+    g.save(); g.translate(x, y); g.rotate(ang); g.lineJoin = 'round';
+    g.beginPath(); g.moveTo(12 * k * dpr, 0); g.lineTo(-7 * k * dpr, 7.5 * k * dpr); g.lineTo(-3 * k * dpr, 0); g.lineTo(-7 * k * dpr, -7.5 * k * dpr); g.closePath();
+    g.fillStyle = GOLD_L; g.strokeStyle = NAVY; g.lineWidth = 2 * dpr; g.fill(); g.stroke();
+    g.beginPath(); g.moveTo(9 * k * dpr, 0); g.lineTo(-3 * k * dpr, 0); g.lineTo(-5 * k * dpr, -5 * k * dpr); g.closePath(); g.fillStyle = 'rgba(255,255,255,.55)'; g.fill(); g.restore();
+  }
+  function horseMark(g, x, y, k, dpr) { badge(g, x, y, 8.5 * k * dpr, dpr, GOLD_L, '#6b2f1a'); horseHead(g, x, y + 0.3 * dpr, 5.6 * k * dpr, '#f6e3ad', '#2a1408'); }
+  function mmDraw() {
+    const cv = $('mmC'); if (!cv || !cv.width || !MB.tile) return;
+    const g = cv.getContext('2d'), W = cv.width, c = W / 2, dpr = MMP.dpr || 1, R = MMP_ZOOM[MB.zi], s = W / (2 * R);
+    g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, W, W);
+    g.save(); g.beginPath(); g.arc(c, c, c, 0, TAU); g.clip();
+    g.fillStyle = SEA_FILL; g.fillRect(0, 0, W, W);
+    g.drawImage(MB.tile, c + (MB.bx - MB.H - PL.x) * s, c + (MB.bz - MB.H - PL.z) * s);
+    const h = ownedHorse();
+    if (h && !h.mounted) { const dx = (h.x - PL.x) * s, dz = (h.z - PL.z) * s, d = Math.hypot(dx, dz), lim = c - 12 * dpr;
+      if (d < lim) horseMark(g, c + dx, c + dz, 0.85, dpr); else { const k = lim / d; horseMark(g, c + dx * k, c + dz * k, 0.7, dpr); } }
+    g.drawImage(mmOverlay(W, dpr), 0, 0);
+    playerArrow(g, c, c, 0.95, dpr);
+    g.restore();
+  }
+
+  /* ── (٦) خريطة العالم: سحب وتكبير بالإصبعين/العجلة/الأزرار؛ المنظر يُرسم عند الثبات، وأثناء الحركة تُحرَّك النسخة الجاهزة ── */
+  const WV = { cx: 0, cz: 0, s: 0, s0: 0, smax: 5, init: false, cv: null, R: null, dirty: true, lastG: 0, ptr: new Map(), pin: null, tap: null, comp: null, compD: 0, ui: false, renderVer: -1 };
+  function fitView(W, H) { const t = M.L0 ? M.L0.b.tight : { x0: -CFG.HW, x1: CFG.HW, z0: -CFG.HH, z1: CFG.HH }; WV.s0 = Math.min(W / (t.x1 - t.x0), H / (t.z1 - t.z0)) * 0.96; WV.cx = (t.x0 + t.x1) / 2; WV.cz = (t.z0 + t.z1) / 2; WV.s = WV.s0; }
+  function clampView() {
+    WV.s = cl(WV.s, WV.s0 * 0.85, WV.smax); const t = M.L0 ? M.L0.b.tight : { x0: -CFG.HW, x1: CFG.HW, z0: -CFG.HH, z1: CFG.HH };
+    WV.cx = cl(WV.cx, t.x0, t.x1); WV.cz = cl(WV.cz, t.z0, t.z1); WV.dirty = true; WV.lastG = now();
+  }
+  function wmLayout() {
+    const cv = $('wC'); if (!cv) return; wmUI();
+    const dpr = WM.dpr = Math.min(devicePixelRatio || 1, 2), W = Math.round(innerWidth * dpr), H = Math.round(innerHeight * dpr);
+    if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+    WV.cv = WV.cv || document.createElement('canvas'); WV.cv.width = W; WV.cv.height = H; WM.W = W; WM.H = H;
+    const sm = WV.s0; fitView(innerWidth, innerHeight); if (WV.init && sm) { WV.s0 = Math.min(WV.s0, WV.s0); } 
+    if (!WV.init) { WV.init = true; } else if (WV.last) { WV.cx = WV.last.cx; WV.cz = WV.last.cz; WV.s = WV.last.s; }
+    WV.smax = Math.max(4, WV.s0 * 8); clampView(); wmRender(); wmDraw();
+  }
+  function wmRender() {
+    if (!WV.cv) return; const dpr = WM.dpr || 1, W = WV.cv.width, H = WV.cv.height, g = WV.cv.getContext('2d');
+    const P = view(W, H, dpr, WV.cx, WV.cz, WV.s * dpr, false); P.s0 = WV.s0 * dpr; P.clipLab = true;
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    let trees = [];
+    if (P.s > 0.16 * dpr) { const cells = ((P.x1 - P.x0) / 64 + 1) * ((P.z1 - P.z0) / 64 + 1); trees = cells < 140 ? treesExact(P.x0, P.z0, P.x1, P.z1) : treesIndexed(P).filter(t => t.src !== 2 || P.s < 0.5 * dpr); }
+    drawWorld(g, P, trees);
+    WV.R = { cx: WV.cx, cz: WV.cz, s: WV.s }; WV.renderVer = M.ver; WV.dirty = true;
+  }
+  function compass(dpr) {
+    if (WV.comp && WV.compD === dpr) return WV.comp;
+    const r = 30 * dpr, cv = document.createElement('canvas'); cv.width = cv.height = Math.ceil(r * 2 + 26 * dpr); const g = cv.getContext('2d'), c = cv.width / 2;
+    g.beginPath(); g.arc(c, c, r * 0.62, 0, TAU); g.fillStyle = 'rgba(246,236,210,.55)'; g.fill(); g.strokeStyle = 'rgba(90,60,24,.8)'; g.lineWidth = 1.2 * dpr; g.stroke();
+    g.beginPath(); g.arc(c, c, r * 0.5, 0, TAU); g.setLineDash([2 * dpr, 2 * dpr]); g.stroke(); g.setLineDash([]);
+    for (let k = 0; k < 8; k++) {                         // نجمة ثمانية الرؤوس: الرؤوس الأربعة الكبرى والأربعة الصغرى، كل رأس معيّن بوجهين (فاتح/داكن)
+      const a = k * Math.PI / 4 - Math.PI / 2, L = (k % 2 ? 0.56 : 1) * r, wdt = (k % 2 ? 0.13 : 0.2) * r, ca = Math.cos(a), sa = Math.sin(a), px = -sa, py = ca;
+      g.beginPath(); g.moveTo(c, c); g.lineTo(c + ca * L, c + sa * L); g.lineTo(c + ca * wdt * 1.2 + px * wdt, c + sa * wdt * 1.2 + py * wdt); g.closePath(); g.fillStyle = k % 2 ? '#e9cf8a' : GOLD_L; g.fill();
+      g.beginPath(); g.moveTo(c, c); g.lineTo(c + ca * L, c + sa * L); g.lineTo(c + ca * wdt * 1.2 - px * wdt, c + sa * wdt * 1.2 - py * wdt); g.closePath(); g.fillStyle = k % 2 ? '#8a6524' : '#1b2e52'; g.fill();
+      g.beginPath(); g.moveTo(c + ca * L, c + sa * L); g.lineTo(c + ca * wdt * 1.2 + px * wdt, c + sa * wdt * 1.2 + py * wdt); g.lineTo(c, c); g.lineTo(c + ca * wdt * 1.2 - px * wdt, c + sa * wdt * 1.2 - py * wdt); g.closePath(); g.strokeStyle = '#2a1c0c'; g.lineWidth = 0.9 * dpr; g.stroke();
+    }
+    g.beginPath(); g.arc(c, c, 2.6 * dpr, 0, TAU); g.fillStyle = '#2a1c0c'; g.fill();
+    g.font = '700 ' + Math.round(13 * dpr) + 'px ' + FONT; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineWidth = 3 * dpr; g.strokeStyle = HALO;
+    g.strokeText('ش', c, c - r - 6 * dpr); g.fillStyle = '#7a1e12'; g.fillText('ش', c, c - r - 6 * dpr);
+    WV.comp = cv; WV.compD = dpr; return cv;
+  }
+  function scaleBar(g, W, H, dpr) {
+    const s = WV.s * dpr, nice = [25, 50, 100, 250, 500, 1000, 2000]; let m = nice[0]; for (const q of nice) if (q * s <= 110 * dpr) m = q;
+    const L = m * s, x1 = W - 16 * dpr, x0 = x1 - L, y = H - 20 * dpr;
+    g.fillStyle = 'rgba(246,236,210,.75)'; g.fillRect(x0 - 6 * dpr, y - 16 * dpr, L + 12 * dpr, 26 * dpr);
+    for (let i = 0; i < 4; i++) { g.fillStyle = i % 2 ? '#f6ecd2' : NAVY; g.fillRect(x0 + i * L / 4, y, L / 4, 4 * dpr); }
+    g.strokeStyle = NAVY; g.lineWidth = 1 * dpr; g.strokeRect(x0, y, L, 4 * dpr);
+    g.font = '700 ' + Math.round(10 * dpr) + 'px ' + FONT; g.textAlign = 'center'; g.textBaseline = 'middle'; try { g.direction = 'rtl'; } catch (e) {}
+    g.fillStyle = NAVY; g.fillText(m >= 1000 ? arD(m / 1000) + ' كم' : arD(m) + ' م', (x0 + x1) / 2, y - 7 * dpr);
+  }
+  function wmDraw() {
+    const cv = $('wC'); if (!cv || !WV.cv || !WV.R) return; const g = cv.getContext('2d'), W = cv.width, H = cv.height, dpr = WM.dpr || 1, R = WV.R, k = WV.s / R.s;
+    g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = SEA_FILL; g.fillRect(0, 0, W, H);
+    g.imageSmoothingEnabled = true; g.drawImage(WV.cv, W / 2 + (R.cx - WV.cx) * WV.s * dpr - W / 2 * k, H / 2 + (R.cz - WV.cz) * WV.s * dpr - H / 2 * k, W * k, H * k);
+    const X = x => (x - WV.cx) * WV.s * dpr + W / 2, Y = z => (z - WV.cz) * WV.s * dpr + H / 2, h = ownedHorse();
+    if (h && !h.mounted) { const hx = X(h.x), hy = Y(h.z); horseMark(g, hx, hy, 1.15, dpr);
+      if (WV.s > WV.s0 * 2.5) { g.font = '700 ' + Math.round(10 * dpr) + 'px ' + FONT; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineWidth = 3 * dpr; g.strokeStyle = HALO; g.strokeText('حصانك', hx, hy + 16 * dpr); g.fillStyle = '#6b2f1a'; g.fillText('حصانك', hx, hy + 16 * dpr); } }
+    playerArrow(g, X(PL.x), Y(PL.z), 1.15, dpr);
+    const cp = compass(dpr); g.drawImage(cp, 10 * dpr, 10 * dpr);
+    scaleBar(g, W, H, dpr);
+    if (!(M.L0 && M.L0.ready)) { g.font = '700 ' + Math.round(13 * dpr) + 'px ' + FONT; g.textAlign = 'center'; g.fillStyle = GOLD_L; g.fillText('…جارٍ رسم الخريطة', W / 2, H / 2); }
+    WV.dirty = false;
+  }
+  function wmTick(dt) {
+    if (!WM.open) return;
+    const t = now(), settled = t - WV.lastG > 140 && WV.ptr.size === 0, R = WV.R;
+    if (settled && (!R || R.cx !== WV.cx || R.cz !== WV.cz || R.s !== WV.s || (WV.renderVer !== M.ver && t - (WV.rT || 0) > 400))) { wmRender(); WV.rT = now(); }
+    WM.t += dt; if (WV.dirty || WM.t > 0.25) { WM.t = 0; wmDraw(); }
+  }
+  function zoomAt(f, sx, sy) { const b = WV.s, ns = cl(b * f, WV.s0 * 0.85, WV.smax), W = innerWidth, H = innerHeight;
+    const wx = WV.cx + (sx - W / 2) / b, wz = WV.cz + (sy - H / 2) / b; WV.s = ns; WV.cx = wx - (sx - W / 2) / ns; WV.cz = wz - (sy - H / 2) / ns; clampView(); }
+  function wmUI() {
+    if (WV.ui) return; WV.ui = true;
+    const st = document.createElement('style'); st.id = 'map20Css';
+    st.textContent = '#wmap .wf{left:auto;right:auto;inset-inline-start:auto;left:10px;transform:none;bottom:calc(8px + var(--safeB));max-width:62%;gap:3px 9px;padding:4px 9px;border-radius:10px;background:rgba(246,236,210,.86);border:1px solid #b8913f;color:#1b2a44;font:600 10.5px "Noto Naskh Arabic",Cairo,Tahoma,serif;box-shadow:0 3px 10px rgba(0,0,0,.35)}' +
+      '#wmap .wf .lg svg{width:15px;height:15px;flex:none}#wmap #wC{background:#1f3758;cursor:grab}' +
+      '#wZ{position:absolute;right:10px;top:calc(58px + var(--safeT));z-index:2;display:flex;flex-direction:column;gap:7px}' +
+      '#wZ button{min-width:58px;height:34px;padding:0 10px;border-radius:10px;border:1px solid #c9a24a;background:linear-gradient(180deg,#1d3157,#0e1b33)!important;color:#f0cf78!important;font:700 12.5px "Noto Naskh Arabic",Cairo,Tahoma,serif;box-shadow:0 3px 10px rgba(0,0,0,.4);touch-action:manipulation;cursor:pointer}' +
+      '#wZ button:active{transform:scale(.95)}';
+    document.head.appendChild(st);
+    const ic = (b) => '<svg viewBox="0 0 20 20">' + b + '</svg>';
+    const f = document.querySelector('#wmap .wf');
+    if (f) f.innerHTML = [
+      [ic('<path d="M3 15h6v-5L6 7 3 10z" fill="#f2e4c4" stroke="#16243d"/><path d="M2.5 10.5L6 6.5l3.5 4" fill="#b4583a" stroke="#16243d"/><path d="M10 16h7v-6l-3.5-3.5L10 10z" fill="#f2e4c4" stroke="#16243d"/><path d="M9.5 10.5L13.5 6l4 4.5" fill="#b4583a" stroke="#16243d"/>'), 'قرية'],
+      [ic('<circle cx="10" cy="10" r="7.5" fill="#ead9b2" stroke="#4e3d2a" stroke-width="2"/><path d="M7 12V9.5Q7 6.5 10 6q3 .5 3 3.5V12z" fill="#f0cf78" stroke="#4a3214"/>'), 'المدينة'],
+      [ic('<path d="M2 10h16" stroke="#5c4022" stroke-width="5" stroke-linecap="round"/><path d="M2 10h16" stroke="#f4e7c5" stroke-width="2.6" stroke-linecap="round"/>'), 'طريق'],
+      [ic('<circle cx="7" cy="9" r="4.6" fill="#7e9550" stroke="#2a3418"/><path d="M14 3q2.4 4 1.7 10.5-1.7 1.3-3.4 0Q11.6 7 14 3z" fill="#3f5a3c" stroke="#1d2c1d"/>'), 'أشجار'],
+      [ic('<circle cx="10" cy="10" r="8" fill="#5a3a1c" stroke="#f0cf78" stroke-width="1.6"/><path d="M8 16l.4-5.6Q6.6 6.8 9.4 4.5l.6-2 1.2 2Q14.6 5.6 16 10q.4 1.5-1.2 1.6l-3-1q-1.3 2-1 5.4z" fill="#f3dfa8"/>'), 'إسطبل'],
+      [ic('<path d="M17 10L5 16.5 7.8 10 5 3.5z" fill="#f0cf78" stroke="#0e1b33" stroke-width="1.4" stroke-linejoin="round"/>'), 'أنت'],
+    ].map(([s, t]) => '<span class="lg">' + s + t + '</span>').join('');
+    const z = document.createElement('div'); z.id = 'wZ';
+    z.innerHTML = '<button id="wZi" aria-label="تكبير الخريطة">تكبير</button><button id="wZo" aria-label="تصغير الخريطة">تصغير</button><button id="wMe" aria-label="موقعي على الخريطة">موقعي</button>';
+    $('wmap').appendChild(z);
+    $('wZi').onclick = () => zoomAt(1.8, innerWidth / 2, innerHeight / 2); $('wZo').onclick = () => zoomAt(1 / 1.8, innerWidth / 2, innerHeight / 2);
+    $('wMe').onclick = () => { WV.cx = PL.x; WV.cz = PL.z; if (WV.s < WV.s0 * 4) WV.s = WV.s0 * 4; clampView(); };
+    const c = $('wC'), pos = e => { const r = c.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; };
+    c.addEventListener('pointerdown', e => { try { c.setPointerCapture(e.pointerId); } catch (_) {} const p = pos(e); WV.ptr.set(e.pointerId, p);
+      if (WV.ptr.size === 2) { const [a, b] = [...WV.ptr.values()]; WV.pin = { d: Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, s: WV.s, mx: (a[0] + b[0]) / 2, my: (a[1] + b[1]) / 2, cx: WV.cx, cz: WV.cz }; }
+      WV.tap = WV.ptr.size === 1 ? { x: p[0], y: p[1], t: now(), mv: 0 } : null; e.preventDefault(); });
+    c.addEventListener('pointermove', e => { if (!WV.ptr.has(e.pointerId)) return; const p = pos(e), o = WV.ptr.get(e.pointerId); WV.ptr.set(e.pointerId, p);
+      if (WV.ptr.size === 1) { WV.cx -= (p[0] - o[0]) / WV.s; WV.cz -= (p[1] - o[1]) / WV.s; if (WV.tap) WV.tap.mv += Math.hypot(p[0] - o[0], p[1] - o[1]); clampView(); }
+      else if (WV.ptr.size === 2 && WV.pin) { const [a, b] = [...WV.ptr.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]) || 1, mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, Q = WV.pin, W = innerWidth, H = innerHeight;
+        const wx = Q.cx + (Q.mx - W / 2) / Q.s, wz = Q.cz + (Q.my - H / 2) / Q.s; WV.s = cl(Q.s * d / Q.d, WV.s0 * 0.85, WV.smax); WV.cx = wx - (mx - W / 2) / WV.s; WV.cz = wz - (my - H / 2) / WV.s; clampView(); }
+      e.preventDefault(); });
+    const up = e => { WV.ptr.delete(e.pointerId); if (WV.ptr.size < 2) WV.pin = null; WV.lastG = now();
+      if (WV.tap && WV.ptr.size === 0 && WV.tap.mv < 8 && now() - WV.tap.t < 300) { const t = now(); if (WV.lastTap && t - WV.lastTap.t < 330 && Math.hypot(WV.lastTap.x - WV.tap.x, WV.lastTap.y - WV.tap.y) < 30) { zoomAt(2, WV.tap.x, WV.tap.y); WV.lastTap = null; } else WV.lastTap = { t, x: WV.tap.x, y: WV.tap.y }; }
+      if (WV.ptr.size === 0) WV.tap = null; };
+    c.addEventListener('pointerup', up); c.addEventListener('pointercancel', up);
+    c.addEventListener('wheel', e => { const p = pos(e); zoomAt(Math.exp(-e.deltaY * 0.0016), p[0], p[1]); e.preventDefault(); }, { passive: false });
+  }
+  function open() {
+    if (WM.open || INV.open) return;
+    WM.open = true; $('wmap').classList.add('on'); $('wmap').setAttribute('aria-hidden', 'false');
+    document.exitPointerLock?.();
+    try { history.pushState({ ow: 'map' }, ''); WM.hist = true; } catch (e) { WM.hist = false; }
+    wmLayout();
+  }
+  function close(fromPop) {
+    if (!WM.open) return;
+    WM.open = false; WV.last = { cx: WV.cx, cz: WV.cz, s: WV.s }; WV.ptr.clear(); WV.pin = null;
+    $('wmap').classList.remove('on'); $('wmap').setAttribute('aria-hidden', 'true');
+    const had = WM.hist; WM.hist = false; if (!fromPop && had) { try { history.back(); } catch (e) {} }
+  }
+
+  /* ── (٧) منفّذ المهام الخلفية: ميزانية صغيرة أثناء اللعب، أكبر والخريطة مفتوحة ── */
+  function work(budget) {
+    const tEnd = now() + budget;
+    try {
+      if (!M.L0) L0Start();
+      for (const t of M.want.slice(0, 2)) { if (now() > tEnd) return; const near = Math.abs((t.tx + .5) * TS - PL.x) < TS * 1.2 && Math.abs((t.tz + .5) * TS - PL.z) < TS * 1.2; if (WM.open || near) tileRun(t, tEnd); }
+      if (!M.L0.ready) { if (terrRun(M.L0.J, tEnd)) L0Finish(); return; }
+      if (!M.TD && typeof TREESET !== 'undefined' && TREESET.ready) tdInit();
+      const D = M.TD;
+      if (D && !D.old.done && now() < tEnd) { if (tdOld(tEnd)) forestBuild(); }
+      if (D && D.old.done && !D.nat.done && WM.open && now() < tEnd) { tdNat(tEnd); if (D.nat.done || now() - D.fT > 700) forestBuild(); }
+      tilesTrim();
+    } catch (e) { warn('work', e); }
+  }
+  function mmTick(dt) {
+    work(WM.open ? 6 : 3);
+    MMP.t += dt; if (MMP.t < 0.1) return; MMP.t = 0;
+    try { cityData(); mmEnsure(now() + 4); mmDraw(); } catch (e) { warn('minimap', e); }
+  }
+  function wmTickAll(dt) { if (WM.open) { work(28); try { wmTick(dt); } catch (e) { warn('wm', e); } } }
+  function setRelief(fn) { mapRelief = typeof fn === 'function' ? fn : (x, z) => LIB.height(x, z); M.L0 = null; M.tiles.clear(); M.want.length = 0; MB.tile = null; MB.gen = null; bump(); }
+  return { mmTick, mmDraw, mmZoom: d => { MMP.zi = cl(MMP.zi + d, 0, MMP_ZOOM.length - 1); MMP.t = 1; }, mmRebuild: () => { MB.gen = null; MB.tile = null; MMP.t = 1; },
+    wmLayout, wmDraw, wmTick: wmTickAll, open, close, setRelief, relief: (x, z) => mapRelief(x, z), work, state: () => ({ L0: !!(M.L0 && M.L0.ready), L0row: M.L0 && M.L0.J ? M.L0.J.j : -1, tiles: M.tiles.size, want: M.want.length, trees: M.TD ? M.TD.n : -1, nat: M.TD ? M.TD.nNat : -1, oldDone: !!(M.TD && M.TD.old.done), natDone: !!(M.TD && M.TD.nat.done), city: !!M.city, reg: M.reg ? M.reg.map(r => r.name) : null, view: { cx: WV.cx, cz: WV.cz, s: WV.s, s0: WV.s0 }, err: M.err, mm: { zi: MB.zi, bx: MB.bx, bz: MB.bz } }), V: WV };
+})();
+// استبدال دوال الخريطة القديمة (المصغّرة والكاملة) بالجديدة — نفس الأسماء التي يناديها frame() والأزرار
+mmpBuild = () => MAP20.mmRebuild(); mmpDraw = () => MAP20.mmDraw(); mmpTick = dt => MAP20.mmTick(dt); mmpZoom = d => MAP20.mmZoom(d);
+wmLayout = () => MAP20.wmLayout(); wmDraw = () => MAP20.wmDraw(); wmTick = dt => MAP20.wmTick(dt); openWM = () => MAP20.open(); closeWM = fromPop => MAP20.close(fromPop);
+window.MAP20 = MAP20; window.mapRelief = (x, z) => MAP20.relief(x, z);
+
+/* ═══ v20 btn20: زر القتال يتبع السلاح في اليد (سيف/قوس/رمح/قبضة) + زر الصد «الصد» يظهر مع الدرع فقط ═══ */
+const BTN20 = (() => {
+  const SVG = {    // أيقونات خطية ذهبية على كحلي — بلا صلبان: السيف بواقية قرصية، القوس بلا سهم معترض، الرمح بلا عارضة
+    sword: '<path d="M12.1 13.7L18.7 6.7L19.7 4.3L17.3 5.3L10.3 11.9z"/><path d="M11.9 12.1L17.6 6.4" stroke-width="1"/><circle cx="9.4" cy="14.6" r="2.5"/><path d="M7.6 16.4L5.0 19.0"/><circle cx="4.2" cy="19.8" r="1.2"/>',
+    bow: '<path d="M6.2 3.6c2.4.2 4.6 1.3 6.6 3.3s3.2 4.3 3.4 6.8c.2 2.4-.3 4.6-1.4 6.6"/><path d="M6.2 3.6l-1.4-.8M14.8 20.3l.9 1.3"/><path d="M6.2 3.6L14.8 20.3" stroke-width="1"/><path d="M13.6 9.9c.5.9.8 1.8 1 2.8" stroke-width="3"/>',
+    spear: '<path d="M3.6 20.4L13.9 10.1"/><path d="M13.9 10.1C16.0 10.7 17.9 8.4 19.4 4.6C15.6 6.1 13.3 8.0 13.9 10.1z"/><path d="M14.8 9.2L18.0 6.0" stroke-width="1"/><circle cx="13.0" cy="11.0" r="1.1"/>',
+    fist: '<path d="M7.3 11V8.4a1.55 1.55 0 0 1 3.1 0V10.6"/><path d="M10.4 10.2V7.6a1.55 1.55 0 0 1 3.1 0v2.6"/><path d="M13.5 10.2V8.2a1.55 1.55 0 0 1 3.1 0v2.4"/><path d="M16.6 10.5a1.55 1.55 0 0 1 3.1 0v3.2c0 3.9-2.6 6.6-6.3 6.6h-1.6c-3 0-5-2-5-5.2V11"/><path d="M7.3 12.8h3.6a1.6 1.6 0 0 1 0 3.2H9.2"/>',
+    shield: '<path d="M12 2.9l7.2 2.7v5.7c0 4.6-3 8.2-7.2 9.9-4.2-1.7-7.2-5.3-7.2-9.9V5.7z"/><path d="M12 6.4l4.2 1.6v3.3c0 2.8-1.7 5-4.2 6.2-2.5-1.2-4.2-3.4-4.2-6.2V8z" stroke-width="1.2"/><circle cx="12" cy="11.6" r="1.3"/>'
+  };
+  Object.assign(ICONS, { w20sword: SVG.sword, w20bow: SVG.bow, w20spear: SVG.spear, w20fist: SVG.fist, w20shield: SVG.shield });
+  const LBL = { sword: 'سيف', bow: 'قوس', spear: 'رمح', fist: 'قبضة' };
+  const FIST_DMG = 12;
+  const isSpear = id => { const d = id && WEAPONS[id]; return !!(d && (d.spear || /spear|lance|pike/i.test(id + ' ' + (d.f || '')) || /رمح/.test(d.name || ''))); };
+  ST.hand = ST.hand || 'w'; ST.sheath31 = false;   /* v32: أُلغي سلّ السيف بأول ضربة — بلا سيف مشترى يقاتل اللاعب بقبضته */                       // ما في اليد: 'w' سلاح المشاجرة، 'r' القوس/النبال، 'fist' القبضة
+  const B = { held: { btn: false, key: false, rmb: false }, w: 0, mode: '', ico: '', lastW: ST.weapon, lastR: ST.ranged, el: null, bl: null, blkT: 0, st: null };
+  function mode() {
+    if (ST.hand === 'r' && ST.ranged && RANGED[ST.ranged]) return 'bow';
+    if (ST.hand === 'fist' || !ST.weapon || !WEAPONS[ST.weapon] || !ST.owned[ST.weapon]) return 'fist';   /* v32 */
+    return isSpear(ST.weapon) ? 'spear' : 'sword';
+  }
+  const hasShield = () => !!(ST.shieldT && SHIELDS[ST.shieldT]);
+  const canBlock = () => hasShield() && !MNT.on && !ST.dead && !(typeof plBowMode === 'function' && plBowMode());   // v24: لا زر صد والقوس بيده (الدرع غير ظاهر)
+  const wantBlock = () => B.held.btn || B.held.key || B.held.rmb;
+  // ── الحالة: أي تغيير في المعدات (تجهيز، شراء، التقاط، خلع) يُلتقط هنا مهما كان مصدره ──
+  function sync() {
+    if (ST.weapon !== B.lastW) { B.lastW = ST.weapon; if (ST.weapon) ST.hand = 'w'; recalcDmg(); }
+    if (ST.ranged !== B.lastR) { const was = B.lastR; B.lastR = ST.ranged; if (ST.ranged && !was) ST.hand = 'r'; else if (!ST.ranged && ST.hand === 'r') ST.hand = 'w'; else if (ST.ranged && ST.hand === 'r') ST.hand = 'r'; recalcDmg(); }
+    const m = mode();
+    if (m !== B.mode) { B.mode = m; if (B.el) { B.el.innerHTML = ic('w20' + m); B.el.dataset.w20 = m; B.el.setAttribute('aria-label', 'هجوم: ' + LBL[m]); } }
+    const show = canBlock();
+    if (B.bl && B.bl.hidden === show) { B.bl.hidden = !show; if (!show) { B.held.btn = false; B.bl.classList.remove('on'); } }
+    ST.blocking = show && wantBlock() && ST.act !== 'attack' && ST.act !== 'dodge';
+    if (B.bl) B.bl.classList.toggle('on', !!ST.blocking);
+  }
+  // ── الهجوم حسب ما في اليد ──
+  const _doAttack = doAttack;
+  let hint32 = -1e9; doAttack = function () { if (mode() === 'fist' && !MNT.on && !ST.dead && !Object.keys(WEAPONS).some(k => ST.owned[k]) && performance.now() - hint32 > 20000) { hint32 = performance.now(); toast('ليس معك سيف — تقاتل بقبضتك. اشترِ سيفاً من الحدّاد في سوق المدينة (٢٠ ذهب)'); }   /* v32: تلميح الشراء */
+    if (mode() === 'bow' && !MNT.on) { if (!ST.dead && ST.act !== 'dodge') doShoot(); return; } return _doAttack(); };
+  const _recalc = recalcDmg;
+  recalcDmg = function () { _recalc(); if (mode() === 'fist') ST.dmg = FIST_DMG; };
+  // ── التجهيز: الضغط على السيف المجهَّز يُنزله (قتال بالقبضة)، والضغط عليه مجدداً يعيده؛ حمل القوس يضعه في اليد ──
+  const _equip = equipItem;
+  equipItem = function (kind) {
+    if (!ST.owned[kind]) return false;
+    const s = GEAR_SLOT[kind];
+    if (s === 'w' && ST.weapon === kind && ST.hand !== 'fist' && !(ST.hand === 'r' && ST.ranged)) {
+      ST.hand = 'fist'; toast('أنزلتَ ' + GEAR_NAME[kind] + ' — القتال بالقبضة'); recalcDmg(); renderInv(); sync(); return true; }
+    if (s === 'w' && ST.weapon === kind) { ST.hand = 'w'; toast('أمسكتَ ' + GEAR_NAME[kind]); recalcDmg(); renderInv(); sync(); return true; }
+    const r = _equip(kind);
+    if (r && s === 'w') ST.hand = 'w';
+    if (r && s === 'r') { ST.hand = ST.ranged ? 'r' : (ST.hand === 'r' ? 'w' : ST.hand); B.lastR = ST.ranged; }
+    if (r) { B.lastW = ST.weapon; recalcDmg(); renderInv(); }
+    sync(); return r;
+  };
+  // ── القبضة: إخفاء السيف عن الشخصية ──
+  const _gvApply = gvApply;
+  gvApply = function (root) {
+    if (!root || (mode() !== 'fist' && !(ST.sheath31 && mode() !== 'bow'))) return _gvApply(root);
+    const w = ST.weapon; ST.weapon = null;
+    try { _gvApply(root); } finally { ST.weapon = w; }
+    const F = GV.fr.get(root); if (F && F.sm) F.sm.visible = false;
+  };
+  // ── الصد: الضرر من الأمام يُخفَّف أو يُلغى (الدرع الأقوى يلغي أكثر) ──
+  function blockDmg(n, src) {
+    B.blkHit = false; if (!ST.blocking) return n;
+    let k = 0.35 - SHIELDS[ST.shieldT].red;            // من الأمام: يبقى ٢٣٪ (دائري) … ٠٪ (أسطوري)
+    if (src && typeof src.x === 'number') {
+      const dx = src.x - PL.x, dz = src.z - PL.z, d = Math.hypot(dx, dz) || 1, c = (dx * -Math.sin(PL.face) + dz * -Math.cos(PL.face)) / d;
+      if (c < -0.34) return n;                         // من الخلف: الصد لا ينفع
+      if (c < 0.34) k = 0.6;                           // من الجانب: تخفيف جزئي
+    }
+    k = Math.max(0, k); B.blkHit = k < 0.7; B.blkT = 0.25;
+    if (k === 0) { toast('صددتَ الضربة بالكامل'); }
+    return n * k;
+  }
+  // ── وقفة الصد (لا يوجد مقطع Block في نموذج اللاعب): رفع الساعد الأيسر والدرع أمام الصدر ──
+  const v0 = new THREE.Vector3(), v1 = new THREE.Vector3(), v2 = new THREE.Vector3(), qa = new THREE.Quaternion(), qb = new THREE.Quaternion(), qc = new THREE.Quaternion();
+  function aim(bone, child, dirW, w) {
+    bone.getWorldPosition(v0); child.getWorldPosition(v1); v1.sub(v0); if (v1.lengthSq() < 1e-8) return; v1.normalize();
+    qa.setFromUnitVectors(v1, dirW); bone.parent.getWorldQuaternion(qb); qc.copy(qb).invert().multiply(qa).multiply(qb).multiply(bone.quaternion);
+    bone.quaternion.slerp(qc, w); bone.updateMatrixWorld(true);
+  }
+  function pose(M, dt) {
+    const want = ST.blocking ? 1 : 0; B.w += (want - B.w) * Math.min(1, dt * 14); if (B.w < 0.01) return;
+    if (M.cur === 'Attack' || ST.cur === 'death' || M.acts.Block) return;   // v21: نموذج اللاعب الجديد فيه مقطع Block (plBlockLayer)
+    const root = M.wrap; if (!B.st) { const g = n => root.getObjectByName(n); B.st = { ua: g('LeftArm'), fa: g('LeftForeArm'), h: g('LeftHand'), sp: g('Spine02') || g('Spine01') || g('Spine') }; }
+    const P = B.st; if (!P.ua || !P.fa || !P.h || !P.sp) return;
+    root.updateMatrixWorld(true);
+    const fw = v2.set(-Math.sin(PL.face), 0, -Math.cos(PL.face));          // اتجاه وجه اللاعب
+    const rt = new THREE.Vector3(-fw.z, 0, fw.x);                           // يمين اللاعب
+    P.ua.getWorldPosition(v0); P.sp.getWorldPosition(v1); const side = Math.sign(v1.sub(v0).dot(rt)) || 1;   // الكتف الأيسر على أي جهة
+    const dUa = new THREE.Vector3().addScaledVector(fw, 0.62).addScaledVector(rt, -side * 0.42).add(new THREE.Vector3(0, -0.62, 0)).normalize();
+    aim(P.ua, P.fa, dUa, B.w);
+    const dFa = new THREE.Vector3().addScaledVector(fw, 0.35).addScaledVector(rt, side * 0.88).add(new THREE.Vector3(0, 0.3, 0)).normalize();
+    aim(P.fa, P.h, dFa, B.w);
+  }
+  const _gvs = gearVisSync;
+  gearVisSync = function (M) { try { if (M && M.player) pose(M, B.dt || 0.016); } catch (e) { if (!B.perr) { B.perr = 1; console.warn('[v20] block pose', e && e.message); } } return _gvs(M); };
+  // ── الواجهة ──
+  function initUI() {
+    const st = document.createElement('style'); st.id = 'btn20css';
+    st.textContent = 'html body #acts #bBlk{right:9px!important;bottom:86px!important;width:56px!important;height:56px!important;left:auto!important;top:auto!important}' +
+      'html body #bBlk[hidden],html.v19ride body #bBlk{display:none!important}' +
+      'html body #bAtk[data-w20] svg{width:44%!important;height:44%!important}' +
+      'html body #bBlk.on{transform:scale(.94)}' +
+      '@media (pointer:fine){html:not(.touch) body #bBlk{display:none!important}}';
+    document.head.appendChild(st);
+    B.el = document.getElementById('bAtk');
+    const acts = document.getElementById('acts');
+    if (acts && !document.getElementById('bBlk')) {
+      const b = document.createElement('button'); b.className = 'tb'; b.id = 'bBlk'; b.setAttribute('aria-label', 'الصد'); b.setAttribute('data-ug', 'الصد'); b.innerHTML = ic('w20shield'); b.hidden = true; acts.appendChild(b);
+      const on = e => { e.preventDefault(); B.held.btn = true; try { b.setPointerCapture(e.pointerId); } catch (_) {} sync(); };
+      const off = () => { B.held.btn = false; sync(); };
+      b.addEventListener('pointerdown', on); for (const ev of ['pointerup', 'pointercancel', 'lostpointercapture']) b.addEventListener(ev, off);
+      b.addEventListener('contextmenu', e => e.preventDefault());
+      B.bl = b;
+    }
+    addEventListener('keyup', e => { if (e.code === 'KeyQ') { B.held.key = false; sync(); } });
+    addEventListener('mouseup', e => { if (e.button === 2) { B.held.rmb = false; sync(); } });
+    addEventListener('blur', () => { B.held.btn = B.held.key = B.held.rmb = false; });
+  }
+  try { initUI(); } catch (e) { console.warn('[v20] btn20 ui', e); }
+  let tPrev = performance.now();
+  (function loop() { requestAnimationFrame(loop); const t = performance.now(); B.dt = Math.min(0.05, (t - tPrev) / 1000); tPrev = t; try { sync(); } catch (e) { if (!B.err) { B.err = 1; console.warn('[v20] btn20', e); } } })();
+  recalcDmg(); sync();
+  const api = {
+    blockDmg, mode, isSpear, B, sync, equip: k => equipItem(k),
+    q(down) { if (!hasShield() || MNT.on) return false; B.held.key = !!down; sync(); return true; },          // Q: صد (وإلا يبقى تبديل الكتف)
+    rmb(down) { if (!hasShield() || MNT.on) return false; B.held.rmb = !!down; sync(); return true; },        // زر الفأرة الأيمن: صد (وإلا رمي)
+    blocked: () => !!B.blkHit
+  };
+  window.__btn20 = api; console.info('[v20] btn20 ready'); return api;
+})();
+
+/* ═══ v20 SHOP20 (task e82a0d36): محل المؤن ومحل الأدوية الجديدان + بائع المؤن v3 وبائعة الأدوية v3 ═══
+   general (المتجر العام) ← supply-shop + supply-seller ؛ pharm (الصيدلية) ← potion-shop + potion-seller
+   الموبايل: -lite ؛ high: النسخة الكاملة عبر __qRegister. المبنى يُدمج حسب المادة + أطلس للقوام الصغير لتقليل نداءات الرسم. */
+const SHOP20 = (() => {
+  const URL = { supShop: 'shops/supply-shop-lite.glb', potShop: 'shops/potion-shop-lite.glb', fdShop: 'shops/food-v5-lite.glb' /* v36: محل الطعام v5 */, stShop: 'shops/stable-v6-lite.glb', bsShop: 'shops/blacksmith-v7-lite.glb' /* v38: محل الحداد v7 */, bnShop: 'shops/barn-v41-lite.glb' /* v39: الحظيرة v4.1 (v37: الإسطبل v6) */, stSel: 'shops/stable-keeper-lite.glb' /* v37: صاحب الإسطبل fix4 */, supSel: 'shops/supply-seller-lite.glb', potSel: 'shops/potion-seller-lite.glb', smSel: 'shops/blacksmith-npc-lite.glb?k=81', fdSel: 'shops/food-vendor-lite.glb' };
+  const FULL = { supShop: 'shops/supply-shop.glb', potShop: 'shops/potion-shop.glb', fdShop: 'shops/food-v5.glb', stShop: 'shops/stable-v6.glb', bsShop: 'shops/blacksmith-v7.glb', bnShop: 'shops/barn-v41.glb', stSel: 'shops/stable-keeper.glb', supSel: 'shops/supply-seller.glb', potSel: 'shops/potion-seller.glb', smSel: 'shops/blacksmith-npc.glb?k=81', fdSel: 'shops/food-vendor.glb' };
+  // COL: صناديق التصادم المحلية [x0,x1,z0,z1] (الواجهة +Z، الأصل عند مركز القاعدة)؛ sel: موضع البائع المحلي؛ stand: أين يقف اللاعب
+  const TYPE = {
+    general: { shop: 'supShop', sel: 'supSel', selZ: 0.7, selY: 0.06, gest: ['Count', 'Offer'], talk: ['Talk', 'Offer', 'Talk'], name: 'محل المؤن', COL: null },
+    pharm: { shop: 'potShop', sel: 'potSel', selZ: 0.7, selY: 0.06, gest: ['Grind', 'Offer'], talk: ['Talk', 'Offer', 'Talk'], name: 'محل الأدوية', COL: null },
+    smith: { shop: 'bsShop', sel: 'smSel', gest: ['Idle2', 'Agree'], talk: ['Talk', 'Agree'], ry: Math.PI, nf: Math.PI, name: 'محل الحداد', COL: null },   // v38: محل الحداد v7 (يُدخل إليه، الحداد يشتغل جوّا)
+    pottery: { shop: 'stShop', sel: 'stSel', selX: 0.35, selZ: 8.1, selY: 0.03, gest: ['Work'], talk: ['Greet', 'Talk'], name: 'الإسطبل', COL: null },   // v37: الإسطبل v6 (تاجر الخيل عند npc_spot)
+    fruit: { shop: 'fdShop', sel: 'fdSel', selX: -2.1, selZ: 2.05, selY: 0.02, gest: ['Offer', 'Wave'], talk: ['Talk', 'Talk2', 'Offer'], ry: Math.PI, nf: Math.PI, gait: 0.77, name: 'محل الطعام', COL: null } };   // v38 nf: الدوران صار باتجاه وقفة البائع (stall.nf) لا بتدوير النموذج — فيمشي ووجهه لقدّام   // v36: محل الطعام v5 (الطباخ عند npc_spot) 
+  try { if (typeof SHOPS !== 'undefined') { if (SHOPS.general) { SHOPS.general.name = 'محل المؤن'; SHOPS.general.job = 'بائع المؤن'; } if (SHOPS.pharm) { SHOPS.pharm.name = 'محل الأدوية'; SHOPS.pharm.job = 'بائع الأدوية'; } } } catch (e) {}   // أسماء كما يسمّيها مصطفى
+  const M = {}, ST = { loaded: 0, failed: [], placed: [], ms: 0 }; let left = Object.keys(URL).length, t0 = performance.now();
+  const high = () => window.__QUALITY === 'high';
+  for (const k in URL) try { window.__qRegister && window.__qRegister(URL[k], FULL[k]); } catch (e) {}
+  // ── تحويل الهندسة إلى Float32 بمصفوفة العالم (المصدر مكمّم) ──
+  const _v = new THREE.Vector3(), _n3 = new THREE.Matrix3();
+  function bake(src, mtx) {
+    const P = src.attributes.position, N = src.attributes.normal, UV = src.attributes.uv, UV1 = src.attributes.uv1, C = src.attributes.color, n = P.count;   // v36: uv1 = خريطة الإضاءة المخبوزة
+    const pos = new Float32Array(n * 3), nor = new Float32Array(n * 3), uv = UV ? new Float32Array(n * 2) : null, uv1 = UV1 ? new Float32Array(n * 2) : null, col = C ? new Float32Array(n * 3) : null;
+    _n3.getNormalMatrix(mtx);
+    for (let i = 0; i < n; i++) { _v.set(P.getX(i), P.getY(i), P.getZ(i)).applyMatrix4(mtx); pos[i * 3] = _v.x; pos[i * 3 + 1] = _v.y; pos[i * 3 + 2] = _v.z;
+      if (N) { _v.set(N.getX(i), N.getY(i), N.getZ(i)).applyMatrix3(_n3).normalize(); nor[i * 3] = _v.x; nor[i * 3 + 1] = _v.y; nor[i * 3 + 2] = _v.z; } else nor[i * 3 + 1] = 1;
+      if (uv) { uv[i * 2] = UV.getX(i); uv[i * 2 + 1] = UV.getY(i); } if (uv1) { uv1[i * 2] = UV1.getX(i); uv1[i * 2 + 1] = UV1.getY(i); }
+      if (col) { col[i * 3] = C.getX(i); col[i * 3 + 1] = C.getY(i); col[i * 3 + 2] = C.getZ(i); } }
+    let idx; if (src.index) { idx = new Uint32Array(src.index.count); for (let i = 0; i < idx.length; i++) idx[i] = src.index.getX(i); } else { idx = new Uint32Array(n); for (let i = 0; i < n; i++) idx[i] = i; }
+    if (mtx.determinant() < 0) for (let i = 0; i < idx.length; i += 3) { const t = idx[i + 1]; idx[i + 1] = idx[i + 2]; idx[i + 2] = t; }
+    return { pos, nor, uv, uv1, col, idx, n };
+  }
+  function merge(parts, wantUV, wantCol, wantRect, wantUV1) {
+    let nv = 0, ni = 0; for (const p of parts) { nv += p.n; ni += p.idx.length; }
+    const pos = new Float32Array(nv * 3), nor = new Float32Array(nv * 3), uv = wantUV ? new Float32Array(nv * 2) : null, uv1 = wantUV1 ? new Float32Array(nv * 2) : null, col = wantCol ? new Float32Array(nv * 3).fill(1) : null, idx = nv < 65536 ? new Uint16Array(ni) : new Uint32Array(ni), rect = wantRect ? new Float32Array(nv * 4) : null;
+    let o = 0, oi = 0; for (const p of parts) { pos.set(p.pos, o * 3); nor.set(p.nor, o * 3); if (uv && p.uv) uv.set(p.uv, o * 2); if (uv1 && p.uv1) uv1.set(p.uv1, o * 2); if (col && p.col) col.set(p.col, o * 3); if (rect && p.rect) rect.set(p.rect, o * 4);
+      for (let i = 0; i < p.idx.length; i++) idx[oi + i] = p.idx[i] + o; o += p.n; oi += p.idx.length; }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
+    if (uv) g.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); if (uv1) g.setAttribute('uv1', new THREE.BufferAttribute(uv1, 2)); if (col) g.setAttribute('color', new THREE.BufferAttribute(col, 3)); if (rect) g.setAttribute('aRect', new THREE.BufferAttribute(rect, 4)); g.setIndex(new THREE.BufferAttribute(idx, 1));
+    g.computeBoundingBox(); g.computeBoundingSphere(); return g;
+  }
+  const SHELL = /^(wood|floor|roof|counter|wall|stone|floorstone|wooddark)$/;
+  // ── أطلس بالتكرار: كل المواد المعتمة ذات القوام (حتى المتكررة) في قماش واحد؛ المظلل يلفّ UV داخل خانة المادة (fract + textureGrad) ──
+  const LM36 = m => !!(m && m.emissiveMap && m.emissiveMap.channel === 1);   // v36: محل المؤن fix7: الإضاءة المخبوزة في emissiveTexture على TEXCOORD_1
+  function atlasPack(groups) {
+    const cand = groups.filter(G => G.kind === 'tex' && G.mat.map && G.mat.map.image && !G.mat.transparent && G.mat.alphaTest === 0 && !LM36(G.mat));   // v36: المواد ذات الإضاءة المخبوزة تبقى خارج الأطلس
+    if (cand.length < 2) return groups;
+    const C = high() ? 512 : 256, P = high() ? 8 : 4, cols = high() ? 6 : 8, rows = Math.ceil(cand.length / cols), AW = cols * C, AH = rows * C, I = C - 2 * P;
+    const cvC = document.createElement('canvas'), cvN = document.createElement('canvas'); cvC.width = cvN.width = AW; cvC.height = cvN.height = AH;
+    const xc = cvC.getContext('2d'), xn = cvN.getContext('2d'); xn.fillStyle = 'rgb(128,128,255)'; xn.fillRect(0, 0, AW, AH);
+    const tile = (x, img, cx, cy) => { x.save(); x.beginPath(); x.rect(cx, cy, C, C); x.clip(); for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) x.drawImage(img, cx + P + a * I, cy + P + b * I, I, I); x.restore(); };
+    const used = [], parts = []; let rough = 0;
+    cand.forEach((c, i) => { const cx = (i % cols) * C, cy = Math.floor(i / cols) * C, m = c.mat;
+      try { tile(xc, m.map.image, cx, cy);
+        const col = m.color.clone().convertLinearToSRGB(); if (Math.abs(col.r - 1) + Math.abs(col.g - 1) + Math.abs(col.b - 1) > 0.02) { xc.save(); xc.globalCompositeOperation = 'multiply'; xc.fillStyle = '#' + col.getHexString(); xc.fillRect(cx, cy, C, C); xc.restore(); }
+        if (m.normalMap && m.normalMap.image) tile(xn, m.normalMap.image, cx, cy);
+      } catch (e) { return; }
+      const r = [(cx + P) / AW, (cy + P) / AH, I / AW, I / AH];
+      for (const p of c.parts) { if (!p.uv) continue; if (!m.vertexColors) p.col = null; p.rect = new Float32Array(p.n * 4); for (let k = 0; k < p.n; k++) p.rect.set(r, k * 4);
+        if (c.inRange) for (let k = 0; k < p.uv.length; k++) p.uv[k] = Math.min(0.9995, Math.max(0.0005, p.uv[k])); parts.push(p); }
+      rough += m.roughness; used.push(c); });
+    if (used.length < 2) return groups;
+    const tC = new THREE.CanvasTexture(cvC), tN = new THREE.CanvasTexture(cvN); for (const t of [tC, tN]) { t.flipY = false; t.anisotropy = 4; t.generateMipmaps = true; t.minFilter = THREE.LinearMipmapLinearFilter; t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping; }
+    tC.colorSpace = THREE.SRGBColorSpace; tN.colorSpace = THREE.NoColorSpace;
+    const mat = new THREE.MeshStandardMaterial({ map: tC, normalMap: tN, roughness: rough / used.length, metalness: 0 }); mat.name = 'shop20-atlas'; mat.vertexColors = used.some(c => c.mat.vertexColors);
+    mat.onBeforeCompile = sh => {
+      sh.vertexShader = 'attribute vec4 aRect;\nvarying vec4 vRect;\n' + sh.vertexShader.replace('#include <uv_vertex>', '#include <uv_vertex>\n  vRect = aRect;');
+      sh.fragmentShader = 'varying vec4 vRect;\n' + sh.fragmentShader.replace('#include <map_fragment>', '#ifdef USE_MAP\n  vec4 sampledDiffuseColor = textureGrad( map, vRect.xy + fract( vMapUv ) * vRect.zw, dFdx( vMapUv ) * vRect.zw, dFdy( vMapUv ) * vRect.zw );\n  diffuseColor *= sampledDiffuseColor;\n#endif')
+        .replace('texture2D( normalMap, vNormalMapUv )', 'textureGrad( normalMap, vRect.xy + fract( vNormalMapUv ) * vRect.zw, dFdx( vNormalMapUv ) * vRect.zw, dFdy( vNormalMapUv ) * vRect.zw )'); };
+    mat.customProgramCacheKey = () => 'shop20-atlas';
+    for (const p of parts) p.shell = true;            // الأطلس نداء واحد دائم الظهور
+    ST.atlas = (ST.atlas || 0) + used.length; ST.atlasPx = (ST.atlasPx || []).concat([AW + 'x' + AH]);
+    return groups.filter(G => !used.includes(G)).concat([{ kind: 'atlas', mat, parts }]);
+  }
+  function buildShop(k, g) {
+    g.scene.updateMatrixWorld(true); const by = new Map(), _m = new THREE.Matrix4(), _w = new THREE.Matrix4();
+    const F36 = k === 'fdShop' || k === 'stShop' || k === 'bnShop', A37 = k !== 'fdShop', SH36 = /^(Block|Stone|Brick|Paving|Timber|Plaster|Fabric|Dark|Iron)$/;
+    g.scene.traverse(o => { if (!o.isMesh) return; if (F36 && ((o.userData && (o.userData.collider || o.userData.fallback_flame)) || /^Flame_|_collider$|^col_/.test(o.name) || (o.parent && o.parent.name === 'colliders') || (o.material && o.material.name === 'ColliderMat'))) return; const ms = Array.isArray(o.material) ? o.material : [o.material]; if (ms.length > 1) return;
+      const mat = ms[0], cnt = o.isInstancedMesh ? o.count : 1;
+      for (let i = 0; i < cnt; i++) { if (o.isInstancedMesh) { o.getMatrixAt(i, _m); _w.multiplyMatrices(o.matrixWorld, _m); } else _w.copy(o.matrixWorld);
+        const p = bake(o.geometry, _w); p.shell = F36 ? (A37 || SH36.test(mat.name || '')) : SHELL.test(mat.name || ''); if (!by.has(mat)) by.set(mat, []); by.get(mat).push(p); } });
+    if (k === 'potShop') for (const mat of by.keys()) if (/^(stone|floorstone)$/.test(mat.name || '')) mat.color.multiply(new THREE.Color(1.08, 1.2, 1.4));   // ACES + ضوء الغروب يحمّر الحجر الرملي: نعيده كريمياً كما في الصور المعتمدة
+    let groups = [], plain = [], glow = [], tris = 0;
+    for (const [mat, parts] of by) { const tex = !!(mat.map || mat.normalMap), em = mat.emissive && (mat.emissive.r + mat.emissive.g + mat.emissive.b) * (mat.emissiveIntensity || 1) > 0.05;
+      for (const p of parts) tris += p.idx.length / 3;
+      if (!tex && !mat.transparent && mat.alphaTest === 0) {         // بلا قوام: لون الرأس = لون المادة (ومُضيء ← مادة أساسية)
+        const c = em ? mat.color.clone().multiplyScalar(0.45).add(mat.emissive.clone().multiplyScalar(Math.min(2.5, mat.emissiveIntensity || 1) * 0.85)) : mat.color;
+        for (const p of parts) { const col = new Float32Array(p.n * 3); for (let i = 0; i < p.n; i++) { const b = p.col && mat.vertexColors ? [p.col[i * 3], p.col[i * 3 + 1], p.col[i * 3 + 2]] : [1, 1, 1];
+            col[i * 3] = Math.min(1, b[0] * c.r); col[i * 3 + 1] = Math.min(1, b[1] * c.g); col[i * 3 + 2] = Math.min(1, b[2] * c.b); } p.col = col; (em ? glow : plain).push(p); }
+        continue; }
+      let inRange = true; for (const p of parts) { if (!p.uv) { inRange = false; break; } for (let i = 0; i < p.uv.length; i++) if (p.uv[i] < -0.02 || p.uv[i] > 1.02) { inRange = false; break; } if (!inRange) break; }
+      groups.push({ kind: 'tex', mat, parts, inRange }); }
+    if (!F36) groups = atlasPack(groups);   // v36: محل الطعام v5 يحتفظ بقوامه الكامل (بلا أطلس مصغّر)
+    const out = [];
+    for (const G of groups) { const vc = !!G.mat.vertexColors; for (const sh of [true, false]) { const ps = G.parts.filter(p => p.shell === sh); if (!ps.length) continue;
+      if (G.kind === 'tex' && G.mat.transparent) G.mat.depthWrite = false;
+      out.push({ geo: merge(ps, true, vc, G.kind === 'atlas', G.kind === 'tex' && LM36(G.mat)), mat: G.mat, shell: sh, name: G.kind === 'atlas' ? 'atlas' : G.mat.name }); } }
+    if (plain.length) { const mt = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7, metalness: 0.15 }); for (const sh of [true, false]) { const ps = plain.filter(p => p.shell === sh); if (ps.length) out.push({ geo: merge(ps, false, true), mat: mt, shell: sh, name: 'plain' }); } }
+    if (glow.length) { const mt = new THREE.MeshBasicMaterial({ vertexColors: true }); out.push({ geo: merge(glow, false, true), mat: mt, shell: false, name: 'glow' }); }
+    const box = new THREE.Box3(); for (const q of out) box.union(q.geo.boundingBox);
+    for (const q of out) { q.geo.userData.mat = q.mat; if (typeof SHARED !== 'undefined') SHARED.add(q.geo); }
+    return { shop: true, parts: out, box, tris: Math.round(tris), calls: out.length };
+  }
+
+  // v36: محل الطعام v5 — العلامات (fire_bed، npc_spot…) وصناديق التصادم من الملف نفسه
+  function food36(Mt, g) { g.scene.updateMatrixWorld(true); const mk = {}, COL = [], bx = new THREE.Box3(), v = new THREE.Vector3();
+    for (const nm of ['fire_bed', 'smoke_mouth', 'smoke_chimney', 'npc_spot', 'entrance', 'oven_light']) { const o = g.scene.getObjectByName(nm); if (o) { o.getWorldPosition(v); mk[nm] = { p: v.toArray(), ud: Object.assign({}, o.userData) }; } }
+    g.scene.traverse(o => { if (o.isMesh && (/_collider$/.test(o.name) || (o.userData && o.userData.collider))) { bx.setFromObject(o); if (bx.isEmpty()) return; COL.push([bx.min.x, bx.max.x, bx.min.z, bx.max.z, Math.max(0.3, bx.max.y)]); } });
+    Mt.mk = mk; Mt.COL = COL.length ? COL : null; Mt.food36 = true; }
+
+  // v37: الإسطبل v6 والحظيرة v2 — العلامات وصناديق التصادم من الملف نفسه + الخيول/الحيوانات الحية
+  function mk37(Mt, g, k) { g.scene.updateMatrixWorld(true); const mk = {}, COL = [], bx = new THREE.Box3(), v = new THREE.Vector3(), q = new THREE.Quaternion(), s = new THREE.Vector3();
+    g.scene.traverse(o => { if (/^(npc_spot|entrance|horse_(eat_)?spot_\d+|animal_spot_\d+|barn_entrance|yard_center|yard_gate|trough_\d+)$/.test(o.name)) { o.matrixWorld.decompose(v, q, s); mk[o.name] = { p: v.toArray(), q: q.toArray() }; }
+      if (o.isMesh && (/_collider$|^col_/.test(o.name) || (o.userData && o.userData.collider))) { bx.setFromObject(o); if (bx.isEmpty() || bx.max.y < 0.15) return; COL.push([bx.min.x, bx.max.x, bx.min.z, bx.max.z, Math.max(0.3, bx.max.y)]); } });
+    Mt.mk = mk; Mt.COL = COL.length ? COL : null; Mt.a37 = k; ST['cols_' + k] = COL.length; }
+  function mkRoot(grp, Mt, name) { const root = new THREE.Group(); root.name = name; grp.add(root);
+    for (const nm in Mt.mk) { const o = new THREE.Object3D(); o.name = nm; o.position.fromArray(Mt.mk[nm].p); o.quaternion.fromArray(Mt.mk[nm].q); root.add(o); } root.updateMatrixWorld(true); return root; }
+  const LIVE37 = [];   // { grp, upd(dt, cam) }
+  let horseMod = null, AL37 = null;
+  const aLoader = () => AL37 || (AL37 = Promise.all([import('three/addons/loaders/GLTFLoader.js'), import('three/addons/libs/meshopt_decoder.module.js'), import('three/addons/utils/SkeletonUtils.js')]).then(([a, b, c]) => { const l = new a.GLTFLoader(); l.setMeshoptDecoder(b.MeshoptDecoder); return { l, SU: c }; }));
+  function horses37(grp, Mt) { const root = mkRoot(grp, Mt, 'stable37_markers');
+    (horseMod || (horseMod = import('./shops/stable-v6-horses.js'))).then(m => m.addStableHorses(root, { base: 'horses37/', clips: 'shops/stable-v6-horse-clips.glb', lite: !high(), updateDistance: 45 })).then(h => {
+      for (const x of h.horses) x.object.traverse(o => { if (o.isMesh) { o.castShadow = high(); o.frustumCulled = true; if (o.isSkinnedMesh) { if (!o.boundingSphere) o.computeBoundingSphere(); o.boundingSphere.radius *= 1.6; } } });
+      LIVE37.push({ grp, upd: (dt, cam) => h.update(dt, cam) }); ST.horses37 = (ST.horses37 || 0) + h.horses.length; }).catch(e => { console.warn('[v37] stable horses: ' + (e && e.message || e)); ST.horsesErr = String(e); }); }
+  function beasts37(grp, Mt) { const root = mkRoot(grp, Mt, 'barn37_markers'), PLAN = [['cow', 'animal_spot_1'], ['cow', 'animal_spot_4'], ['cow', 'animal_spot_9'], ['sheep', 'animal_spot_2'], ['sheep', 'animal_spot_8'], ['sheep', 'animal_spot_10']];
+    aLoader().then(({ l, SU }) => { const cache = {}; const get = f => cache[f] || (cache[f] = l.loadAsync('animals36/' + f + '-lite.glb'));
+      return Promise.all(PLAN.map(async ([f, spot], i) => { const mk = root.getObjectByName(spot); if (!mk) return null; const gl = await get(f), o = SU.clone(gl.scene); o.position.copy(mk.position); o.quaternion.copy(mk.quaternion); root.add(o);
+        o.traverse(c => { if (c.isMesh) { c.castShadow = false; c.frustumCulled = true; if (c.isSkinnedMesh) { if (!c.boundingSphere) c.computeBoundingSphere(); c.boundingSphere.radius *= 1.6; } } });
+        const mx = new THREE.AnimationMixer(o), cl = n => gl.animations.find(a => a.name === n || a.name.endsWith('|' + n)), A = [cl('Graze'), cl('Idle')].filter(Boolean); let cur = 0;
+        if (!A.length) return { mx, o }; let a = mx.clipAction(A[(i % 2) % A.length]); a.play(); a.time = Math.random() * a.getClip().duration; mx.timeScale = 0.9 + Math.random() * 0.2; cur = (i % 2) % A.length;
+        let t = 6 + Math.random() * 8; const step = dt => { t -= dt; if (t <= 0 && A.length > 1) { t = 7 + Math.random() * 9; cur = 1 - cur; const b = mx.clipAction(A[cur]); b.reset(); b.play(); a.crossFadeTo(b, 0.7, false); a = b; } };
+        return { mx, o, step }; })); }).then(list => { const L = list.filter(Boolean), P = new THREE.Vector3();
+        LIVE37.push({ grp, upd: (dt, cam) => { grp.getWorldPosition(P); if (cam && P.distanceToSquared(cam.position) > 60 * 60) return; for (const x of L) { if (x.step) x.step(dt); x.mx.update(dt); } } }); ST.beasts37 = L.length; })
+      .catch(e => { console.warn('[v37] barn animals: ' + (e && e.message || e)); ST.beastsErr = String(e); }); }
+  function tick37(dt, cam) { for (const x of LIVE37) { let o = x.grp; while (o.parent) o = o.parent; if (o !== scene) continue; x.upd(dt, cam); } }
+  // الحظيرة داخل السور: قطعة مستوية قرب الإسطبل (المحور الطويل مماسّ للحلقة، الحوش بعيد عن الإسطبل)
+  function placeBarn(L, det, cx, cz, H, A) { const Mt = M.bnShop; if (!Mt || !A) return false;
+    const yaw = Math.atan2(A.t[0], A.t[1]), dx = Math.sin(yaw), dz = Math.cos(yaw), lx = dz, lz = -dx, b = Mt.box, mz = (b.min.z + b.max.z) / 2, ox = A.x - dx * mz, oz = A.z - dz * mz;
+    const W = (u, w) => [ox + lx * u + dx * w, oz + lz * u + dz * w]; let gy = Infinity, gmax = -Infinity;
+    for (const [u, w] of [[b.min.x, b.min.z], [b.max.x, b.min.z], [b.min.x, b.max.z], [b.max.x, b.max.z], [0, 0], [0, mz]]) { const q = W(u, w), h = H(q[0], q[1]); gy = Math.min(gy, h); gmax = Math.max(gmax, h); }
+    const grp = new THREE.Group(); grp.position.set(ox - cx, gy - 0.02, oz - cz); grp.rotation.y = yaw; grp.userData.barn37 = 1; const detG = new THREE.Group(); grp.add(detG); let anchor = null;
+    for (const q of Mt.parts) { const m = new THREE.Mesh(q.geo, q.mat); m.castShadow = high(); m.receiveShadow = true; m.name = 'barn37_' + q.name; grp.add(m); if (!anchor) anchor = m; }
+    det.add(grp); const top = gy + b.max.y;
+    for (const [x0, x1, z0, z1, h] of (Mt.COL || [])) { const c = W((x0 + x1) / 2, (z0 + z1) / 2), sb = topOf(solidBox(c[0], c[1], x1 - x0, z1 - z0, yaw, 0.02), h ? gy + h : top); L.obst.push(sb); L.solid.push(sb); }
+    try { beasts37(grp, Mt); } catch (e) { console.warn('[v37] beasts ' + e); }
+    ST.barn37 = { x: +A.x.toFixed(1), z: +A.z.toFixed(1), yaw: +yaw.toFixed(3), slope: +(gmax - gy).toFixed(2), cols: (Mt.COL || []).length }; return true; }
+  const FIRE36 = []; let fireMod = null, fireLoop = false;
+
+  // v38: محل الحداد v7 — مبنى يُدخل إليه (بلا دمج: ملف النار يحتاج العقد بأسمائها)، الحداد يشتغل جوّا: ينفخ الكير ويدق بالمطرقة بإيديه الاثنتين والشرر يطير
+  function bs38Prep(g) { g.scene.updateMatrixWorld(true); const box = new THREE.Box3(), bx = new THREE.Box3(), COL = [], SKIP = [], mk = {}, v = new THREE.Vector3(), q = new THREE.Quaternion(), s = new THREE.Vector3(); let tris = 0, calls = 0;
+    g.scene.traverse(o => { if (/^(npc_spot|entrance|anvil_strike|bellows_spot|interior_center|stair_bottom)$/.test(o.name)) { o.matrixWorld.decompose(v, q, s); mk[o.name] = { p: v.toArray(), q: q.toArray() }; }
+      if (!o.isMesh) return; const col = /_collider$|^col_/.test(o.name) || (o.parent && o.parent.name === 'colliders') || (o.userData && o.userData.collider) || (o.material && o.material.name === 'ColliderMat');
+      if (col) { o.visible = false; bx.setFromObject(o); if (bx.isEmpty()) return; if (bx.min.y > 1.0 || bx.max.y < 0.05) { SKIP.push(o.name); return; } COL.push([bx.min.x, bx.max.x, bx.min.z, bx.max.z, Math.max(0.05, bx.max.y), o.name]); return; }   // الأرضية المرتفعة والدرجات منخفضة: اللاعب يصعد عليها (STEP_UP)
+      box.expandByObject(o); calls++; const gi = o.geometry; tris += (gi.index ? gi.index.count : gi.attributes.position.count) / 3; o.castShadow = high(); o.receiveShadow = true; });
+    ST.bs38 = { cols: COL.length, skip: SKIP, calls, tris: Math.round(tris), box: [box.min.x, box.max.x, box.min.z, box.max.z, box.max.y].map(x => +x.toFixed(2)), mk: Object.keys(mk) };
+    return { shop: true, bs38: true, g, box, COL, mk, parts: [], tris: Math.round(tris), calls }; }
+  let bsMod = null; const BS38L = [];
+  function bs38Place(grp, Mt) { const root = Mt.used ? Mt.g.scene.clone(true) : Mt.g.scene; Mt.used = true; root.name = 'bs38_shop'; grp.add(root);
+    const it = { grp, root, Mt, forge: null, npc: null, busy: false, t: 0 }; BS38L.push(it); LIVE37.push({ grp, upd: (dt, cam) => bs38Upd(it, dt, cam) }); return it; }
+  const _b38 = new THREE.Vector3();
+  function bs38Upd(it, dt, cam) {
+    if (!it.forge) { if (it.busy || !M.smSel || !M.smSel.wrap) return; it.busy = true;
+      (bsMod || (bsMod = import('./shops/blacksmith-v7-fire-g38.js'))).then(m => { try {
+        const raw = M.smSel.wrap.children[0].children[0], npc = skClone(raw); npc.name = 'bs38_smith'; npc.traverse(o => { if (o.isMesh) { o.frustumCulled = false; o.castShadow = high(); } });
+        const seen = new Set(), anims = []; for (const c of Object.values(M.smSel.clips)) if (!seen.has(c.name)) { seen.add(c.name); anims.push(c); }
+        it.root.add(npc); it.root.updateMatrixWorld(true);
+        it.forge = m.addForgeFire(it.root, { animations: it.Mt.g.animations, light: true, flash: high(), npc, npcAnimations: anims }); it.npc = npc;
+        try { const r = window.__dbg && __dbg.renderer, c = window.__dbg && __dbg.camera; if (r && c) it.forge.setPointScale(r.domElement.height, c.fov); } catch (e) {}
+        ST.bs38f = (ST.bs38f || 0) + 1; } catch (e) { console.warn('[v38] forge ' + (e && e.stack || e)); } }).catch(e => console.warn('[v38] forge import ' + e)); return; }
+    it.grp.getWorldPosition(_b38); const d = _b38.distanceTo(cam.position); it.t += dt;
+    const day = ENV.T >= 5.5 && ENV.T < 21; if (it.npc) it.npc.visible = day && d < 95;
+    if (d > 110) return; if (it.t > 0.5) { it.t = 0; try { const r = __dbg.renderer; it.forge.setPointScale(r.domElement.height, cam.fov); } catch (e) {} }
+    it.forge.update(Math.min(dt, 0.1)); }
+  function fire36(grp, Mt) { if (!Mt.mk || !Mt.mk.fire_bed) return; const root = new THREE.Group(); root.name = 'food36_markers'; grp.add(root);
+    for (const nm in Mt.mk) { const o = new THREE.Object3D(); o.name = nm; o.position.fromArray(Mt.mk[nm].p); o.userData = Mt.mk[nm].ud; root.add(o); }
+    (fireMod || (fireMod = import('./shops/food-v5-fire.js'))).then(m => { try { const f = m.addOvenFire(root, {}); FIRE36.push({ f, grp }); ST.fire36 = FIRE36.length;
+        if (!fireLoop) { fireLoop = true; const P = new THREE.Vector3(); const tick = () => { const t = performance.now() / 1000; for (const F of FIRE36) { const cam = typeof camera !== 'undefined' ? camera : null; if (cam) { F.grp.getWorldPosition(P); F.f.group.visible = P.distanceToSquared(cam.position) < 90 * 90; } F.f.update(t); } requestAnimationFrame(tick); }; requestAnimationFrame(tick); } }
+      catch (e) { console.warn('[v36] food fire: ' + (e && e.message || e)); ST.fireErr = String(e); } }).catch(e => { console.warn('[v36] food fire load: ' + e); ST.fireErr = String(e); }); }
+  function buildSeller(k, g) {
+    const clips = {}; for (const c of g.animations) { const nm = c.name.includes('|') ? c.name.split('|').pop() : c.name; c.name = nm; clips[nm] = c; }
+    if (!clips.Idle) throw new Error('Idle missing'); if (!clips.Walk) clips.Walk = clips.Idle; if (!clips.Talk) clips.Talk = clips.Idle; clips.Run = clips.Run || clips.Walk; clips.Walk2 = clips.Walk2 || clips.Walk;
+    g.scene.traverse(o => { if (o.isMesh) { o.castShadow = false; o.frustumCulled = true; const ms = Array.isArray(o.material) ? o.material : [o.material];
+      for (const m of ms) { if (typeof CHARENV !== 'undefined' && !m.transparent) { m.envMap = CHARENV; m.envMapIntensity = 0.3; } if (typeof GLB_MAT !== 'undefined') GLB_MAT.add(m); } } });
+    const wrap = new THREE.Group(), inner = new THREE.Group(); inner.rotation.y = Math.PI; inner.add(g.scene); wrap.add(inner);   // مثل أهل البلد: النموذج يواجه +Z
+    return { npc: true, seller: true, wrap, clips };
+  }
+  const done = () => { if (--left === 0) { ST.ms = Math.round(performance.now() - t0); console.info('[v20] SHOP20 ready ' + JSON.stringify({ loaded: ST.loaded, failed: ST.failed, ms: ST.ms, calls: Object.fromEntries(Object.entries(M).filter(e => e[1] && e[1].shop).map(([k, v]) => [k, v.calls])) })); } };
+  try { const ld = new GLTFLoader(); ld.setMeshoptDecoder(MeshoptDecoder);
+    for (const k in URL) try { window.__qLoad(ld, URL[k], g => { try { M[k] = k === 'bsShop' ? bs38Prep(g) : /Shop$/.test(k) ? buildShop(k, g) : buildSeller(k, g); if (k === 'fdShop') food36(M[k], g); if (k === 'stShop' || k === 'bnShop') mk37(M[k], g, k); ST.loaded++; } catch (e) { console.warn('[v20] SHOP20 ' + k + ': ' + (e && e.message || e)); M[k] = null; ST.failed.push(k); } done(); },
+      undefined, e => { console.warn('[v20] SHOP20 load fail ' + URL[k]); M[k] = null; ST.failed.push(k); done(); }); } catch (e) { M[k] = null; ST.failed.push(k); done(); } } catch (e) { console.warn('[v20] SHOP20 init: ' + e); left = 0; }
+  const ready = () => left <= 0 || performance.now() - t0 > 120000;
+  // ── وضع المحل في السوق مكان كشك general/pharm ──
+
+  function shopDress22(b, type) {                    // v22: طابق علوي مزخرف للمحل المكعّب (نوافذ مقوّسة، مشربية، أفاريز، شرفات، قبة صغيرة) — نداء رسم واحد
+    const P = [], C = (r, g, bb) => [r, g, bb];
+    const PL = C(0.86, 0.75, 0.58), TR = C(0.95, 0.9, 0.8), DK = C(0.1, 0.08, 0.07), WD = C(0.45, 0.28, 0.15), WD2 = C(0.32, 0.2, 0.11), DM = C(0.36, 0.56, 0.52), GD = C(0.85, 0.66, 0.25), BL = C(0.2, 0.36, 0.52);
+    const box = (w, h, d, x, y, z, c, ry) => { const g = new THREE.BoxGeometry(w, h, d); if (ry) g.rotateY(ry); g.translate(x, y + h / 2, z); P.push([g, c]); };
+    const cyl = (r0, r1, h, x, y, z, c, seg, rx, ry) => { const g = new THREE.CylinderGeometry(r0, r1, h, seg || 10, 1); if (rx) g.rotateX(rx); if (ry) g.rotateY(ry); g.translate(x, y, z); P.push([g, c]); };
+    const x0 = b.min.x, x1 = b.max.x, z0 = b.min.z, z1 = b.max.z, H = b.max.y, Wd = x1 - x0, Dp = z1 - z0, cx = (x0 + x1) / 2;
+    const sz0 = z0 + 0.12, sz1 = z1 - 0.75, sx0 = x0 + 0.18, sx1 = x1 - 0.18, SH = 2.5, sw = sx1 - sx0, sd = sz1 - sz0, scz = (sz0 + sz1) / 2;
+    // أفريز فوق الطابق الأرضي + الطابق العلوي + أفريز علوي + شرفات مسننة
+    box(Wd + 0.24, 0.22, Dp + 0.24, cx, H - 0.05, (z0 + z1) / 2, TR);
+    box(sw, SH, sd, cx, H + 0.17, scz, PL);
+    box(sw + 0.2, 0.18, sd + 0.2, cx, H + 0.17 + SH, scz, TR);
+    const top = H + 0.35 + SH, mer = (ax, az, bx, bz) => { const L = Math.hypot(bx - ax, bz - az), n = Math.max(2, Math.round(L / 0.55)), ry = Math.atan2(bx - ax, bz - az); for (let i = 0; i <= n; i++) { const t = i / n; box(0.28, 0.34, 0.22, ax + (bx - ax) * t, top, az + (bz - az) * t, PL, ry); } };
+    const ex0 = sx0 - 0.05, ex1 = sx1 + 0.05, ez0 = sz0 - 0.05, ez1 = sz1 + 0.05;
+    mer(ex0, ez1, ex1, ez1); mer(ex0, ez0, ex1, ez0); mer(ex0, ez0, ex0, ez1); mer(ex1, ez0, ex1, ez1);
+    // قبة صغيرة على السطح الخلفي
+    { const r = Math.min(1.0, sw * 0.24), g = new THREE.SphereGeometry(r, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2); g.translate(cx + sw * 0.18, top + 0.32, sz0 + sd * 0.35); P.push([g, DM]); cyl(r * 1.04, r * 1.04, 0.32, cx + sw * 0.18, top + 0.16, sz0 + sd * 0.35, PL, 14); cyl(0.03, 0.03, 0.36, cx + sw * 0.18, top + 0.32 + r + 0.16, sz0 + sd * 0.35, GD, 6); const k = new THREE.SphereGeometry(0.06, 8, 6); k.translate(cx + sw * 0.18, top + 0.32 + r + 0.36, sz0 + sd * 0.35); P.push([k, GD]); }
+    // نافذة مقوّسة: فتحة داكنة + قوس + إطار + عتبة (+ مصاريع خشبية اختيارية)
+    const win = (u, y, w, h, face, sh) => {   // face: 'f' أمام (+z عند sz1)، 'b' خلف، 'l' يسار (-x)، 'r' يمين
+      const t = 0.06, put = (lw, lh, ld, lu, ly, lo, c) => { if (face === 'f') box(lw, lh, ld, u + lu, ly, sh + lo, c); else if (face === 'b') box(lw, lh, ld, u + lu, ly, sh - lo, c); else if (face === 'l') box(ld, lh, lw, sh - lo, ly, u + lu, c); else box(ld, lh, lw, sh + lo, ly, u + lu, c); };
+      const arch = (r, ly, lo, c, d) => { const g = new THREE.CylinderGeometry(r, r, d, 12, 1, false, 0, Math.PI); g.rotateZ(Math.PI / 2); g.rotateY(Math.PI / 2);   // نصف قرص بمستوى الواجهة
+        if (face === 'f') g.translate(u, ly, sh + lo); else if (face === 'b') g.translate(u, ly, sh - lo); else { g.rotateY(Math.PI / 2); g.translate(face === 'l' ? sh - lo : sh + lo, ly, u); } P.push([g, c]); };
+      put(w + 0.16, h + 0.08, t, 0, y - 0.08, 0.01, TR); arch(w / 2 + 0.08, y + h, 0.01, TR, t);
+      put(w, h, t, 0, y, 0.035, DK); arch(w / 2, y + h, 0.035, DK, t);
+      put(w + 0.3, 0.07, 0.16, 0, y - 0.1, 0.06, TR);
+      if (sh !== undefined && w > 0.45) { put(0.035, h, 0.03, -w / 6, y, 0.07, WD2); put(0.035, h, 0.03, w / 6, y, 0.07, WD2); }   // v25: قضبان عمودية فقط (لا شكل صليب)
+    };
+    // الواجهة العلوية: مشربية خشبية بالوسط + نافذتان
+    const fz = sz1; win(sx0 + sw * 0.17, H + 0.75, 0.5, 0.95, 'f', fz); win(sx1 - sw * 0.17, H + 0.75, 0.5, 0.95, 'f', fz);
+    { const mw = Math.min(1.5, sw * 0.38), mh = 1.35, my = H + 0.55, md = 0.5;
+      box(mw + 0.12, 0.1, md + 0.08, cx, my - 0.1, fz + md / 2, WD2);
+      box(mw, mh, md, cx, my, fz + md / 2, WD);
+      for (let i = 0; i < 7; i++) box(0.035, mh * 0.8, 0.03, cx - mw / 2 + mw * (i + 0.5) / 7, my + mh * 0.1, fz + md + 0.015, WD2);
+      for (let j = 0; j < 4; j++) box(mw, 0.03, 0.03, cx, my + mh * (0.15 + j * 0.22), fz + md + 0.02, WD2);
+      box(mw + 0.24, 0.08, md + 0.2, cx, my + mh, fz + md / 2, WD2);
+      for (const s of [-1, 1]) box(0.06, 0.32, 0.06, cx + s * (mw / 2 - 0.05), my - 0.42, fz + 0.05, WD2); }
+    // الجوانب والخلف (علوي)
+    const nS = Math.max(1, Math.round(sd / 1.6));
+    for (let i = 0; i < nS; i++) { const z = sz0 + sd * (i + 0.5) / nS; win(z, H + 0.75, 0.48, 0.9, 'l', sx0); win(z, H + 0.75, 0.48, 0.9, 'r', sx1); }
+    for (const s of [-0.25, 0.25]) win(cx + sw * s, H + 0.75, 0.48, 0.9, 'b', sz0);
+    // الطابق الأرضي: نوافذ صغيرة بمصاريع على الجانبين والخلف + أعمدة ركنية
+    for (const z of [z0 + Dp * 0.3, z0 + Dp * 0.62]) { win(z, 1.35, 0.42, 0.75, 'l', x0); win(z, 1.35, 0.42, 0.75, 'r', x1); }
+    win(cx, 1.35, 0.5, 0.8, 'b', z0);
+    for (const [x, z] of [[x0, z0], [x1, z0], [x0, z1], [x1, z1]]) { box(0.26, H - 0.05, 0.26, x, 0, z, TR); box(0.34, 0.16, 0.34, x, 0, z, TR); }
+    // فانوس معلّق بجانب المدخل
+    for (const s of [-1, 1]) { const lx = cx + s * (Wd / 2 - 0.45), lz = z1 + 0.18; box(0.04, 0.04, 0.3, lx, H - 0.6, lz - 0.12, WD2); cyl(0.08, 0.1, 0.24, lx, H - 0.78, lz, GD, 6); }
+    // دمج بلون الرأس
+    let nv = 0; const gs = P.map(([g0, c]) => { const g = g0.index ? g0.toNonIndexed() : g0; nv += g.attributes.position.count; return [g, c]; });
+    const pos = new Float32Array(nv * 3), nor = new Float32Array(nv * 3), col = new Float32Array(nv * 3); let o = 0;
+    const lin = c => c.map(v => Math.pow(v, 2.2));
+    for (const [g, c] of gs) { pos.set(g.attributes.position.array, o * 3); nor.set(g.attributes.normal.array, o * 3); const cl = lin(c); for (let i = 0; i < g.attributes.position.count; i++) { col[(o + i) * 3] = cl[0]; col[(o + i) * 3 + 1] = cl[1]; col[(o + i) * 3 + 2] = cl[2]; } o += g.attributes.position.count; g.dispose(); }
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); geo.setAttribute('color', new THREE.BufferAttribute(col, 3)); geo.computeBoundingSphere();
+    const m = new THREE.Mesh(geo, shopDress22.mat || (shopDress22.mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, metalness: 0 }))); m.name = 'shop22_dress'; m.receiveShadow = true; m.castShadow = window.__QUALITY === 'high';
+    return m;
+  }
+
+  function plaster24(grp) {   // v24: جدار الطوب البرتقالي لمحل الأدوية يصير لياسة بلون الطابق العلوي (مبنى واحد لا صندوقان)
+    grp.traverse(o => { if (!o.isMesh || o.name !== 'shop20_atlas' || !o.material || o.material.userData.pl24) return; const m = o.material.clone(); m.userData.pl24 = 1; o.material = m;
+      m.onBeforeCompile = (sh) => { sh.fragmentShader = sh.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>
+        { vec3 c = diffuseColor.rgb; float mx = max(c.r, max(c.g, c.b)), mn = min(c.r, min(c.g, c.b)); float sat = (mx - mn) / max(mx, 1e-3);
+          float org = step(c.g * 1.12, c.r) * step(c.b * 1.05, c.g) * smoothstep(0.30, 0.45, sat) * smoothstep(0.04, 0.09, mx);
+          float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
+          vec3 cream = vec3(0.70, 0.52, 0.31) * clamp(0.55 + 2.4 * l, 0.6, 1.25);
+          diffuseColor.rgb = mix(c, cream, org); }`); };
+      m.customProgramCacheKey = () => 'plaster24'; });
+  }
+  function join24() {   // v24: محل المؤن ومحل الأدوية المتجاوران يُوصلان بجدار وأفريز واحد فيقرآن مبنى واحداً بجناحين
+    const D = []; scene.traverse(o => { if (o.name === 'shop22_dress' && o.parent) D.push(o.parent); }); if (D.length < 2) return;
+    const bb = D.map(g => { g.updateMatrixWorld(true); const b = new THREE.Box3(); g.traverse(q => { if (q.isMesh && (q.name === 'shop20_atlas' || q.name === 'shop22_dress')) b.expandByObject(q); }); return b; });
+    for (let i = 0; i < D.length; i++) for (let j = i + 1; j < D.length; j++) { let a = bb[i], b = bb[j]; if (a.min.x > b.min.x) [a, b] = [b, a];
+      if (D[i].userData.j24 || D[j].userData.j24) continue; const gap = b.min.x - a.max.x, zo0 = Math.max(a.min.z, b.min.z), zo1 = Math.min(a.max.z, b.max.z); if (gap < -0.2 || gap > 2.5 || zo1 - zo0 < 2) continue;
+      const y0 = Math.min(a.min.y, b.min.y), h = Math.min(a.max.y, b.max.y) - y0, P = [], add = (w, hh, d, x, y, z, c) => { const g = new THREE.BoxGeometry(w, hh, d).toNonIndexed(); g.translate(x, y + hh / 2, z); P.push([g, c]); };
+      const x0 = a.max.x - 0.35, x1 = b.min.x + 0.35, cx = (x0 + x1) / 2, w = x1 - x0, d = zo1 - zo0 - 1.6, cz = (zo0 + zo1) / 2 - 0.8, PLc = [0.86, 0.75, 0.58], TRc = [0.95, 0.9, 0.8];
+      add(w, h * 0.92, d, cx, y0, cz, PLc); add(w + 0.1, 0.22, d + 0.3, cx, y0 + h * 0.62, cz, TRc); add(w + 0.1, 0.2, d + 0.3, cx, y0 + h * 0.92, cz, TRc); if (w > 0.9) {   // v25: واجهة مكتملة للجدار الواصل — نافذة بإطار حجري وعتبة وحاجب ومشربية خشبية ومصاريع، وباب خشبي بألواح ومسامير بقوس حجري ودرجة
+        const fz = cz + d / 2, ST = [0.80, 0.71, 0.56], ST2 = [0.70, 0.62, 0.49], STP = [0.62, 0.59, 0.54], STP2 = [0.55, 0.53, 0.49], STL = [0.74, 0.71, 0.66], SHD = [0.24, 0.21, 0.18], QS = [0.75, 0.69, 0.59], QS2 = [0.69, 0.63, 0.53], QL = [0.58, 0.52, 0.42], WD = [0.47, 0.29, 0.15], WD2 = [0.30, 0.19, 0.10], WDK = [0.19, 0.12, 0.07], IR = [0.13, 0.12, 0.11], GD = [0.80, 0.62, 0.26];
+        const G = (g, c) => { P.push([g.index ? g.toNonIndexed() : g, c]); };
+        const bx = (bw, bh, bd, x, y, z, c, rz) => { const g = new THREE.BoxGeometry(bw, bh, bd); if (rz) g.rotateZ(rz); g.translate(x, y, z); G(g, c); };   // y = المركز
+        const half = (r, y, z, dd, c, seg) => { const g = new THREE.CylinderGeometry(r, r, dd, seg || 18, 1, false, 0, Math.PI); g.rotateZ(Math.PI / 2); g.rotateY(Math.PI / 2); g.translate(cx, y, z); G(g, c); };
+        // ── الباب: درجتان حجريتان + إطار حجري بقوس وحجر مفتاح + مصراع بألواح عمودية وعوارض ومسامير وحلقة
+        const dw = Math.min(1.1, w * 0.42), dh = 2.05, gY = y0 + 0.13, RS = 0.165, TD = 0.23, NS = 3, sY = gY + RS * NS, dTop = sY + dh, FM = 0.17;   // v27: باب أضيق قليلاً وإطار أنحف فيتسع حجر الزاوية بجانبه + درجات مرفوعة فوق أرض الشارع
+        for (let s = 0; s < NS; s++) { const top = gY + RS * (s + 1), front = fz + TD * (NS - s), sw = dw + 0.72 - s * 0.16, col = s % 2 ? STP : STP2;   // كل درجة: جسم حجري + أنف فاتح + خط ظل غامق تحت الأنف + ظل على الدرجة تحتها
+          bx(sw, top - (y0 - 0.1), front - fz, cx, (top + y0 - 0.1) / 2, fz + (front - fz) / 2, col);
+          bx(sw + 0.02, 0.025, 0.035, cx, top - 0.0125, front - 0.005, STL);
+          bx(sw + 0.01, 0.035, 0.012, cx, top - 0.025 - 0.035 / 2, front + 0.004, SHD);
+          if (s > 0) bx(sw + 0.16, 0.006, 0.07, cx, gY + RS * s + 0.003, front + 0.035, SHD); }
+        bx(dw + 0.1, 0.03, 0.06, cx, sY + 0.012, fz + 0.12, SHD);   // خط ظل العتبة عند أسفل الباب
+        bx(dw + FM * 2, dh + 0.02, 0.09, cx, sY + dh / 2, fz + 0.045, ST); half(dw / 2 + FM, dTop, fz + 0.045, 0.09, ST);
+        for (const s of [-1, 1]) { bx(0.24, 0.1, 0.13, cx + s * (dw / 2 + 0.05), dTop - 0.05, fz + 0.06, ST2); bx(0.24, 0.14, 0.12, cx + s * (dw / 2 + 0.05), sY + 0.07, fz + 0.06, ST2); }
+        bx(0.2, 0.3, 0.14, cx, dTop + dw / 2 + 0.1, fz + 0.07, ST2);   // حجر المفتاح
+        bx(dw, dh, 0.04, cx, sY + dh / 2, fz + 0.095, WDK); half(dw / 2, dTop, fz + 0.095, 0.04, WDK);
+        bx(dw - 0.06, dh - 0.04, 0.05, cx, sY + dh / 2 - 0.01, fz + 0.11, WD);
+        const nPl = Math.max(4, Math.round(dw / 0.16)); for (let k = 1; k < nPl; k++) bx(0.018, dh - 0.06, 0.012, cx - dw / 2 + 0.03 + (dw - 0.06) * k / nPl, sY + dh / 2 - 0.01, fz + 0.14, WD2);
+        for (const fy of [0.22, 0.62, 0.9]) { bx(dw - 0.1, 0.11, 0.025, cx, sY + dh * fy, fz + 0.15, WD2); for (let k = 0; k < 5; k++) bx(0.035, 0.035, 0.02, cx - dw / 2 + 0.12 + (dw - 0.24) * k / 4, sY + dh * fy, fz + 0.17, IR); }
+        { const g = new THREE.TorusGeometry(0.07, 0.012, 6, 14); g.translate(cx + dw * 0.28, sY + dh * 0.5, fz + 0.17); G(g, IR); bx(0.07, 0.07, 0.02, cx + dw * 0.28, sY + dh * 0.5 + 0.07, fz + 0.16, IR); }
+        // نافذة القوس فوق الباب: خشب داكن بأشعة خشبية (شمسية)
+        half(dw / 2 - 0.04, dTop, fz + 0.115, 0.03, WD2); for (let k = 1; k < 6; k++) { const a = Math.PI * k / 6, L = dw / 2 - 0.06; bx(L, 0.025, 0.02, cx + Math.cos(a) * L / 2, dTop + Math.sin(a) * L / 2, fz + 0.135, WD, a); }
+        bx(dw - 0.04, 0.05, 0.03, cx, dTop + 0.01, fz + 0.13, WD2);
+        // ── النافذة العلوية: إطار حجري بقوس + حاجب (عتبة علوية) + عتبة سفلية بكوابيل + خلفية خشب داكن ومشربية + مصاريع مفتوحة بشرائح
+        const ww = Math.min(0.9, w * 0.36), wh = 1.15, wy = y0 + h * 0.62 + 0.42, wT = wy + wh;
+        bx(ww + 0.3, wh + 0.04, 0.08, cx, wy + wh / 2, fz + 0.04, ST); half(ww / 2 + 0.15, wT, fz + 0.04, 0.08, ST);
+        bx(ww + 0.62, 0.1, 0.2, cx, wT + ww / 2 + 0.2, fz + 0.1, ST2); bx(ww + 0.5, 0.06, 0.14, cx, wT + ww / 2 + 0.13, fz + 0.07, ST);   // الحاجب (العتبة العلوية)
+        bx(ww + 0.5, 0.09, 0.24, cx, wy - 0.05, fz + 0.12, ST); for (const s of [-1, 1]) bx(0.1, 0.2, 0.16, cx + s * (ww / 2 + 0.08), wy - 0.2, fz + 0.08, ST2);
+        bx(ww, wh, 0.03, cx, wy + wh / 2, fz + 0.085, WDK); half(ww / 2, wT, fz + 0.085, 0.03, WDK);
+        bx(ww, 0.04, 0.05, cx, wy + 0.02, fz + 0.1, WD2); bx(ww, 0.04, 0.05, cx, wT, fz + 0.1, WD2); for (const s of [-1, 1]) bx(0.04, wh, 0.05, cx + s * (ww / 2 - 0.02), wy + wh / 2, fz + 0.1, WD2);
+        const nV = 7, nH = 9; for (let k = 1; k < nV; k++) bx(0.026, wh - 0.06, 0.03, cx - ww / 2 + ww * k / nV, wy + wh / 2, fz + 0.11, WD);
+        for (let k = 1; k < nH; k++) bx(ww - 0.06, 0.026, 0.03, cx, wy + wh * k / nH, fz + 0.115, WD);
+        for (let a = 1; a < nV; a++) for (let b = 1; b < nH; b++) bx(0.036, 0.036, 0.02, cx - ww / 2 + ww * a / nV, wy + wh * b / nH, fz + 0.13, WD2);   // عُقد المشربية المخروطة
+        for (let k = 1; k < 5; k++) { const a = Math.PI * k / 5, L = ww / 2 - 0.03; bx(L, 0.022, 0.02, cx + Math.cos(a) * L / 2, wT + Math.sin(a) * L / 2, fz + 0.11, WD, a); }
+        for (const s of [-1, 1]) { const sw2 = ww / 2 + 0.02, sx = cx + s * (ww / 2 + 0.15 + sw2 / 2 + 0.03);
+          bx(sw2, wh, 0.045, sx, wy + wh / 2, fz + 0.03, WD2); bx(sw2 - 0.06, wh - 0.08, 0.02, sx, wy + wh / 2, fz + 0.06, WDK);
+          for (let k = 0; k < 9; k++) bx(sw2 - 0.08, 0.04, 0.02, sx, wy + 0.1 + (wh - 0.2) * k / 8, fz + 0.075, WD, 0);
+          for (const fy of [0.2, 0.8]) bx(0.06, 0.02, 0.02, sx - s * (sw2 / 2 - 0.03), wy + wh * fy, fz + 0.09, IR); }
+        // شريط حجري رفيع بين الطابقين يمرّ تحت النافذة + فانوس صغير بجانب الباب
+        { const lx = cx + (dw / 2 + FM + w / 2 - 0.35) / 2; /* v30: الفانوس في منتصف عمود الزاوية بين حافة إطار الباب وحافة الجدار */ bx(0.04, 0.04, 0.26, lx, dTop - 0.15, fz + 0.13, IR); const g = new THREE.CylinderGeometry(0.07, 0.09, 0.22, 6); g.translate(lx, dTop - 0.3, fz + 0.26); G(g, GD); }
+        {   // v26: تفصيل حجري خفيف على اللياسة بين الباب والنافذة: زوايا حجرية (quoins) على حافتي الجدار + مدماك حجري رفيع فوق قوس الباب
+          const archTop = dTop + dw / 2 + 0.27, bandTop = y0 + h * 0.62 - 0.11, xl = cx - w / 2 + 0.35, xr = cx + w / 2 - 0.35, doorHalf = dw / 2 + FM;   // v27: المسافة تُقاس من حافة الإطار الأنحف
+          const by = archTop + (bandTop - archTop) * 0.5;
+          if (bandTop - archTop > 0.3) { bx(w - 0.66, 0.12, 0.05, cx, by, fz + 0.025, QS); bx(w - 0.66, 0.022, 0.035, cx, by - 0.071, fz + 0.018, QL); bx(w - 0.66, 0.014, 0.052, cx, by + 0.067, fz + 0.026, STL); }
+          const room = (xr - xl) / 2 - doorHalf, QG = 0.03, qlog = [];   // v30: باب عريض 1.10م — عرض حجر الزاوية يُحسب لكل مدماك من حافة الإطار/القوس عند ذلك الارتفاع (يتبع انحناء القوس) مع الحفاظ على تناوب كبير/صغير
+          const fhAt = (ya, yb) => { if (yb <= sY) return 0; if (ya <= dTop) return doorHalf; const t = ya - dTop; return t >= doorHalf ? 0 : Math.sqrt(doorHalf * doorHalf - t * t); };
+          for (const s of [-1, 1]) { const xe = s < 0 ? xl : xr; let k = 0;
+            for (let y = y0 + 0.42; y + 0.24 < y0 + h * 0.9; y += 0.28, k++) { const rr = (xr - xl) / 2 - fhAt(y, y + 0.24) - QG; let qw = k % 2 ? 0.2 : 0.32; if (rr < 0.32) { const big = Math.min(0.32, rr); qw = k % 2 ? Math.min(0.2, big * 0.625) : big; } if (s > 0) qlog.push(+qw.toFixed(3)); if (qw < 0.1) continue;
+              bx(qw, 0.24, 0.04, xe - s * qw / 2, y + 0.12, fz + 0.012, k % 2 ? QS2 : QS); bx(qw, 0.02, 0.03, xe - s * qw / 2, y - 0.012, fz + 0.008, QL); } }
+          console.info('[v26] v30 facade stone', JSON.stringify({ w: +w.toFixed(2), h: +h.toFixed(2), dw: +dw.toFixed(2), sY: +(sY - y0).toFixed(2), archTop: +(archTop - y0).toFixed(2), bandTop: +(bandTop - y0).toFixed(2), room: +room.toFixed(2), lx: +(dw / 2 + FM + w / 2 - 0.35).toFixed(3) / 2, q30: qlog }));
+        }
+      }
+      let nv = 0; for (const [g] of P) nv += g.attributes.position.count; const pos = new Float32Array(nv * 3), nor = new Float32Array(nv * 3), col = new Float32Array(nv * 3); let o = 0;
+      for (const [g, c] of P) { pos.set(g.attributes.position.array, o * 3); nor.set(g.attributes.normal.array, o * 3); for (let k = 0; k < g.attributes.position.count; k++) { col[(o + k) * 3] = Math.pow(c[0], 2.2); col[(o + k) * 3 + 1] = Math.pow(c[1], 2.2); col[(o + k) * 3 + 2] = Math.pow(c[2], 2.2); } o += g.attributes.position.count; g.dispose(); }
+      const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3)); geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3)); geo.setAttribute('color', new THREE.BufferAttribute(col, 3)); geo.computeBoundingSphere();
+      const m = new THREE.Mesh(geo, shopDress22.mat); m.name = 'shop24_join'; m.receiveShadow = true; scene.add(m); m.position.set(0, 0, 0);
+      const par = D[i].parent; if (par) { par.updateMatrixWorld(true); const inv = new THREE.Matrix4().copy(par.matrixWorld).invert(); m.applyMatrix4(inv); par.add(m); }
+      D[i].userData.j24 = D[j].userData.j24 = 1; console.info('[v27] shops joined, gap ' + gap.toFixed(2) + 'm'); }
+  }
+  // ═══ v36: عربة التاجر (wagon fix7) بجانب محل المؤن + إضاءة النهار لمحل المؤن (supply-daylight.js) ═══
+  const WAG36 = { url: 'wagon/merchant-wagon-lite.glb', full: 'wagon/merchant-wagon.glb', tpl: null, pend: [], ST: { ok: 0, fail: 0, placed: [] },
+    // موضع العربة في إطار محل المؤن: u جانبي (+x)، w للأمام (+z = الواجهة)، ry دوران إضافي
+    cfg: Object.assign({ u: -5.1, w: 0.59, ry: -Math.PI / 2 }, window.__v36wag || {}),   // v36: في خانة الكشك المحذوف غرب محل المؤن، موازية للصف، الذراعان للغرب
+    init() { try { window.__qRegister && window.__qRegister(this.url, this.full); const ld = new GLTFLoader(); ld.setMeshoptDecoder(MeshoptDecoder);
+      window.__qLoad(ld, this.url, g => { try { g.scene.traverse(o => { if (o.isMesh) { o.castShadow = high(); o.receiveShadow = true; o.frustumCulled = true; } });
+          this.tpl = g.scene; this.ST.ok = 1; this.ST.url = window.__qResolved ? window.__qResolved(this.url) : this.url; for (const h of this.pend) h.add(this.tpl.clone()); this.pend.length = 0;
+          console.info('[v36] wagon ready ' + this.ST.url); } catch (e) { this.ST.fail = 1; console.warn('[v36] wagon build ' + (e && e.message || e)); } },
+        undefined, e => { this.ST.fail = 1; console.warn('[v36] wagon load fail ' + this.url); }); } catch (e) { this.ST.fail = 1; console.warn('[v36] wagon init ' + e); } },
+    put(L, det, b, W, yaw, gyF, cx, cz) {
+      const c = this.cfg, u = c.u !== null ? c.u : b.max.x + 1.75, w = c.w !== null ? c.w : b.max.z - 1.6, q = W(u, w), ry = yaw + (c.ry || 0);
+      const h = new THREE.Group(); h.name = 'wagon36'; const gy = gyF(q[0], q[1]); h.position.set(q[0] - cx, gy - 0.03, q[1] - cz); h.rotation.y = ry; det.add(h);
+      if (this.tpl) h.add(this.tpl.clone()); else this.pend.push(h);
+      // التصادم: الصندوق والعجلات (2.3 × 4.0 م) + الذراعان قدّام (0.9 × 1.6 م، منخفض)
+      const fx = Math.sin(ry), fz = Math.cos(ry), at = (a, f) => [q[0] + fz * a + fx * f, q[1] - fx * a + fz * f];
+      const c1 = at(0, 0.1), c2 = at(0, 2.75);
+      const s1 = topOf(solidBox(c1[0], c1[1], 2.3, 4.0, ry, 0.02), gy + 2.6), s2 = topOf(solidBox(c2[0], c2[1], 0.9, 1.5, ry, 0.02), gy + 0.7);
+      for (const s of [s1, s2]) { L.obst.push(s); L.solid.push(s); }
+      this.ST.placed.push({ x: +q[0].toFixed(2), z: +q[1].toFixed(2), yaw: +ry.toFixed(3) }); return h; } };
+  WAG36.init();
+  const DAY36 = { grps: [], api: null, mod: null, t: 0, cur: null, far: true, _p: new THREE.Vector3(),
+    add(grp) { this.grps.push(grp); if (!this.req) { this.req = 1; import('./shops/supply-daylight.js?v=36').then(m => { this.mod = m; }).catch(e => console.warn('[v36] daylight ' + (e && e.message || e))); } },
+    tick(dt, day, cam) { if (!this.mod || !this.grps.length || !cam) return;
+      if (!this.api) { this.api = this.mod.addSupplyDaylight(scene, this.grps[0]); this.cur = this.grps[0]; }
+      this.t -= dt; if (this.t <= 0) { this.t = 0.5; let best = null, bd = Infinity;
+        for (const g of this.grps) { let o = g; while (o.parent) o = o.parent; if (o !== scene) continue; g.getWorldPosition(this._p); const d = this._p.distanceToSquared(cam.position); if (d < bd) { bd = d; best = g; } }
+        if (best && best !== this.cur) { best.add(this.api.group); this.cur = best; } this.far = !best || bd > 80 * 80; }
+      this.api.update(this.far ? 0 : day); } };
+
+  function place(L, S0, det, cx, cz, H) {
+    const T0 = TYPE[S0.type], Mt = T0 && M[T0.shop]; if (!Mt) return false;
+    const sx = S0.x, sz = S0.z, yaw = Math.atan2(S0.fx - sx, S0.fz - sz), dx = Math.sin(yaw), dz = Math.cos(yaw), lx = dz, lz = -dx, b = Mt.box;
+    const back = b.max.z - 1.5, ox = sx - dx * back, oz = sz - dz * back;     // الواجهة على خط واجهة المحل القديم (+١.٥م أمام النقطة)
+    const W = (u, w) => [ox + lx * u + dx * w, oz + lz * u + dz * w];          // محلي (x=u, z=w) ← عالم
+    let gy = Infinity; for (const [u, w] of [[b.min.x, b.min.z], [b.max.x, b.min.z], [b.min.x, b.max.z], [b.max.x, b.max.z], [0, 0]]) { const q = W(u, w); gy = Math.min(gy, H(q[0], q[1])); }
+    const grp = new THREE.Group(); grp.position.set(ox - cx, gy - 0.02, oz - cz); grp.rotation.y = yaw; grp.userData.shop20 = S0.type;
+    const detG = new THREE.Group(); grp.add(detG); let anchor = null;
+    for (const q of Mt.parts) { const m = new THREE.Mesh(q.geo, q.mat); m.castShadow = high() && q.shell; m.receiveShadow = true; m.name = 'shop20_' + q.name; (q.shell ? grp : detG).add(m); if (q.shell && !anchor) anchor = m; }
+    if (Mt.bs38) { try { bs38Place(grp, Mt); } catch (e) { console.warn('[v38] bs38Place ' + (e && e.message || e)); } }
+    const R2 = (high() ? 60 : 32) ** 2, _p = new THREE.Vector3();
+    if (anchor) anchor.onBeforeRender = (r, s, cam) => { grp.getWorldPosition(_p); detG.visible = _p.distanceToSquared(cam.position) < R2; };
+    det.add(grp); if (S0.type === 'general') { try { DAY36.add(grp); WAG36.put(L, det, b, W, yaw, H, cx, cz); } catch (e) { console.warn('[v36] place ' + (e && e.message || e)); } } /* v31: shops back to their v20 look (no v22 upper storey, no v24 plaster recolour, no v24/v25 joining house wall) */
+    // التصادم: جدار خلفي + جداران جانبيان + الكاونتر (بفتحة جانبية يمرّ منها البائع)
+    const top = gy + b.max.y, COL = T0.COL || Mt.COL || autoCol(Mt, T0);
+    for (const [x0, x1, z0, z1, h] of COL) { const c = W((x0 + x1) / 2, (z0 + z1) / 2), sb = topOf(solidBox(c[0], c[1], x1 - x0, z1 - z0, yaw, 0.02), h ? gy + h : top); L.obst.push(sb); L.solid.push(sb); }
+    const sp38 = Mt.bs38 && Mt.mk.npc_spot ? Mt.mk.npc_spot.p : null, kp = sp38 ? W(sp38[0], sp38[2]) : W(T0.selX || 0, T0.selZ), fr = W(0, b.max.z + 0.9); if (Mt.food36) { try { fire36(grp, Mt); } catch (e) { console.warn('[v36] fire36 ' + e); } } if (Mt.a37 === 'stShop') { try { horses37(grp, Mt); } catch (e) { console.warn('[v37] horses37 ' + e); } }
+    L.stalls.push({ type: S0.type, deg: S0.deg, x: sx, z: sz, face: yaw, keeper: kp, front: fr, lat: [lx, lz], s20: true, sway: Mt.bs38 ? 0 : 0.3, bs38: !!Mt.bs38, nf: yaw + (T0.nf || 0), r37: Mt.food36 ? [W(0, 4.2), W(0, 2.9), W(0, 0.8), W(T0.selX || 0, 0.8)] : null });   /* v37: مسار دخول/خروج صاحب محل الطعام عبر فتحة الكاونتر */
+    L.poi.stall.push({ x: fr[0] + dx * 0.6, z: fr[1] + dz * 0.6, type: 'stall' });
+    ST.placed.push({ type: S0.type, x: +ox.toFixed(2), z: +oz.toFixed(2), yaw: +yaw.toFixed(3), keeper: kp.map(v => +v.toFixed(2)), calls: Mt.calls, tris: Mt.tris });
+    return true;
+  }
+  function autoCol(Mt, T0) { const b = Mt.box, t = 0.35, zc0 = T0.selZ + 0.42, zc1 = b.max.z - 0.15;
+    return [[b.min.x, b.max.x, b.min.z, b.min.z + t], [b.min.x, b.min.x + t, b.min.z, b.max.z], [b.max.x - t, b.max.x, b.min.z, b.max.z], [b.min.x + t, b.max.x - t - 0.0, zc0, zc1, 1.1]]; }
+  // ── نسخة البائع: هيكل + خلاط + إيماءات Count/Grind/Offer أثناء الوقوف، Talk/Offer أثناء الحديث ──
+  function keeper(shop) {
+    const T0 = shop && TYPE[shop.type], Mt = T0 && M[T0.sel]; if (!Mt || !Mt.npc) return null;
+    const inst = skClone(Mt.wrap), mixer = new THREE.AnimationMixer(inst), acts = {}; let mat = null;
+    inst.traverse(o => { if (o.isSkinnedMesh || o.isMesh) { if (o.isSkinnedMesh && !mat) { mat = o.material.clone(); o.material = mat; } o.frustumCulled = true; o.castShadow = false;
+      if (o.isSkinnedMesh) { if (!o.boundingSphere) o.computeBoundingSphere(); o.boundingSphere.radius *= 1.35; } } });
+    if (!mat || !mat.emissive) return null;
+    { const acc = [], body = []; inst.traverse(o => { if (o.isMesh && !o.isSkinnedMesh) acc.push(o); else if (o.isSkinnedMesh) body.push(o); });   // الإكسسوارات الصغيرة (قوارير، مفاتيح، كتاب…) تختفي بعيداً: نداءات رسم أقل على الهاتف
+      const R2 = (high() ? 30 : 13) ** 2, _q = new THREE.Vector3(); if (acc.length && body[0]) body[0].onBeforeRender = (r, s, cam) => { body[0].getWorldPosition(_q); const v = _q.distanceToSquared(cam.position) < R2; if (acc[0].visible !== v) for (const o of acc) o.visible = v; }; }
+    for (const nm in Mt.clips) acts[nm] = mixer.clipAction(Mt.clips[nm]);
+    const dur = nm => acts[nm] ? acts[nm].getClip().duration : 3, has = nm => !!acts[nm];
+    const gest = T0.gest.filter(has), talk = T0.talk.filter(has);
+    const G = { inst, mat, mixer, acts, cur: null, acc: 0, seller: shop.type, gT: 3 + Math.random() * 5, gNm: null, gLeft: 0, tI: 0, tLeft: 0 };
+    if (T0.selY) inst.position.y = T0.selY; if (T0.sc) inst.scale.setScalar(T0.sc); if (T0.ry && !T0.nf) inst.rotation.y = T0.ry;   /* v35 — v38: النموذج لا يُدار (كان يمشي بالعكس)، الوقفة عند المحل تستعمل stall.nf */ if (T0.gait) G.gait = T0.gait;
+    G.idleNm = (n, dt) => { if (n.mv) { G.gNm = null; return 'Idle'; }
+      if (G.gNm) { G.gLeft -= dt; if (G.gLeft > 0) return G.gNm; G.gNm = null; G.gT = 6 + Math.random() * 7; return 'Idle'; }
+      G.gT -= dt; if (G.gT <= 0 && gest.length) { G.gNm = gest[(Math.random() * gest.length) | 0]; G.gLeft = dur(G.gNm) * (G.gNm === 'Grind' ? 2 : 1); return G.gNm; } return 'Idle'; };
+    G.talkNm = dt => { if (!talk.length) return 'Talk'; G.tLeft -= dt; if (G.tLeft <= 0) { G.tI = (G.tI + 1) % talk.length; G.tLeft = dur(talk[G.tI]); } return talk[G.tI]; };
+    return G;
+  }
+  // القرى تُبنى قبل وصول النماذج أحياناً: نبدّل البائع القديم بالجديد متى جهزت النماذج
+  function reskin() { let k = 0; try { for (const v of (typeof VILLAGES !== 'undefined' ? VILLAGES : [])) { const L = v.live; if (!L || !L.npcs) continue;
+      for (const n of L.npcs) { if (!n.shop || n.dead || !TYPE[n.shop.type] || (n.gm && n.gm.seller)) continue; const G = keeper(n.shop); if (!G) continue;
+        while (n.piv.children.length) n.piv.remove(n.piv.children[0]); n.piv.add(G.inst); n.gm = G; n.mat = G.mat; n.rb = null; k++; } } } catch (e) { console.warn('[v20] SHOP20 reskin: ' + e); }
+    ST.reskinned = (ST.reskinned || 0) + k; return k; }
+  const api = { M, ST, TYPE, ready, place, keeper, reskin, WAG36, DAY36, placeBarn, tick37, LIVE37, get done() { return left <= 0; } };
+  setInterval(() => { if (left <= 0 && (M.supSel || M.potSel || M.smSel || M.fdSel || M.stSel)) reskin(); }, 4000);
+  window.__shop20 = api; return api;
+})();
+
+
+/* ═══ v23: إزالة ما خارج الكاميرا لكل نسخة على حدة (مباني/زينة المدينة المكررة، الأشجار) + الشخصيات المتحركة البعيدة أو خلف الكاميرا — أخف بكثير على الجوال ═══ */
+const CULL23 = (() => {
+  const T = THREE, fr = new T.Frustum(), pm = new T.Matrix4(), m4 = new T.Matrix4(), sp = new T.Sphere(), cp = new T.Vector3(), c = new T.Vector3();
+  const reg = new Map(), watch = new Map(), sk = [], hid = []; let fN = 0, lastScan = -1e9, lastKey = '';
+  const mob = () => window.__QUALITY !== 'high';
+  function scan() {
+    sk.length = 0;
+    scene.traverse(o => {
+      if (o.isInstancedMesh && !o.isSkinnedMesh && o.count > 1 && !reg.has(o) && !(o.userData && o.userData.noCull23)) {
+        const w = watch.get(o); if (!w) watch.set(o, { v: o.instanceMatrix.version, n: o.count, f: fN });
+        else if (w.v !== o.instanceMatrix.version || w.n !== o.count) { w.v = o.instanceMatrix.version; w.n = o.count; w.f = fN; }
+        else if (fN - w.f > 45) { watch.delete(o); adopt(o); } }
+      if (o.isSkinnedMesh && !o.frustumCulled && o.visible) sk.push(o); });
+  }
+  function adopt(o) {
+    const g = o.geometry; if (!g.boundingSphere) g.computeBoundingSphere(); const n = o.count, mats = o.instanceMatrix.array.slice(0, n * 16), cols = o.instanceColor ? o.instanceColor.array.slice(0, n * 3) : null;
+    const sph = new Float32Array(n * 4); for (let i = 0; i < n; i++) { m4.fromArray(mats, i * 16); sp.copy(g.boundingSphere).applyMatrix4(m4); sph[i * 4] = sp.center.x; sph[i * 4 + 1] = sp.center.y; sph[i * 4 + 2] = sp.center.z; sph[i * 4 + 3] = sp.radius; }
+    reg.set(o, { n, mats, cols, sph, ver: -1, k: n }); o.frustumCulled = false;
+  }
+  function instPass() {
+    for (const [o, R] of reg) {
+      if (!o.parent) { reg.delete(o); continue; }
+      if (R.ver >= 0 && o.instanceMatrix.version !== R.ver) { reg.delete(o); continue; }   // اللعبة غيّرتها: نتركها
+      if (!o.visible) continue; o.updateMatrixWorld(); const mw = o.matrixWorld, e = mw.elements, scl = Math.max(Math.hypot(e[0], e[1], e[2]), Math.hypot(e[4], e[5], e[6]), Math.hypot(e[8], e[9], e[10]));
+      let k = 0; const A = o.instanceMatrix.array, C = o.instanceColor ? o.instanceColor.array : null;
+      for (let i = 0; i < R.n; i++) { sp.center.set(R.sph[i * 4], R.sph[i * 4 + 1], R.sph[i * 4 + 2]).applyMatrix4(mw); sp.radius = R.sph[i * 4 + 3] * scl;
+        if (!fr.intersectsSphere(sp)) continue;
+        if (mob()) { const dd = sp.center.distanceTo(cp) - sp.radius, lim = sp.radius < 2.5 ? 75 : sp.radius < 7 ? 150 : 1e9; if (dd > lim) continue; }
+        if (k !== i) { for (let j = 0; j < 16; j++) A[k * 16 + j] = R.mats[i * 16 + j]; if (C && R.cols) { C[k * 3] = R.cols[i * 3]; C[k * 3 + 1] = R.cols[i * 3 + 1]; C[k * 3 + 2] = R.cols[i * 3 + 2]; } }
+        else if (R.k !== R.n) { for (let j = 0; j < 16; j++) A[k * 16 + j] = R.mats[i * 16 + j]; if (C && R.cols) { C[k * 3] = R.cols[i * 3]; C[k * 3 + 1] = R.cols[i * 3 + 1]; C[k * 3 + 2] = R.cols[i * 3 + 2]; } }
+        k++; }
+      o.count = k; R.k = k; o.instanceMatrix.needsUpdate = true; if (o.instanceColor) o.instanceColor.needsUpdate = true; R.ver = o.instanceMatrix.version; }
+  }
+  function before() {
+    if (window.__noCull23 || !mob()) return; fN++;
+    camera.updateMatrixWorld(); pm.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse); fr.setFromProjectionMatrix(pm); camera.getWorldPosition(cp);
+    if (fN - lastScan > 15) { lastScan = fN; try { scan(); } catch (e) {} }
+    const key = cp.x.toFixed(1) + ',' + cp.y.toFixed(1) + ',' + cp.z.toFixed(1) + ',' + pm.elements[0].toFixed(3) + ',' + pm.elements[8].toFixed(3) + ',' + pm.elements[2].toFixed(3) + ',' + pm.elements[6].toFixed(3) + ',' + pm.elements[10].toFixed(3);
+    if (key !== lastKey || fN % 20 === 0) { lastKey = key; try { instPass(); } catch (e) { console.warn('[v23] cull', e && e.message); } }
+    hid.length = 0; const lim = mob() ? 95 : 200;
+    for (const o of sk) { if (!o.visible) continue; const b = o.skeleton && o.skeleton.bones[0]; if (b) b.getWorldPosition(c); else o.getWorldPosition(c); sp.center.copy(c); sp.radius = 3.2;
+      if (!fr.intersectsSphere(sp) || c.distanceTo(cp) > lim) { o.visible = false; hid.push(o); } }
+  }
+  function after() { for (const o of hid) o.visible = true; hid.length = 0; }
+  return { before, after, reg, stats: () => { let n = 0, k = 0; for (const [, R] of reg) { n += R.n; k += R.k; } return { meshes: reg.size, inst: n, drawn: k, skHidden: hid.length, sk: sk.length }; } };
+})();
+window.CULL23 = CULL23;
+
+/* ═══ v46 PERF46: أداء أسرع بلا أي تغيير بالشكل — ما بينحذف شي وما بتنزل الجودة. ?perf=0 يعطّلها كلها ═══
+   (١) سجلّ أخطاء الشيدر (تشخيص بس) مطفى: كان بيوقّف الإطار ليستنّى كل شيدر يخلص. تجهيز الشيدرات مسبقاً موجود بس مطفى افتراضياً (?perf_warm=1 وقت التحميل، ?perf_live=1 وقت اللعب) لأنه ما أثبت فايدة بالقياس
+   (٢) الصور المكرّرة بين ملفات GLB (نفس البايتات حرفياً): بتنفك وبتنرفع عالـGPU مرة وحدة
+   (٣) اختياري ومطفى افتراضياً (?perf_env=1): انعكاس السما للشخصيات من أول ظهور بدل بعد ثانيتين — بيغيّر لحظة الانتقال فما شغّلناه
+   (٤) حزمة النماذج المضمّنة: ما منحتفظ بنسخة 10 MB بالذاكرة بعد ما تنقرا، وما منحمّل 3 نماذج ما حدا بيقراها */
+const PERF46 = (() => {
+  const Q = new URLSearchParams(location.search), on = Q.get('perf') !== '0';
+  const ST = { on, ver: 'v46', tpl: 0, objs: 0, mats: 0, ms: 0, maxMs: 0, scans: 0, err: 0, queue: 0, imgs: 0, dedup: 0, dedupMB: 0, hashMs: 0, envSwap: 0, mainRT: '', progsWarm: 0, progsLoad: 0 };
+  const api = { on, ST, tick() {} };
+  window.PERF46 = api;
+  if (!on) return api;
+  const R = renderer, P = R.properties, RN = window.__rnow || performance.now.bind(performance);
+  const OPT = k => Q.get('perf_' + k) !== '0', OPTIN = k => Q.get('perf_' + k) === '1';
+  if (OPT('log')) try { R.debug.checkShaderErrors = !!Q.get('shaderlog'); } catch (e) {}   // سجلّ أخطاء الشيدر للتشخيص فقط: كان بيوقّف الإطار ليستنّى كل شيدر يخلص
+  const mob = window.__QUALITY !== 'high', WARM = OPTIN('warm') || OPTIN('live');
+  const seenMat = new WeakSet(), seenObj = new WeakSet();
+  let objQ = []; const tplQ = [];
+  let frameN = 0, loadDone = false, mainRT = undefined, inMain = false;
+  const callsBy = new Map();
+  // ── (٣) نفس شغل charSweep تبع V40 بالضبط، بس من أول ما تبين المادة
+  const envOK = () => OPTIN('env') && window.V40F && V40F.env && V40F.charEnv !== 'room' && !!scene.environment;
+  function envFix(m) { if (m && m.envMap === CHARENV && envOK()) { m.envMap = null; if (!m.userData.v40c) { m.userData.v40c = 1; m.envMapIntensity *= V40F.charK; } m.needsUpdate = true; ST.envSwap++; } }
+  // ── (١) الشيدرات: منجهّزها جوّا رسمة المشهد الرئيسي نفسها (نفس الهدف، نفس الأضواء، نفس الضباب) → نفس البرامج حرفياً
+  const oRender = R.render.bind(R);
+  const nProg = () => (R.info.programs ? R.info.programs.length : 0);
+  function work(cam) { const t0 = RN(), budget = loadDone ? (mob ? 4 : 3) : 100, maxNew = loadDone ? (mob ? 1 : 2) : 1e9; let n = 0, made = 0, flip = 0;
+    while (made < maxNew && RN() - t0 < budget) { n++;
+      const useTpl = tplQ.length && tplQ[0].f <= frameN && (!objQ.length || (flip++ & 1));
+      let o = null, isTpl = false;
+      if (useTpl) { o = tplQ.shift().o; isTpl = true; let nw = false; o.traverse(x => { if (x.isMesh) for (const m of [].concat(x.material || [])) { envFix(m); if (m && !P.get(m).currentProgram) nw = true; } }); if (!nw) continue; }
+      else if (objQ.length) { o = objQ.shift(); if (!o.parent) continue; }
+      else break;
+      const p0 = nProg(); try { R.compile(o, cam, scene); if (isTpl) ST.tpl++; else ST.objs++; } catch (e) { ST.err++; } const d = nProg() - p0; made += d; ST.progsWarm += d; }
+    const dt = RN() - t0; ST.ms += dt; ST.maxMs = Math.max(ST.maxMs, dt); ST.queue = objQ.length + tplQ.length; if (!loadDone) ST.progsLoad = ST.progsWarm; }
+  R.render = function (s, c) {
+    if (s !== scene || inMain) return oRender(s, c);
+    const rt = R.getRenderTarget(), auto = R.info.autoReset, c0 = R.info.render.calls;
+    if (WARM && rt === mainRT && (objQ.length || tplQ.length) && (!loadDone || OPTIN('live'))) work(c);
+    inMain = true; try { return oRender(s, c); } finally { inMain = false; const dc = auto ? R.info.render.calls : R.info.render.calls - c0; callsBy.set(rt, (callsBy.get(rt) || 0) + dc); } };
+  // ── (٢) صور مكرّرة: بصمة كاملة للبايتات (هاشين 32-bit + الطول + النوع) → نفس الصورة المفكوكة ونفس الـSource
+  const IMG = new Map();
+  function hashBytes(ab) { const n4 = ab.byteLength >> 2, u = new Uint32Array(ab, 0, n4); let h1 = 0x811c9dc5 | 0, h2 = 0x9e3779b9 | 0;
+    for (let i = 0; i < n4; i++) { const x = u[i]; h1 = Math.imul(h1 ^ x, 0x01000193); h2 = Math.imul((h2 << 5 | h2 >>> 27) ^ x, 0x85ebca6b); }
+    const b = new Uint8Array(ab, n4 << 2); for (let i = 0; i < b.length; i++) { h1 = Math.imul(h1 ^ b[i], 0x01000193); h2 = Math.imul(h2 ^ b[i], 0xc2b2ae35); }
+    return (h1 >>> 0).toString(36) + '.' + (h2 >>> 0).toString(36); }
+  function patchParser(PP) { if (PP.__perf46) return; PP.__perf46 = true; const oLIS = PP.loadImageSource;
+    PP.loadImageSource = function (si, loader) { const parser = this;
+      if (parser.sourceCache[si] !== undefined) return oLIS.call(parser, si, loader);
+      const sd = parser.json.images && parser.json.images[si]; if (!sd || sd.bufferView === undefined) return oLIS.call(parser, si, loader);
+      const p = parser.getDependency('bufferView', sd.bufferView).then(bv => { ST.imgs++;
+        const t0 = RN(); const key = (sd.mimeType || '') + ':' + bv.byteLength + ':' + hashBytes(bv); ST.hashMs += RN() - t0;
+        const hit = IMG.get(key);
+        if (hit) { ST.dedup++; ST.dedupMB += bv.byteLength / 1048576;   // نسخة جديدة نضيفة (نفس الصورة المفكوكة ونفس الـSource) بنفس الإعدادات اللي كان المحمّل رح يعطيها
+          return hit.then(t0 => { const t = t0.clone(); t.userData = Object.assign({}, sd.extras || {}, { mimeType: sd.mimeType }); return t; }); }
+        const saved = parser.sourceCache[si]; delete parser.sourceCache[si]; const q = oLIS.call(parser, si, loader); parser.sourceCache[si] = saved;
+        const pristine = q.then(t => t.clone());   // لقطة قبل ما أي حدا يعدّل عليها (flipY، الفلاتر، colorSpace…)
+        pristine.catch(() => IMG.delete(key)); IMG.set(key, pristine); return q; });
+      parser.sourceCache[si] = p; return p; }; }
+  try { const oParse = GLTFLoader.prototype.parse;
+    GLTFLoader.prototype.parse = function (data, path, onLoad, onError) {
+      if (!this.__perf46 && OPT('img')) { this.__perf46 = true; this.register(p => { try { patchParser(Object.getPrototypeOf(p)); } catch (e) { ST.err++; } return { name: 'PERF46_images' }; }); }
+      return oParse.call(this, data, path, g => { try { if (g && g.scene && WARM) tplQ.push({ o: g.scene, f: frameN + 45 }); } catch (e) {} return onLoad(g); }, onError); };
+  } catch (e) { ST.err++; }
+  const cp = new THREE.Vector3(), wp = new THREE.Vector3();
+  function scan() { ST.scans++; camera.getWorldPosition(cp); const nq = [];
+    scene.traverse(o => { if (seenObj.has(o) || !(o.isMesh || o.isPoints || o.isLine || o.isSprite)) return; seenObj.add(o); let nw = false;
+      for (const m of [].concat(o.material || [])) if (m && !seenMat.has(m)) { seenMat.add(m); ST.mats++; envFix(m); nw = true; }
+      if (nw) { o.getWorldPosition(wp); nq.push([wp.distanceToSquared(cp), o]); } });
+    if (nq.length) { nq.sort((a, b) => a[0] - b[0]); objQ = objQ.concat(nq.map(x => x[1])); } }
+  api.tick = function () { frameN++;
+    if (!loadDone) loadDone = !!(MODELS && MODELS.ready) && !!LOADX.done;
+    let best = undefined, bc = -1; for (const [rt, n] of callsBy) if (n > bc) { bc = n; best = rt; } callsBy.clear();   // الرسمة الرئيسية = اللي فيها أكتر draw calls
+    if (best !== undefined) { mainRT = best; ST.mainRT = best ? 'rt' : 'screen'; }
+    if (WARM && (!loadDone || OPTIN('live')) && frameN % (loadDone ? 20 : 8) === 1) { try { scan(); } catch (e) { ST.err++; } }
+    if (loadDone && !OPTIN('live') && (objQ.length || tplQ.length)) { objQ = []; tplQ.length = 0; ST.queue = 0; } };
+  return api;
+})();
+function frame() {
+  requestAnimationFrame(frame);
+  const rawDt = clock.getDelta(), dt = uiLock() ? 0 : Math.min(0.05, rawDt);
+  physicsAdvance(dt); updateCamera(dt); PMQ.tick(dt);
+  avatar.position.set(PL.x - ORG.x, PL.y, PL.z - ORG.z); avatar.rotation.y = PL.face;
+  updateCombat(dt); avatar.rotation.y = PL.face; updateAnim(dt); updateWolves(dt); updateBandits(dt); updateMounts(dt); updateAnimals(dt); updateArrows(dt); guardsCrowd(dt); updateVillages(dt);
+  water.position.set(PL.x - ORG.x, CFG.SEA, PL.z - ORG.z);
+  updateEnv(dt); if (window.V20) V20.tick(dt); goldSave20(dt);
+  chunkT += dt; if (chunkT > 0.25) { chunkT = 0; updateChunks(); }
+  pump();
+  // قياس الأداء والجودة التلقائية
+  fpsAcc += dt; fpsN++;
+  if (fpsAcc >= 1) { fpsShown = Math.round(fpsN / fpsAcc); fpsAcc = fpsN = 0;
+    if (S.auto && chunks.size > 20) { lowCount = fpsShown < 24 ? lowCount + 1 : 0; if (lowCount >= 4) { lowCount = 0; stepDown(); } } }
+  hudT += dt; if (hudT > 0.4) { hudT = 0; const fl = $('fpsL'); if (fl) { fl.hidden = !S.fps; if (S.fps) fl.textContent = 'FPS: ' + fpsShown + ' · ' + NAMES[S.preset]; } }
+  mmpTick(rawDt); if (WM.open) wmTick(rawDt);
+  FAUNA.tick(dt); try { T33.tick(dt); } catch (e) { if (!T33.err) { T33.err = 1; console.warn('[v33] tick', e); } } try { SHOP20.tick37 && SHOP20.tick37(dt, camera); } catch (e) { if (!window.__t37e) { window.__t37e = 1; console.warn('[v37] tick', e); } } try { SHOP20.DAY36 && SHOP20.DAY36.tick(dt, 1 - U.uNight.value, camera); } catch (e) { if (!window.__d36e) { window.__d36e = 1; console.warn('[v36] daylight tick', e); } }
+  loadUpdate(rawDt);
+  CULL23.before(); if (window.V40 && V40.render) V40.render(dt); else renderer.render(scene, camera); CULL23.after(); PERF46.tick();
+}
+window.__dbg = { SPOT_T, losClear, guardsCrowd, SEARCH_T, MODELS, stallMesh, SHIELDS, BODYS, WEAPONS, RANGED, QUIVERS, HELMS, SETS, GEAR_SLOT, GEAR_NAME, GV, gvApply, arrowDmg, gearSanitize, gearRed, MNT, mountToggle, equipItem, openShopDlg, hurt, recalcDmg, ST, WM, openWM, closeWM, CITY, CITYV, LIB, TREE_DEFS, BANDITS, CAMPS, banHit, banRelocate, onNewDay, buildSpurRoads, banRespawn, banFindCamp, LOADX, loadTarget, inputLock, hitNPC, respawn, respawnNPC, witnessGuards, resetGuardsAfterDeath, BAG, ITEMS, INV, ST, WM, openInv, closeInv, openWM, closeWM, uiLock, useItem, renderBar, renderInv, buy, MMP, mmpBuild, mmpDraw, mmpTick, mmpZoom, TREESET, npcWalk, treeRockExcluded, treePlacements, treeCandidate, treeExcluded, treeRoadDistance, gatherTreeSolids, attachTrees, addChunk, killChunk, WORLD, CFG, renderer, scene, camera, updateChunks, recenter, sdist, pushOut, moveCollide, IN, keys, ST, HOUSE_DEFS, HCACHE, PL, CAM, VILLAGES, NPCS, WOLVES, ANIMALS, MODELS, ENV, S, LIB, chunks,
+  tp(x, z) { PL.x = x; PL.z = z; PL.y = LIB.height(x, z) + 0.5; CAM.tx = x; CAM.ty = PL.y + 1.6; CAM.tz = z; } };
+// ═══ v10: أدوات اختبار الفيزياء (شغّل window.__phys.runTests() من الكونسول بعد التحميل) ═══
+window.__phys = { PHYS, STEP_UP, SOL, mountMake, solidGround, camRayHit, physSteps, physicsAdvance, physRestore, step, updateCamera, topOf,
+  runTests() {
+    const R = { ok: true, notes: [] }, save = { x: PL.x, y: PL.y, z: PL.z, yaw: CAM.yaw, pitch: CAM.pitch, dist: CAM.dist }, added = [];
+    physRestore(); PHYS.hold = true;
+    const V = VILLAGES.filter(v => v.live).sort((a, b) => Math.hypot(a.x - PL.x, a.z - PL.z) - Math.hypot(b.x - PL.x, b.z - PL.z))[0];
+    if (!V) return { ok: false, err: 'no live village' };
+    const near = (x, z, e) => { SOL.length = 0; gatherSolids(x, z, e, SOL); return SOL.length; };
+    let spot = null;                                // بقعة مفتوحة شبه مستوية داخل نطاق القرية
+    for (let rr = 20; rr < 120 && !spot; rr += 4) for (let a = 0; a < 6.283 && !spot; a += 0.2) { const x = V.x + Math.cos(a) * rr, z = V.z + Math.sin(a) * rr, h = LIB.height(x, z);
+      if (h < 1 || Math.abs(LIB.height(x + 6, z) - h) > 0.25 || Math.abs(LIB.height(x - 4, z) - h) > 0.25 || Math.abs(LIB.height(x, z + 3) - h) > 0.25 || Math.abs(LIB.height(x, z - 3) - h) > 0.25) continue;
+      if (near(x, z, 9) === 0) spot = { x, z, h }; }
+    if (!spot) return { ok: false, err: 'no open spot' };
+    R.spot = { x: +spot.x.toFixed(1), z: +spot.z.toFixed(1), village: V.name || '' };
+    const put = (x, z, y) => { PL.x = x; PL.z = z; PL.y = y === undefined ? LIB.height(x, z) : y; PL.vx = PL.vz = PL.vy = 0; PL.ground = y === undefined; PL.onSolid = false; PL.swim = false; PHYS.acc = 0; PHYS.fv = false; IN.jump = false; };
+    const run = (sec, hz, cb) => { const n = Math.round(sec * hz); let my = -1e9; for (let i = 0; i < n; i++) { if (cb) cb(i / hz); physSteps(Math.min(0.05, 1 / hz)); if (PL.y > my) my = PL.y; } return my; };
+    const add = o => { V.live.solid.push(o); added.push(o); return o; };
+    const lock = inputLock(); if (lock) R.notes.push('inputLock() كان true — القفز لا يعمل أثناءه');
+    try {
+      // ١) ارتفاع قمة القفزة عند 30/60/144Hz — الجديد (خطوة ثابتة) مقابل القديم (dt متغيّر)
+      R.jump = {};
+      for (const hz of [30, 60, 144]) {
+        put(spot.x, spot.z); const y0 = PL.y; IN.jump = true; PHYS.peak = -1e9; run(1.2, hz); const a1 = PHYS.peak - y0;
+        put(spot.x, spot.z); IN.jump = true; let a0 = -1e9; for (let i = 0; i < Math.round(1.2 * hz); i++) { step(Math.min(0.05, 1 / hz)); a0 = Math.max(a0, PL.y - y0); }
+        R.jump[hz] = { v10: +a1.toFixed(4), old: +a0.toFixed(4) }; }
+      const J = Object.values(R.jump).map(j => j.v10); R.jump.spreadV10 = +(Math.max(...J) - Math.min(...J)).toFixed(4);
+      const J0 = Object.values(R.jump).filter(j => j.old !== undefined).map(j => j.old); R.jump.spreadOld = +(Math.max(...J0) - Math.min(...J0)).toFixed(4);
+      R.jump.pass = R.jump.spreadV10 < 1e-3 && J[0] > 1;
+      // ٢) الوقوف فوق شكل صلب: صندوق ٢×٢م سطحه +١٫٠م
+      const bx = spot.x + 3, bz = spot.z, bt = LIB.height(bx, bz) + 1.0, box = add(topOf(solidBox(bx, bz, 2, 2, 0), bt));
+      put(bx, bz, bt + 0.6); run(1, 60); R.standDrop = { y: +PL.y.toFixed(3), top: +bt.toFixed(3), ground: PL.ground, onSolid: !!PL.onSolid, pass: Math.abs(PL.y - bt) < 1e-3 && PL.ground };
+      put(bx - 3.5, bz); run(1.5, 60, t => { PHYS.fv = true; PHYS.fvx = 5; PHYS.fvz = 0; }); PHYS.fv = false;
+      R.blockedNoJump = { x: +(PL.x - (bx - 1)).toFixed(3), dy: +(PL.y - LIB.height(PL.x, PL.z)).toFixed(3), pass: PL.x < bx - 1 - PL_R + 0.01 && PL.y < bt - 0.5 };
+      put(bx - 2.6, bz); IN.jump = true; run(1.5, 60, t => { PHYS.fv = t < 0.45; PHYS.fvx = 4.5; PHYS.fvz = 0; }); PHYS.fv = false;
+      R.jumpOnto = { y: +PL.y.toFixed(3), top: +bt.toFixed(3), x: +(PL.x - bx).toFixed(2), pass: Math.abs(PL.y - bt) < 1e-3 && Math.abs(PL.x - bx) < 1.2 };
+      // ٣) صعود حافة صغيرة (+٠٫٣م) مشياً بلا قفز
+      const sx = spot.x - 3, sz = spot.z + 0, st = LIB.height(sx, sz) + 0.3, ledge = add(topOf(solidBox(sx, sz, 2, 2, 0), st));
+      put(sx + 2.8, sz); run(0.9, 60, t => { PHYS.fv = true; PHYS.fvx = -3; PHYS.fvz = 0; }); PHYS.fv = false;
+      R.stepUp = { y: +PL.y.toFixed(3), top: +st.toFixed(3), pass: Math.abs(PL.y - st) < 1e-3 };
+      // ٤) جدار رفيع (١٠سم) بسرعة عالية عند 15FPS: لا اختراق
+      const wx = spot.x + 0, wz = spot.z + 6, wall = add(solidBox(wx, wz, 0.1, 8, 0));
+      R.tunnel = {};
+      for (const v of [13.5, 40, 120]) { put(wx - 3, wz); run(2, 15, () => { PHYS.fv = true; PHYS.fvx = v; PHYS.fvz = 0.3; }); PHYS.fv = false;
+        R.tunnel['v' + v] = { x: +(PL.x - wx).toFixed(3), pass: PL.x < wx }; }
+      put(wx - 3, wz); for (let i = 0; i < 30; i++) { PHYS.fv = true; PHYS.fvx = 120; PHYS.fvz = 0.3; step(1 / 15); } PHYS.fv = false;
+      R.tunnel.rawStep15fps_120ms = { x: +(PL.x - wx).toFixed(3), pass: PL.x < wx };
+      R.tunnel.pass = Object.values(R.tunnel).every(t => t.pass);
+      // ٥) الكاميرا خلف جدار بيت حقيقي
+      const H = V.live.solid.filter(o => { const h = o.top - LIB.height(o[0], o[1]); return o.length >= 6 && h > 2.5 && h < 14 && Math.min(o[3], o[4]) > 2 && Math.max(o[3], o[4]) < 9; }).sort((a, b) => Math.hypot(a[0] - V.x, a[1] - V.z) - Math.hypot(b[0] - V.x, b[1] - V.z));
+      R.camera = { houses: H.length };
+      let camPass = 0, camTried = 0;
+      for (const o of H.slice(0, 6)) {
+        const c = o[6], s = o[7];    // العمودي الخارجي للوجه +lx محلياً → عالمياً (معكوس تحويل sdist)
+        for (const [nlx, nlz, ext] of [[1, 0, o[3]], [-1, 0, o[3]], [0, 1, o[4]], [0, -1, o[4]]]) {
+          const nx = nlx * c + nlz * s, nz = -nlx * s + nlz * c, px = o[0] + nx * (ext + PL_R + 0.5), pz = o[1] + nz * (ext + PL_R + 0.5);
+          if (near(px, pz, 0.6) && SOL.some(q => q !== o && sdist(q, px, pz) < PL_R + 0.3)) continue;
+          put(px, pz); CAM.yaw = Math.atan2(-nx, -nz); CAM.pitch = 0.12; CAM.dist = Math.max(CAM.dist, 5); CAM.tx = px; CAM.ty = PL.y + 1.6; CAM.tz = pz; CAM.cd = undefined;
+          const res = {};
+          for (const on of [false, true]) { PHYS.camSolids = on; CAM.cd = undefined; CAM.tx = px; CAM.tz = pz; const ds = [];
+            for (let i = 0; i < 90; i++) { updateCamera(1 / 60); if (i >= 30) ds.push(Math.hypot(camera.position.x + ORG.x - CAM.tx, camera.position.z + ORG.z - CAM.tz)); }
+            const cx = camera.position.x + ORG.x, cz = camera.position.z + ORG.z, cy = camera.position.y, sd = sdist(o, cx, cz), m = ds.reduce((a, b) => a + b, 0) / ds.length;
+            res[on ? 'v10' : 'old'] = { sdist: +sd.toFixed(2), camY: +cy.toFixed(2), top: +o.top.toFixed(2), inside: sd < 0 && cy < o.top, jitter: +Math.sqrt(ds.reduce((a, b) => a + (b - m) * (b - m), 0) / ds.length).toFixed(4) }; }
+          PHYS.camSolids = true; camTried++; if (!res.v10.inside) camPass++; if (!R.camera.sample) R.camera.sample = res; break; }
+        if (camTried >= 4) break; }
+      R.camera.tried = camTried; R.camera.outside = camPass; R.camera.pass = camTried > 0 && camPass === camTried;
+      // ٥ب) الوقوف على أشكال حقيقية من اللعبة: دكّة/بئر/جذع (سطح بين ٠٫٥ و١٫٦م فوق الأرض)
+      const RA = V.live.solid.filter(o => { const h = o.top - LIB.height(o[0], o[1]); return h > 0.5 && h < 1.6; }).slice(0, 5); R.realAssets = { found: RA.length, list: [] };
+      for (const o of RA) { put(o[0], o[1], o.top + 0.8); run(1.2, 60); R.realAssets.list.push({ kind: o.length < 6 ? 'circle' : 'box', h: +(o.top - LIB.height(o[0], o[1])).toFixed(2), stoodAt: +(PL.y - o.top).toFixed(3) }); }
+      R.realAssets.pass = RA.length > 0 && R.realAssets.list.every(q => Math.abs(q.stoodAt) < 0.01);
+      // ٥ج) إحصاء ارتفاعات الصخور المحمّلة (فوق الأرض عند مركز كل دائرة)
+      { const hs = []; for (const c of chunks.values()) for (const q of c.mesh.userData.rockSolids || []) hs.push(q.top - LIB.height(q[0], q[1])); hs.sort((a, b) => a - b);
+        R.rocks = hs.length ? { n: hs.length, min: +hs[0].toFixed(2), p50: +hs[hs.length >> 1].toFixed(2), p90: +hs[Math.floor(hs.length * 0.9)].toFixed(2), max: +hs[hs.length - 1].toFixed(2), steppable: hs.filter(h => h <= STEP_UP).length } : { n: 0 }; }
+      // ٦) أداء: متوسط زمن step + updateCamera داخل القرية
+      put(V.x + 8, V.z + 8); let t0 = performance.now(); for (let i = 0; i < 600; i++) step(1 / 60); const tS = (performance.now() - t0) / 600;
+      t0 = performance.now(); for (let i = 0; i < 600; i++) updateCamera(1 / 60); const tC = (performance.now() - t0) / 600;
+      R.perfMs = { step: +tS.toFixed(4), camera: +tC.toFixed(4) };
+    } catch (e) { R.ok = false; R.err = String(e && e.stack || e); }
+    for (const o of added) { const i = V.live.solid.indexOf(o); if (i >= 0) V.live.solid.splice(i, 1); }
+    put(save.x, save.z); PL.y = save.y; CAM.yaw = save.yaw; CAM.pitch = save.pitch; CAM.dist = save.dist; CAM.cd = undefined; PHYS.hold = false; PHYS.fv = false; PHYS.camSolids = true;
+    R.ok = R.ok && ['jump', 'standDrop', 'blockedNoJump', 'jumpOnto', 'stepUp', 'tunnel', 'camera'].every(k => R[k] && R[k].pass);
+    console.info('[v10 physics tests]', JSON.stringify(R)); return R;
+  } };
+
+/* ═══ v40-test: المرحلة ١ — السماء تضيء العالم وتنعكس عليه، مؤثرات الصورة (ظل الزوايا، توهّج، تلوين دافئ، تنعيم حواف)، ظلال متتالية، ضباب جوي، أصوات الخطوات ═══ */
+window.V40 = (() => {
+  const F = V40F, T = THREE, VER = 'v40-test';
+  const st = { ver: VER, tier: 'off', fxTier: 'none', err: {}, stats: {}, envN: 0, csmSize: 0, ready: false, fxLoading: false };
+  const warn = (k, e) => { if (!st.err[k]) { st.err[k] = String(e && e.message || e); console.warn('[v40] ' + k, e); } };
+  try { document.title = document.title.replace(/\s*v40-test$/, '') + ' v40-test'; const b = document.createElement('div'); b.id = 'v40badge'; b.textContent = VER + (F.on ? '' : ' (off)');
+    b.style.cssText = 'position:fixed;left:6px;bottom:calc(4px + env(safe-area-inset-bottom));z-index:40;font:700 10px/1.3 system-ui,sans-serif;color:#fff;opacity:.6;background:rgba(0,0,0,.35);padding:1px 6px;border-radius:6px;pointer-events:none;direction:ltr';
+    document.body.appendChild(b); } catch (e) {}
+  if (!F.on) return { st, render: null, panel() {}, F };
+  const HQ = () => window.__QUALITY === 'high';
+  const _v = new T.Vector3(), _v2 = new T.Vector2(), _c = new T.Color();
+
+  /* ── ١. السماء كإضاءة وانعكاس للعالم: PMREM من قبة السماء نفسها (نفس الـ uniforms) → scene.environment ── */
+  const E = { pm: null, sc: null, mat: null, rt: null, sig: '', t: -1e9, lastH: -99, uG: { value: new T.Color() }, uK: { value: F.envK } };
+  function envInit() {
+    const fs0 = sky.material.fragmentShader;
+    const fs = fs0.replace('uniform vec3 uSun,uHor,uZen,uSunCol;', 'uniform vec3 uSun,uHor,uZen,uSunCol,uGround40; uniform float uEnvK40;')
+      .replace('pow(s,600.)*6.', 'pow(s,600.)*2.')
+      .replace('gl_FragColor=vec4(col,1.);', 'col=mix(col,uGround40,smoothstep(0.0,0.2,-d.y)); gl_FragColor=vec4(col*uEnvK40,1.);');
+    if (fs.indexOf('uGround40;') < 0 || fs.indexOf('uGround40,smoothstep') < 0 || fs.indexOf('*2.') < 0) throw new Error('sky shader text changed');
+    E.mat = new T.ShaderMaterial({ side: T.BackSide, depthTest: false, depthWrite: false, toneMapped: false, uniforms: Object.assign({}, U, { uGround40: E.uG, uEnvK40: E.uK }),
+      vertexShader: 'varying vec3 vD; void main(){ vD=position; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.); }', fragmentShader: fs });
+    E.sc = new T.Scene(); const m = new T.Mesh(new T.SphereGeometry(50, 32, 16), E.mat); m.frustumCulled = false; E.sc.add(m);
+    E.pm = new T.PMREMGenerator(renderer);
+  }
+  const q20 = c => ((c.r * 24) | 0) + ',' + ((c.g * 24) | 0) + ',' + ((c.b * 24) | 0);
+  function envSig() { const s = U.uSun.value; return q20(U.uHor.value) + '|' + q20(U.uZen.value) + '|' + q20(U.uSunCol.value) + '|' + Math.round(s.x * 8) + ',' + Math.round(s.y * 16) + ',' + Math.round(s.z * 8) + '|' + Math.round(U.uNight.value * 12) + '|' + Math.round(U.uCloud.value * 8); }
+  function envUpdate(force) {
+    const now = performance.now(); if (!force && now - E.t < 1500) return;
+    const sig = envSig(), dh = Math.abs(ENV.T - E.lastH);
+    if (!force && sig === E.sig && dh < 2) return;          // كل ساعتين من وقت اللعبة، أو فوراً عند تغيّر لون السماء/الشمس/الطقس (الفجر/الغروب/الليل)
+    const day = 1 - U.uNight.value;
+    E.uG.value.copy(hemi.groundColor).multiplyScalar(0.06 + 0.3 * day);
+    const t0 = performance.now(); const rt = E.pm.fromScene(E.sc, 0, 0.1, 100);
+    scene.environment = rt.texture; if (E.rt) E.rt.dispose(); E.rt = rt; E.sig = sig; E.t = now; E.lastH = ENV.T; st.envN++; st.envMs = +(performance.now() - t0).toFixed(2);
+  }
+  // الشخصيات كانت تعكس «استوديو» RoomEnvironment ثابت؛ الآن تعكس السماء الحقيقية (envMap = null ← scene.environment) مع تعويض الشدة
+  function charSweep() {
+    if (F.charEnv === 'room') return; let n = 0;
+    scene.traverse(o => { const ms = o.material; if (!ms) return; for (const m of (Array.isArray(ms) ? ms : [ms])) if (m && m.envMap === CHARENV) { m.envMap = null; if (!m.userData.v40c) { m.userData.v40c = 1; m.envMapIntensity *= F.charK; } m.needsUpdate = true; n++; } });
+    st.charSwapped = (st.charSwapped || 0) + n;
+  }
+
+  /* ── ٣. ظلال متتالية CSM: ٣ طبقات حتى ٢٥٠م (٢٠٤٨ على العالي، ١٠٢٤ على المتوسط)؛ الموبايل: ظل الشمس الواحد مع تصحيح الانحياز ── */
+  const C = { csm: null, size: 0, far: 0, fr: 0, aspect: 0, fov: 0, dir: new T.Vector3() };
+  function csmWant() { if (!F.csm || !(S.shadow > 0) || !HQ()) return 0; return S.shadow >= 2048 ? 2048 : 1024; }
+  function csmBias() { if (!C.csm) return; for (const l of C.csm.lights) { const cam = l.shadow.camera, tx = (cam.right - cam.left) / C.size; l.shadow.normalBias = Math.max(0.02, tx * 1.25); l.shadow.bias = -0.00004; } }
+  function csmSet(size) {
+    if (C.csm) { try { C.csm.remove(); for (const l of C.csm.lights) { if (l.shadow.map) l.shadow.map.dispose(); l.dispose && l.dispose(); } } catch (e) {} C.csm = null; sun.visible = true; }
+    C.size = size; st.csmSize = size;
+    if (!size) { sunBias(); return; }
+    const far = size >= 2048 ? 250 : 180, sp = size >= 2048 ? [18, 70] : [15, 55];
+    C.csm = new CSM({ camera, parent: scene, cascades: 3, maxFar: far, mode: 'custom', customSplitsCallback: (n, near, fr, out) => { out.push(sp[0] / fr, sp[1] / fr, 1); },
+      shadowMapSize: size, lightDirection: new T.Vector3(-0.5, -1, -0.4).normalize(), lightIntensity: 0.001, lightNear: 1, lightFar: 2000, lightMargin: 200 });
+    V40C.applyCSM();                                    // CSM.injectInclude استبدل الـ chunk بنسخته غير المشروطة؛ نعيد النسخة المشروطة
+    C.csm.lights.forEach((l, i) => { l.castShadow = true; l.shadow.autoUpdate = i < 2; l.shadow.needsUpdate = true; });
+    C.far = far; C.aspect = camera.aspect; C.fov = camera.fov; csmBias(); sun.visible = false;
+  }
+  function sunBias() { const sz = sun.shadow.mapSize.x || 1024, tx = (sun.shadow.camera.right - sun.shadow.camera.left) / sz; sun.shadow.normalBias = Math.max(0.03, tx * 1.25); sun.shadow.bias = -0.0002; }
+  function csmTick() {
+    const want = csmWant(); if (want !== C.size) csmSet(want);
+    if (!C.csm) { if (sun.shadow.normalBias > 0.5) sunBias(); return; }
+    const cs = C.csm; C.dir.copy(sun.target.position).sub(sun.position).normalize(); cs.lightDirection.copy(C.dir);
+    for (const l of cs.lights) { l.color.copy(sun.color); l.intensity = sun.intensity; }
+    if (camera.aspect !== C.aspect || camera.fov !== C.fov) { C.aspect = camera.aspect; C.fov = camera.fov; cs.updateFrustums(); csmBias(); }
+    camera.updateMatrixWorld(); cs.update(); cs.getExtendedBreaks(V40U.csmB); V40U.csmNP[0].set(camera.near, Math.min(camera.far, C.far));
+    C.fr++; cs.lights[2].shadow.needsUpdate = (C.fr % 4) === 0;        // الطبقة البعيدة تُحدَّث كل ٤ إطارات (الأقرب كل إطارين كالسابق)
+  }
+
+  /* ── ٤. ضباب جوي ── */
+  function fogTick() {
+    if (!F.fog) return; const day = 1 - U.uNight.value, sd = U.uSun.value;
+    V40U.fogV[0].copy(sd); V40U.fogV[1].set(U.uSunCol.value.r, U.uSunCol.value.g, U.uSunCol.value.b).multiplyScalar(0.32 * day * (1 - ENV.cloud * 0.7) * Math.max(0, Math.min(1, sd.y * 4 + 0.3)));
+    V40U.fogV[2].set(F.aer, 0.3, camera.position.y - 12);
+  }
+
+  /* ── ٢. مؤثرات الصورة (تُحمَّل عند الحاجة من نفس الـ CDN) ── */
+  const X = { mods: null, w: 0, h: 0, tier: '', sRT: null, lRT: null, gtao: null, bloom: null, smaa: null, fxaa: null, comp: null, quad: null };
+  function fxWant() {
+    if (!F.fx) return 'none'; if (F.fxTier) return F.fxTier;
+    const p = S.preset; if (p === 'low' || (p === 'custom' && S.shadow === 0)) return 'none';
+    if (!HQ()) return 'mobile';
+    return (p === 'high' || p === 'ultra' || (p === 'custom' && S.shadow >= 2048)) ? 'high' : 'medium';
+  }
+  async function fxLoad() {
+    const B = 'three/addons/';
+    const [pass, gt, bl, sm, sp, fx] = await Promise.all([import(B + 'postprocessing/Pass.js'), import(B + 'postprocessing/GTAOPass.js'), import(B + 'postprocessing/UnrealBloomPass.js'), import(B + 'postprocessing/SMAAPass.js'), import(B + 'postprocessing/ShaderPass.js'), import(B + 'shaders/FXAAShader.js')]);
+    X.mods = { FullScreenQuad: pass.FullScreenQuad, GTAOPass: gt.GTAOPass, UnrealBloomPass: bl.UnrealBloomPass, SMAAPass: sm.SMAAPass, ShaderPass: sp.ShaderPass, FXAAShader: fx.FXAAShader };
+  }
+  const COMP_FS = `
+    uniform sampler2D tScene, tAO; uniform float uAO, uGrade, uVig; varying vec2 vUv;
+    vec3 l2s(vec3 c){ return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(vec3(0.0031308), c)); }
+    void main(){ vec3 c = texture2D(tScene, vUv).rgb;
+      #ifdef USE_AO
+        c *= mix(1.0, texture2D(tAO, vUv).r, uAO);
+      #endif
+      vec3 s = l2s(clamp(c, 0.0, 1.0));
+      vec3 sc = s * s * (3.0 - 2.0 * s); s = mix(s, sc, 0.10 * uGrade);                       // منحنى تباين خفيف
+      float l = dot(s, vec3(0.2126, 0.7152, 0.0722)); s = mix(vec3(l), s, 1.0 + 0.06 * uGrade);  // تشبّع +٦٪
+      s *= mix(vec3(1.0), vec3(1.025, 1.0, 0.965), uGrade);                                        // دفء خفيف
+      s += vec3(0.012, 0.006, 0.0) * (1.0 - l) * uGrade;                                           // ظلال دافئة قليلاً
+      vec2 q = vUv - 0.5; s *= 1.0 - uVig * dot(q, q) * 1.6;                                       // تظليل أطراف خفيف
+      gl_FragColor = vec4(clamp(s, 0.0, 1.0), 1.0); }`;
+  function fxBuild(tier) {
+    fxFree(); const M = X.mods; if (!M || tier === 'none') { X.tier = 'none'; return; }
+    renderer.getDrawingBufferSize(_v2); const w = Math.max(2, _v2.x | 0), h = Math.max(2, _v2.y | 0); X.w = w; X.h = h;
+    const dt = new T.DepthTexture(w, h); dt.type = T.UnsignedIntType;
+    X.sRT = new T.WebGLRenderTarget(w, h, { type: T.HalfFloatType, depthTexture: dt, depthBuffer: true });
+    X.sRT.texture.colorSpace = T.LinearSRGBColorSpace;
+    X.sRT.isXRRenderTarget = true;   // حيلة مقصودة: three يطبّق ACES داخل المواد عند الرسم في هذا الهدف تماماً كما على الشاشة (السماء تبقى بلا tone mapping كما في v39)، والإخراج خطي → ثم التدرّج + sRGB في مرحلتنا الأخيرة
+    X.lRT = new T.WebGLRenderTarget(w, h, { type: T.UnsignedByteType, depthBuffer: false });
+    X.comp = new T.ShaderMaterial({ defines: tier === 'high' ? { USE_AO: 1 } : {}, uniforms: { tScene: { value: X.sRT.texture }, tAO: { value: null }, uAO: { value: 0.85 }, uGrade: { value: 1 }, uVig: { value: tier === 'mobile' ? 0.0 : 0.12 } },
+      vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }', fragmentShader: COMP_FS, depthTest: false, depthWrite: false });
+    X.quad = new M.FullScreenQuad(X.comp);
+    if (tier === 'high') {
+      const g = X.gtao = new M.GTAOPass(scene, camera, w >> 1, h >> 1);
+      g.normalRenderTarget.setSize(1, 1); g.setGBuffer(dt);           // عمق المشهد نفسه (بدون رسم المشهد مرة ثانية)، والعمود العمودي يُستنتج من العمق
+      g.updateGtaoMaterial({ radius: 1.6, distanceExponent: 1.4, thickness: 1.2, scale: 1.0, samples: 12, distanceFallOff: 1.0 });
+      g.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 6, rings: 2, samples: 12 });
+      X.comp.uniforms.tAO.value = g.pdRenderTarget.texture;
+    }
+    if (tier === 'high' || tier === 'medium') { X.bloom = new M.UnrealBloomPass(new T.Vector2(w >> 1, h >> 1), tier === 'high' ? 0.32 : 0.26, 0.45, 0.9); }
+    if (tier === 'high') { X.smaa = new M.SMAAPass(w, h); X.smaa.renderToScreen = true; }
+    else { X.fxaa = new M.ShaderPass(M.FXAAShader); X.fxaa.material.uniforms.resolution.value.set(1 / w, 1 / h); X.fxaa.renderToScreen = true; }
+    X.tier = tier;
+  }
+  function fxFree() {
+    for (const k of ['sRT', 'lRT']) if (X[k]) { if (X[k].depthTexture) X[k].depthTexture.dispose(); X[k].dispose(); X[k] = null; }
+    for (const k of ['gtao', 'bloom', 'smaa', 'fxaa']) if (X[k]) { try { X[k].dispose(); } catch (e) {} X[k] = null; }
+    if (X.comp) { X.comp.dispose(); X.comp = null; } if (X.quad) { X.quad.dispose(); X.quad = null; } X.tier = '';
+  }
+  function fxRender() {
+    const g = X.gtao, oldAC = renderer.autoClear;
+    renderer.setRenderTarget(X.sRT); renderer.render(scene, camera);
+    st.stats = { calls: renderer.info.render.calls, tris: renderer.info.render.triangles, pts: renderer.info.render.points, geos: renderer.info.memory.geometries, tex: renderer.info.memory.textures };
+    if (g) {
+      const gm = g.gtaoMaterial.uniforms; gm.cameraNear.value = camera.near; gm.cameraFar.value = camera.far;
+      gm.cameraProjectionMatrix.value.copy(camera.projectionMatrix); gm.cameraProjectionMatrixInverse.value.copy(camera.projectionMatrixInverse); gm.cameraWorldMatrix.value.copy(camera.matrixWorld);
+      g.renderPass(renderer, g.gtaoMaterial, g.gtaoRenderTarget, 0xffffff, 1.0);
+      g.pdMaterial.uniforms.cameraProjectionMatrixInverse.value.copy(camera.projectionMatrixInverse);
+      g.renderPass(renderer, g.pdMaterial, g.pdRenderTarget, 0xffffff, 1.0);
+    }
+    let src = X.sRT; try { if (window.V41) src = V41.post(X) || X.sRT; } catch (e) { warn('v41 post', e); }
+    X.comp.uniforms.tScene.value = src.texture;
+    if (X.bloom) X.bloom.render(renderer, null, src, 0, false);
+    renderer.setRenderTarget(X.lRT); X.quad.render(renderer);
+    if (X.smaa) X.smaa.render(renderer, null, X.lRT, 0, false); else X.fxaa.render(renderer, null, X.lRT, 0, false);
+    renderer.setRenderTarget(null); renderer.autoClear = oldAC;
+  }
+  function fxTick() {
+    const want = fxWant(); st.fxWant = want;
+    if (want === 'none') { if (X.tier && X.tier !== 'none') fxFree(); X.tier = 'none'; return false; }
+    if (!X.mods) { if (!st.fxLoading) { st.fxLoading = true; fxLoad().catch(e => { warn('fx load', e); F.fx = false; }); } return false; }
+    renderer.getDrawingBufferSize(_v2);
+    if (X.tier !== want || (_v2.x | 0) !== X.w || (_v2.y | 0) !== X.h) { try { fxBuild(want); } catch (e) { warn('fx build', e); F.fx = false; fxFree(); return false; } }
+    return !!X.quad;
+  }
+
+  /* ── ٥. أصوات الخطوات: Howler.js (يُحمَّل متأخراً من الـ CDN)، أصوات مُركَّبة صغيرة (حجر/عشب/رمل) متزامنة مع قدمي اللاعب ── */
+  const A = { on: true, howl: null, loading: false, unlocked: false, feet: null, last: [0, 0], prevY: [0, 0], prevV: [0, 0], minY: [1e9, 1e9], t: 0, phase: -1, n: 0, surf: '' };
+  try { A.on = localStorage.getItem('ow_v40_steps') !== 'off'; } catch (e) {}
+  const SPR = { stone: [[0, 260], [300, 260], [600, 260], [900, 260]], grass: [[1200, 300], [1550, 300], [1900, 300], [2250, 300]], sand: [[2600, 280], [2950, 280], [3300, 280], [3650, 280]] };
+  function sndLoad() {
+    if (A.loading || !F.snd) return; A.loading = true;
+    const go = () => { try { const sprite = {}; for (const k in SPR) SPR[k].forEach((s, i) => { sprite[k + i] = s; });
+      A.howl = new window.Howl({ src: ['v40/steps.mp3'], sprite, volume: 0.9, preload: true }); } catch (e) { warn('howl', e); } };
+    if (window.Howl) return go();
+    const s = document.createElement('script'); s.src = 'vendor/howler/howler.min.js'; s.async = true; s.onload = go; s.onerror = e => warn('howler load', 'cdn'); document.head.appendChild(s);
+  }
+  function sndUnlock() { if (A.unlocked) return; A.unlocked = true; sndLoad(); try { if (window.Howler && window.Howler.ctx && window.Howler.ctx.state === 'suspended') window.Howler.ctx.resume(); } catch (e) {} }
+  for (const ev of ['pointerdown', 'keydown', 'touchstart']) addEventListener(ev, () => { sndUnlock(); try { if (window.Howler && window.Howler.ctx && window.Howler.ctx.state !== 'running') window.Howler.ctx.resume(); } catch (e) {} }, { passive: true });
+  setTimeout(sndLoad, 4000);                                 // تحميل متأخر بعد بدء اللعبة (لا يؤخر الفتح)
+  function surfAt() {
+    try { if (Math.hypot(PL.x - CITY.x, PL.z - CITY.z) < CITY_WALL_R + 12) return 'stone';
+      const h = LIB.height(PL.x, PL.z); if (h < 2.6) return 'sand'; const w = LIB.regionW(PL.x, PL.z); if (w[2] > 0.5) return 'sand'; } catch (e) {}
+    return 'grass';
+  }
+  function findFeet() {
+    const M = MODELS.plSw; if (!M || !M.wrap) return null; const bones = [];
+    M.wrap.traverse(o => { if (o.isBone && /foot|ankle/i.test(o.name) && !/toe|end|ball|tip/i.test(o.name)) bones.push(o); });
+    if (bones.length < 2) return [];
+    const L = bones.find(b => /left|(^|[^a-z])l([^a-z]|$)|_l$|\.l$/i.test(b.name)) || bones[0], R = bones.find(b => b !== L && /right|(^|[^a-z])r([^a-z]|$)|_r$|\.r$/i.test(b.name)) || bones.find(b => b !== L);
+    return [L, R];
+  }
+  function step(i, sp) {
+    A.n++; st.steps = A.n; const surf = A.surf = surfAt(); if (!A.on || !A.howl) return;
+    const run = sp > 2.6, vol = Math.min(0.85, 0.18 + sp * (run ? 0.07 : 0.11)) * (surf === 'grass' ? 0.85 : 1);
+    const id = A.howl.play(surf + ((Math.random() * 4) | 0)); A.howl.volume(vol, id); A.howl.rate(0.92 + Math.random() * 0.16 + (run ? 0.04 : 0), id);
+  }
+  function sndTick(dt) {
+    const M = MODELS.plSw; const moving = M && M.player && (M.cur === 'Walk' || M.cur === 'Run') && PL.ground && !PL.swim && !MNT.on && !ST.dead && PL.speed > 0.5;
+    if (!moving) { A.phase = -1; A.minY = [1e9, 1e9]; return; }
+    if (A.feet === null || (A.feet && A.feet.length && !A.feet[0].parent)) A.feet = findFeet();
+    const now = performance.now() / 1000, sp = PL.speed;
+    if (A.feet && A.feet.length === 2) {                     // مزامنة حقيقية: لحظة ملامسة كل قدم للأرض (أدنى نقطة في مسارها)
+      const by = avatar.getWorldPosition(_v).y;
+      for (let i = 0; i < 2; i++) { const y = A.feet[i].getWorldPosition(_v).y - by, v = (y - A.prevY[i]) / Math.max(dt, 1e-3);
+        A.minY[i] = Math.min(A.minY[i] + dt * 0.05, y);
+        if (A.prevV[i] < -0.15 && v >= -0.15 && y < A.minY[i] + 0.07 && now - A.last[i] > 0.2) { A.last[i] = now; step(i, sp); }
+        A.prevY[i] = y; A.prevV[i] = v; }
+    } else {                                                  // احتياط: نصف دورة المقطع = خطوة
+      const act = M.acts[M.cur]; if (!act) return; const d = act.getClip().duration || 1, ph = (act.time / d) % 1, k = ph < 0.5 ? 0 : 1;
+      if (A.phase >= 0 && k !== A.phase) step(k, sp); A.phase = k;
+    }
+  }
+
+  /* ── لوحة الإعدادات: صف «مؤثرات الصورة» وصف «صوت الخطوات» ── */
+  function panel() {
+    try {
+      const sec = document.getElementById('qRow'); if (!sec || !sec.parentNode) return;
+      if (!document.getElementById('v40Snd')) {
+        const r = document.createElement('div'); r.className = 'row cs'; r.innerHTML = '<span>صوت الخطوات<small>يتغيّر حسب الأرض: حجر، عشب، رمل</small></span><div class="chips" id="v40Snd" role="radiogroup" aria-label="صوت الخطوات"></div>';
+        sec.parentNode.insertBefore(r, sec.nextSibling);
+        const r2 = document.createElement('div'); r2.className = 'row cs'; r2.innerHTML = '<span>مؤثرات الصورة (v40)<small id="v40FxNow"></small></span>';
+        sec.parentNode.insertBefore(r2, r.nextSibling);
+      }
+      const el = document.getElementById('v40Snd'); el.innerHTML = '';
+      [['on', 'تشغيل'], ['off', 'كتم']].forEach(([v, t]) => { const b = document.createElement('button'); b.className = 'chip' + ((A.on ? 'on' : 'off') === v ? ' on' : ''); b.textContent = t;
+        b.onclick = () => { A.on = v === 'on'; try { localStorage.setItem('ow_v40_steps', v); } catch (e) {} sndUnlock(); panel(); }; el.appendChild(b); });
+      const NM = { high: 'كاملة: ظل الزوايا + توهّج + تلوين دافئ + تنعيم SMAA', medium: 'متوسطة: توهّج + تلوين + تنعيم FXAA', mobile: 'خفيفة: تلوين + تنعيم FXAA', none: 'مطفأة (جودة منخفضة)' };
+      const n = document.getElementById('v40FxNow'); if (n) n.textContent = (NM[fxWant()] || '') + ' — تتبع مستوى الجودة تلقائياً';
+    if (window.V41) V41.panel();
+    } catch (e) { warn('panel', e); }
+  }
+
+  /* ── التهيئة قبل أول إطار (حتى تُجمَّع الـ shaders مرة واحدة) ── */
+  try { if (F.env) { envInit(); envUpdate(true); } } catch (e) { warn('env init', e); F.env = false; }
+  try { csmTick(); } catch (e) { warn('csm init', e); F.csm = false; }
+  try { if (F.env) setTimeout(charSweep, 1500); } catch (e) {}
+  let sweepT = 0, hemiSave = 0;
+  function render(dt) {
+    dt = Math.min(0.1, dt || 0.016);
+    try { csmTick(); } catch (e) { warn('csm', e); try { csmSet(0); } catch (e2) {} F.csm = false; }
+    try { if (F.env) { envUpdate(false); { const nw = performance.now(); if (nw - sweepT > 2000) { sweepT = nw; charSweep(); } } } } catch (e) { warn('env', e); }
+    try { fogTick(); } catch (e) { warn('fog', e); }
+    try { if (window.V41) { V41.tick(dt); V41.pre(X); } } catch (e) { warn('v41 pre', e); }
+    try { sndTick(dt); } catch (e) { warn('snd', e); }
+    hemiSave = hemi.intensity; if (F.env && scene.environment) hemi.intensity *= F.hemiK;     // جزء من الإضاءة المحيطة صار يأتي من السماء نفسها
+    let ok = false; try { ok = fxTick(); } catch (e) { warn('fxTick', e); }
+    st.fxTier = ok ? X.tier : 'none';
+    if (ok) { try { fxRender(); } catch (e) { warn('fx render', e); F.fx = false; fxFree(); renderer.setRenderTarget(null); renderer.render(scene, camera); } }
+    else { renderer.render(scene, camera); st.stats = { calls: renderer.info.render.calls, tris: renderer.info.render.triangles, pts: renderer.info.render.points, geos: renderer.info.memory.geometries, tex: renderer.info.memory.textures }; }
+    hemi.intensity = hemiSave;
+  }
+  st.ready = true;
+  return { st, F, render, panel, envUpdate: () => envUpdate(true), csmSet, X, C, E, A, charSweep, step };
+})();
+
+/* ═══ v41-test: ماء three.js (انعكاس + موج) + سماء وغلاف جوي فيزيائي (takram/three-atmosphere) + غيوم حجمية اختيارية للجودة العالية (takram/three-clouds) ═══
+   مفاتيح: ?water=0/1  ?atmo=0/1  ?clouds=0/1  (كلها مطفأة = نفس رسم v40) */
+window.V41 = (() => {
+  const Q = new URLSearchParams(location.search), T = THREE;
+  let cPref = null; try { cPref = localStorage.getItem('ow_v41_clouds'); } catch (e) {}
+  const F = { water: Q.get('water') !== '0', atmo: Q.get('atmo') !== '0',
+    clouds: Q.get('clouds') === '1' ? true : Q.get('clouds') === '0' ? false : cPref === 'on',
+    aS: +(Q.get('atmos') || 12), aK: +(Q.get('atmok') || 10), wRes: +(Q.get('wres') || 0), sunB: Q.get('sunb') != null ? +Q.get('sunb') : 0.11 };
+  const st = { ver: 'v41-test', F, err: {}, atmoReady: false, atmoOn: false, cloudsReady: false, cloudsOn: false, waterOn: false, waterNear: false, refl: 0, reflSkip: 0, poolOk: false, ms: {} };
+  const warn = (k, e) => { if (!st.err[k]) { st.err[k] = String(e && e.message || e); console.warn('[v41] ' + k, e); } };
+  try { document.title = document.title.replace(/\s*v40-test$/, '') + ' v41-test'; setTimeout(() => { for (const el of document.querySelectorAll('div')) if (el.childElementCount === 0 && el.textContent === 'v40-test') el.textContent = 'v41-test'; }, 3000); } catch (e) {}
+  const _v = new T.Vector3(), _c = new T.Color();
+
+  /* ── ١. الماء: Water.js من three (انعكاس مستوٍ حقيقي + خريطة موج متحركة + لمعان الشمس) بدل مستوى الماء القديم ── */
+  const WS = { mesh: null, tex: null, every: 1, frame: 0, t: 0, hideList: [], hideT: -1e9, pools: [], poolT: 0 };
+  function waterInit() {
+    WS.tex = new T.TextureLoader().load('v41/waternormals.jpg', t => { t.wrapS = t.wrapT = T.RepeatWrapping; });
+    const hq = window.__QUALITY === 'high', res = F.wRes || (hq ? 512 : 256);
+    const m = WS.mesh = new Water(new T.PlaneGeometry(9000, 9000), { textureWidth: res, textureHeight: res, waterNormals: WS.tex, sunDirection: new T.Vector3(0, 1, 0),
+      sunColor: 0xffffff, waterColor: 0x0b3d4f, distortionScale: 2.4, fog: true, alpha: 0.9 });
+    m.rotation.x = -Math.PI / 2; m.renderOrder = 1; m.frustumCulled = false;
+    m.material.transparent = true; m.material.depthWrite = false; m.material.uniforms.size.value = 2.2;
+    const ob = m.onBeforeRender;
+    m.onBeforeRender = function (r, s, c) {                    // الانعكاس = رسم المشهد مرة ثانية → فقط إذا في ماء قريب، وبدون العشب والحجارة الصغيرة
+      if (!st.waterOn) return;
+      const every = st.waterNear ? WS.every : 30;
+      if ((WS.frame++ % every) !== 0) { st.reflSkip++; return; }
+      const t0 = performance.now(), hid = reflHide();
+      try { ob.call(this, r, s, c); } catch (e) { warn('refl', e); } finally { for (const o of hid) o.visible = true; }
+      st.refl++; st.ms.refl = performance.now() - t0;
+    };
+    scene.add(m);
+  }
+  function reflHide() {
+    const now = performance.now();
+    if (now - WS.hideT > 4000) { WS.hideT = now; WS.hideList = [];
+      scene.traverse(o => { if ((o.isInstancedMesh && o.count > 150) || o.isPoints || o.isLineSegments || o === rain) { const g = o.geometry; if (!g) return; if (!g.boundingSphere) g.computeBoundingSphere();
+        if (o.isPoints || o.isLineSegments || (g.boundingSphere && g.boundingSphere.radius < 2.2)) WS.hideList.push(o); } }); }
+    const hid = []; for (const o of WS.hideList) if (o.visible) { o.visible = false; hid.push(o); } return hid;
+  }
+  function nearWater() {                                     // هل في ماء ظاهر حول اللاعب؟ (عينات من ارتفاع الأرض)
+    try { const sea = CFG.SEA - 0.05; if (LIB.height(PL.x, PL.z) < sea + 0.3) return true;
+      for (const r of [18, 45, 90, 160, 260]) for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2 + r; if (LIB.height(PL.x + Math.cos(a) * r, PL.z + Math.sin(a) * r) < sea) return true; } } catch (e) {}
+    return false;
+  }
+  function poolFind() {                                      // مادة «الماء» في أحواض النوافير (مدموجة داخل دفعات القصر/الساحة)
+    const out = []; scene.traverse(o => { const m = o.isMesh && o.material; if (m && m.isMeshStandardMaterial && !m.userData.v41pool && Math.abs(m.roughness - 0.05) < 1e-4 && Math.abs(m.metalness - 0.3) < 1e-4 && m.color.getHex() === 0x1f5a70 && out.indexOf(m) < 0) out.push(m); });
+    return out;
+  }
+  function poolInit() {                                      // نفس خريطة موج Water.js + انعكاس البيئة (بدون رسم إضافي للمشهد)
+    for (const m of poolFind()) { m.userData.v41pool = { map: m.normalMap, rough: m.roughness, metal: m.metalness, col: m.color.getHex(), env: m.envMapIntensity, tr: m.transparent, op: m.opacity, obc: m.onBeforeCompile, key: m.customProgramCacheKey };
+      m.normalMap = WS.tex; m.normalScale = new T.Vector2(0.35, 0.35); m.roughness = 0.04; m.metalness = 0.0; m.color.setHex(0x2a6f86); m.envMapIntensity = 1.8; m.transparent = true; m.opacity = 0.9;
+      m.onBeforeCompile = sh => { sh.uniforms.uWT = U.uTime; sh.fragmentShader = 'uniform float uWT;\n' + sh.fragmentShader.replace('#include <normal_fragment_maps>',
+        'vec3 mapN = ( texture2D( normalMap, vNormalMapUv * 3.0 + vec2( uWT * 0.03, uWT * 0.021 ) ).xyz + texture2D( normalMap, vNormalMapUv * 1.7 - vec2( uWT * 0.017, uWT * 0.026 ) ).xyz ) - 1.0;\n mapN.xy *= normalScale; normal = normalize( tbn * mapN );'); };
+      m.customProgramCacheKey = () => 'v41pool'; m.needsUpdate = true; WS.pools.push(m); }
+    st.poolN = WS.pools.length; st.poolOk = WS.pools.length > 0;
+  }
+  function poolOff() { for (const m of WS.pools) { const o = m.userData.v41pool; if (!o) continue; m.normalMap = o.map; m.roughness = o.rough; m.metalness = o.metal; m.color.setHex(o.col); m.envMapIntensity = o.env;
+    m.transparent = o.tr; m.opacity = o.op; m.onBeforeCompile = o.obc; m.customProgramCacheKey = o.key; m.needsUpdate = true; delete m.userData.v41pool; } WS.pools = []; st.poolOk = false; }
+  function waterTick(dt) {
+    const want = F.water;
+    if (want && !WS.mesh) { try { waterInit(); } catch (e) { warn('water init', e); F.water = false; return; } }
+    if (!WS.mesh) return;
+    st.waterOn = want; WS.mesh.visible = want; water.visible = !want;
+    if (want) { WS.poolT -= dt; if (WS.poolT <= 0) { WS.poolT = 3; try { poolInit(); } catch (e) { warn('pool', e); } } } else if (WS.pools.length) poolOff();
+    if (!want) return;
+    WS.mesh.position.copy(water.position);
+    WS.t -= dt; if (WS.t <= 0) { WS.t = 0.5; st.waterNear = nearWater(); }
+    WS.every = window.__QUALITY === 'high' ? 1 : 2;
+    const u = WS.mesh.material.uniforms, day = 1 - U.uNight.value;
+    u.time.value += dt * 0.55; u.sunDirection.value.copy(U.uSun.value);
+    _c.copy(U.uSunCol.value); u.sunColor.value.copy(_c).multiplyScalar(Math.max(0, Math.min(1, U.uSun.value.y * 4)) * 0.9 + 0.02);
+    u.waterColor.value.setHex(0x0b3d4f).multiplyScalar(0.18 + 0.82 * day);
+    u.alpha.value = 0.9;
+  }
+
+  /* ── ٢. الغلاف الجوي الفيزيائي (takram): سماء + شمس + منظور جوي حقيقي (ضباب يعتمد على المسافة والارتفاع ولون الشمس) — مرحلة بعد رسم المشهد ── */
+  const A = { L: null, loading: false, pass: null, aerial: null, pre: null, post: null, clouds: null, rt: null, w: 0, h: 0, tex: null, m: new T.Matrix4(), R: new T.Matrix3(), sunE: new T.Vector3(), fogSave: null };
+  function atmoLoad() {
+    if (A.loading) return; A.loading = true;
+    import('./v41/env-libs.js').then(L => { A.L = L;
+      const ld = new L.PrecomputedTexturesLoader(); ld.setType(renderer);
+      ld.load('v41/atmo/', tex => { A.tex = tex; st.atmoReady = true; }, undefined, e => { warn('atmo textures', e); F.atmo = false; });
+      // إطار ECEF: دمشق تقريباً (33.5 شمالاً، 36.3 شرقاً)، الشرق = +X، الشمال = -Z، الأعلى = +Y، ومقياس المسافة aS (يُظهر عمق الجو في عالم صغير)
+      const org = new L.Geodetic(L.radians(36.3), L.radians(33.5), 0).toECEF(); const enu = L.Ellipsoid.WGS84.getEastNorthUpFrame(org);
+      const B = new T.Matrix4().set(1, 0, 0, 0, 0, 0, -1, 0, 0, 1, 0, 0, 0, 0, 0, 1);
+      A.m.copy(enu).multiply(B).multiply(new T.Matrix4().makeScale(F.aS, F.aS, F.aS));
+      A.R.setFromMatrix4(new T.Matrix4().copy(enu).multiply(B));
+    }).catch(e => { warn('atmo lib', e); F.atmo = false; });
+  }
+  function mkFx(L) {
+    const Pre = new L.Effect('V41Pre', 'uniform float k41;\nvoid mainImage(const in vec4 inputColor, const in vec2 uv, const in float depth, out vec4 outputColor) { outputColor = vec4(inputColor.rgb / k41, inputColor.a); }',
+      { attributes: L.EffectAttribute.DEPTH, uniforms: new Map([['k41', new T.Uniform(F.aK)]]) });   // نفس صفة العمق حتى لا يعيد postprocessing ترتيب المؤثرات
+    const Post = new L.Effect('V41Post', [
+      'uniform float k41, nightK, wk; uniform sampler2D tOrig;',
+      'void mainImage(const in vec4 inputColor, const in vec2 uv, const in float depth, out vec4 outputColor) {',
+      '  vec3 c = inputColor.rgb * k41;',
+      '  if (depth >= 0.99999) { vec3 o = texture2D(tOrig, uv).rgb; c = mix(c, o, wk); c = max(c, o * nightK); }',
+      '  vec3 x = max(c - 0.8, 0.0); c = min(c, vec3(0.8)) + 0.2 * (1.0 - exp(-x / 0.2));',
+      '  outputColor = vec4(c, inputColor.a);', '}'].join('\n'),
+      { attributes: L.EffectAttribute.DEPTH, uniforms: new Map([['k41', new T.Uniform(F.aK)], ['nightK', new T.Uniform(0)], ['wk', new T.Uniform(0)], ['tOrig', new T.Uniform(null)]]) });
+    return { Pre, Post };
+  }
+  function atmoBuild(X) {
+    const L = A.L; atmoFree();
+    const { Pre, Post } = mkFx(L); A.pre = Pre; A.post = Post;
+    A.aerial = new L.AerialPerspectiveEffect(camera, { sky: true, sun: true, moon: false, transmittance: true, inscatter: true, sunLight: false, skyLight: false, correctAltitude: true });
+    Object.assign(A.aerial, A.tex);
+    const fx = [Pre];
+    if (F.clouds) { try { A.clouds = cloudsMake(L); fx.push(A.clouds); } catch (e) { warn('clouds', e); A.clouds = null; } }
+    fx.push(A.aerial, Post);
+    A.pass = new L.EffectPass(camera, ...fx);
+    A.pass.initialize(renderer, false, T.HalfFloatType);
+    A.pass.setDepthTexture(X.sRT.depthTexture);
+    A.w = X.w; A.h = X.h; A.pass.setSize(A.w, A.h);
+    A.rt = new T.WebGLRenderTarget(A.w, A.h, { type: T.HalfFloatType, depthBuffer: false }); A.rt.texture.colorSpace = T.LinearSRGBColorSpace;
+    A.srt = X.sRT; A.cl = F.clouds;
+  }
+  function atmoFree() { try { if (A.pass) A.pass.dispose(); } catch (e) {} A.pass = null; if (A.rt) { A.rt.dispose(); A.rt = null; } A.clouds = null; A.srt = null; }
+  /* ── ٣. الغيوم الحجمية (takram/three-clouds): خيار «جودة عالية» فقط ── */
+  const CT = { lw: null, sh: null, shd: null, tu: null, stbn: null };
+  function cloudsMake(L) {
+    if (!CT.lw) {
+      CT.lw = new T.TextureLoader().load('v41/clouds/local_weather.png', t => { t.minFilter = T.LinearMipMapLinearFilter; t.magFilter = T.LinearFilter; t.wrapS = t.wrapT = T.RepeatWrapping; t.colorSpace = T.NoColorSpace; t.needsUpdate = true; });
+      CT.tu = new T.TextureLoader().load('v41/clouds/turbulence.png', t => { t.minFilter = T.LinearMipMapLinearFilter; t.magFilter = T.LinearFilter; t.wrapS = t.wrapT = T.RepeatWrapping; t.colorSpace = T.NoColorSpace; t.needsUpdate = true; });
+      const d3 = (url, n) => new L.DataTextureLoader(T.Data3DTexture, L.parseUint8Array, { width: n, height: n, depth: n, format: T.RedFormat, minFilter: T.LinearFilter, magFilter: T.LinearFilter,
+        wrapS: T.RepeatWrapping, wrapT: T.RepeatWrapping, wrapR: T.RepeatWrapping, colorSpace: T.NoColorSpace }).load(url);
+      CT.sh = d3('v41/clouds/shape.bin', L.CLOUD_SHAPE_TEXTURE_SIZE); CT.shd = d3('v41/clouds/shape_detail.bin', L.CLOUD_SHAPE_DETAIL_TEXTURE_SIZE);
+      CT.stbn = new L.STBNLoader().load('v41/clouds/stbn.bin');
+    }
+    const c = new L.CloudsEffect(camera);
+    c.qualityPreset = window.__QUALITY === 'high' ? 'medium' : 'low';
+    Object.assign(c, { localWeatherTexture: CT.lw, shapeTexture: CT.sh, shapeDetailTexture: CT.shd, turbulenceTexture: CT.tu, stbnTexture: CT.stbn });
+    Object.assign(c, A.tex);
+    c.coverage = 0.4;
+    st.cloudsReady = true; return c;
+  }
+
+  /* ── ليلاً مع الجو الفيزيائي: ضوء قمر بارد حقيقي بدل الدفء البني (الثوب الأبيض يبقى أبيض)، والفوانيس نقاط دافئة حادة بدل بقع بيضاء ── */
+  const NT = { g0: null, tex: null, haloM: null, hS: 0, hT: null, find: 0 };
+  function sharpTex() { const n = 64, c = document.createElement('canvas'); c.width = c.height = n; const x = c.getContext('2d'), gr = x.createRadialGradient(n / 2, n / 2, 0, n / 2, n / 2, n / 2);
+    for (const [o, a] of [[0, 1], [0.1, 0.95], [0.22, 0.4], [0.45, 0.08], [1, 0]]) gr.addColorStop(o, 'rgba(255,255,255,' + a + ')'); x.fillStyle = gr; x.fillRect(0, 0, n, n);
+    const t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; return t; }
+  function nightFix(on) {
+    const nk = on ? Math.min(1, U.uNight.value * 1.2) : 0;
+    try { if (!NT.g0) NT.g0 = hemi.groundColor.clone(); hemi.groundColor.copy(NT.g0).lerp(_c.setHex(0x232733), nk);
+      if (nk > 0.01) { hemi.color.lerp(_c.setHex(0x6f80a8), 0.45 * nk); moon.color.setHex(0xc4d2ff); moon.intensity = Math.max(moon.intensity, 1.3 * nk * (1 - (ENV.cloud || 0) * 0.5)); } } catch (e) { warn('night light', e); }
+    try { if (!NT.haloM && (NT.find -= 1) <= 0) { NT.find = 120; const o = scene.getObjectByName('night35_halos'); if (o) { NT.haloM = o.material; NT.hS = o.material.size; NT.hT = o.material.map; NT.hC = o.material.color.getHex(); } }
+      const m = NT.haloM; if (m) { if (on) { if (!NT.tex) NT.tex = sharpTex(); if (m.map !== NT.tex) { m.map = NT.tex; m.needsUpdate = true; } m.size = NT.hS * 0.45; m.color.setHex(0xff9440); m.opacity *= 0.85; }
+        else if (m.map !== NT.hT) { m.map = NT.hT; m.size = NT.hS; m.color.setHex(NT.hC); m.needsUpdate = true; } } } catch (e) { warn('halos', e); }
+  }
+  function atmoUse(X) { return F.atmo && st.atmoReady && X && X.sRT && X.tier && X.tier !== 'none'; }
+  function pre(X) {                                          // قبل الرسم: إذا الجو الفيزيائي شغّال، الضباب القديم يبتعد لطرف مسافة الرؤية فقط
+    if (F.atmo && !A.L) atmoLoad();
+    const on = st.atmoOn = !!atmoUse(X);
+    if (on) { V40U.fogV[2].x = 0; const f = scene.fog; if (f) { f.near = f.far * 0.82; } }
+    nightFix(on);
+  }
+  function post(X) {                                         // بعد رسم المشهد في sRT: الغلاف الجوي (+الغيوم) → هدف جديد يكمل منه التوهّج والتلوين
+    if (!st.atmoOn) return null;
+    try {
+      if (!A.pass || A.w !== X.w || A.h !== X.h || A.srt !== X.sRT || A.cl !== F.clouds) atmoBuild(X);
+      const t0 = performance.now();
+      camera.updateMatrixWorld();
+      A.sunE.copy(U.uSun.value); A.sunE.y -= F.sunB; A.sunE.normalize().applyMatrix3(A.R).normalize();   // شمس اللعبة «فنية» (غروبها يبدأ والشمس على ~8°) → نخفض الشمس الفيزيائية قليلاً لتطابق ألوان الغروب توقيت اللعبة
+      const ae = A.aerial; ae.worldToECEFMatrix.copy(A.m); ae.sunDirection.copy(A.sunE);
+      const night = U.uNight.value, cl = ENV.cloud || 0;
+      A.post.uniforms.get('tOrig').value = X.sRT.texture; A.post.uniforms.get('nightK').value = Math.min(1, night * 1.15);
+      A.post.uniforms.get('wk').value = Math.min(0.92, Math.max(0, (cl - 0.3) * 1.4) + (ENV.storm || 0) * 0.5 + (ENV.rain || 0) * 0.3) * (A.clouds ? 0.5 : 1);
+      if (A.clouds) { const c = A.clouds; c.worldToECEFMatrix.copy(A.m); c.sunDirection.copy(A.sunE); c.coverage = Math.min(0.75, 0.32 + cl * 0.5);
+        ae.overlay = c.atmosphereOverlay; ae.shadow = null; ae.shadowLength = null; st.cloudsOn = true; } else st.cloudsOn = false;
+      A.pass.render(renderer, X.sRT, A.rt, Math.min(0.1, A.dt || 1 / 60), false);
+      st.ms.atmo = performance.now() - t0;
+      return A.rt;
+    } catch (e) { warn('atmo render', e); F.atmo = false; atmoFree(); return null; }
+  }
+  /* ── لوحة الإعدادات: صف «غيوم حجمية» ── */
+  function panel() {
+    try { const sec = document.getElementById('qRow'); if (!sec || !sec.parentNode) return;
+      if (!document.getElementById('v41Cl')) { const r = document.createElement('div'); r.className = 'row cs';
+        r.innerHTML = '<span>غيوم حجمية (جودة عالية)<small>غيوم ثلاثية الأبعاد حقيقية — ثقيلة، للأجهزة القوية فقط</small></span><div class="chips" id="v41Cl" role="radiogroup" aria-label="غيوم حجمية"></div>';
+        sec.parentNode.insertBefore(r, sec.nextSibling); }
+      const el = document.getElementById('v41Cl'); el.innerHTML = '';
+      [['on', 'تشغيل'], ['off', 'إطفاء']].forEach(([v, t]) => { const b = document.createElement('button'); b.className = 'chip' + ((F.clouds ? 'on' : 'off') === v ? ' on' : ''); b.textContent = t;
+        b.onclick = () => { F.clouds = v === 'on'; try { localStorage.setItem('ow_v41_clouds', v); } catch (e) {} panel(); }; el.appendChild(b); });
+    } catch (e) { warn('panel', e); }
+  }
+  function tick(dt) { A.dt = dt; try { waterTick(dt); } catch (e) { warn('water', e); } }
+  if (F.atmo) setTimeout(atmoLoad, 50);
+  return { st, F, tick, pre, post, panel, A, WS };
+})();
+
+
+loadTreeModels(); updateChunks(); frame();
+
+/* ═══ v42 FX42 (three.quarks): غبار تحت الأقدام والحصان، شرار ضربة السيف، دخان نار المخيمات — مطفي افتراضياً، يشتغل بـ ?fx=quarks ═══ */
+const FX42 = (() => { const on = /[?&]fx=quarks/.test(location.search) || (() => { try { return localStorage.getItem('ow_fx') === 'quarks'; } catch (e) { return false; } })();
+  const ST = { on, ok: false, err: null, dust: 0, sparks: 0, smoke: 0, systems: 0 }; if (!on) { window.FX42 = { ST, tick() {}, sparks() {} }; return window.FX42; }
+  let Q = null, br = null, S = {}, dustAcc = 0, px = null, pz = null; const smokes = new Map();
+  const tex = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.45, 'rgba(255,255,255,0.55)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
+  const mat = (add) => new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, blending: add ? THREE.AdditiveBlending : THREE.NormalBlending });
+  function mk(o) { const ps = new Q.ParticleSystem(Object.assign({ duration: 1, looping: true, worldSpace: true, emissionOverTime: new Q.ConstantValue(0), renderMode: Q.RenderMode.BillBoard }, o));
+    br.addSystem(ps); scene.add(ps.emitter); ST.systems++; return ps; }
+  function burst(ps, n, x, y, z) { ps.emitter.position.set(x, y, z); ps.emitter.updateMatrixWorld(true); ps.spawn(n, ps.emissionState, ps.emitter.matrixWorld); }
+  import('quarks.core').then(() => import('./vendor/quarks/three.quarks.esm.js')).then(M => { Q = M; br = new Q.BatchedRenderer(); br.name = 'FX42'; scene.add(br);
+    const V4 = (r, g, b, a) => new THREE.Vector4(r, g, b, a);
+    S.dust = mk({ maxParticle: 300, startLife: new Q.IntervalValue(0.5, 1.0), startSpeed: new Q.IntervalValue(0.4, 1.4), startSize: new Q.IntervalValue(0.35, 0.8),
+      startColor: new Q.ConstantColor(V4(0.62, 0.53, 0.40, 0.55)), shape: new Q.ConeEmitter({ radius: 0.35, angle: 0.9 }), material: mat(false),
+      behaviors: [new Q.SizeOverLife(new Q.PiecewiseBezier([[new Q.Bezier(0.6, 1.2, 1.7, 2.0), 0]])), new Q.ColorOverLife(new Q.Gradient([[new THREE.Vector3(1, 1, 1), 0], [new THREE.Vector3(1, 1, 1), 1]], [[0.55, 0], [0, 1]])), new Q.ApplyForce(new THREE.Vector3(0, -1, 0), new Q.ConstantValue(0.6))] });
+    S.sparks = mk({ maxParticle: 200, startLife: new Q.IntervalValue(0.18, 0.4), startSpeed: new Q.IntervalValue(3, 7), startSize: new Q.IntervalValue(0.06, 0.14),
+      startColor: new Q.ConstantColor(V4(1.0, 0.75, 0.35, 1)), shape: new Q.SphereEmitter({ radius: 0.1 }), material: mat(true),
+      behaviors: [new Q.ApplyForce(new THREE.Vector3(0, -1, 0), new Q.ConstantValue(9)), new Q.ColorOverLife(new Q.Gradient([[new THREE.Vector3(1, 0.9, 0.6), 0], [new THREE.Vector3(1, 0.35, 0.1), 1]], [[1, 0], [0, 1]]))] });
+    S.smoke = mk({ maxParticle: 240, startLife: new Q.IntervalValue(3, 5), startSpeed: new Q.IntervalValue(0.5, 1.0), startSize: new Q.IntervalValue(0.6, 1.1),
+      startColor: new Q.ConstantColor(V4(0.42, 0.42, 0.44, 0.45)), shape: new Q.ConeEmitter({ radius: 0.3, angle: 0.25 }), material: mat(false),
+      behaviors: [new Q.SizeOverLife(new Q.PiecewiseBezier([[new Q.Bezier(0.8, 1.6, 2.6, 3.4), 0]])), new Q.ColorOverLife(new Q.Gradient([[new THREE.Vector3(1, 1, 1), 0], [new THREE.Vector3(1, 1, 1), 1]], [[0.45, 0], [0, 1]])), new Q.ApplyForce(new THREE.Vector3(1, 0.3, 0), new Q.ConstantValue(0.25))] });
+    ST.ok = true; console.info('[v42] FX42 three.quarks ready'); }).catch(e => { ST.err = String(e && e.message || e).slice(0, 200); console.warn('[v42] FX42', e); });
+  function tick(dt) { if (!ST.ok || !(dt > 0)) return; try {
+      const sp = px == null ? 0 : Math.hypot(PL.x - px, PL.z - pz) / dt; px = PL.x; pz = PL.z;
+      const ride = !!MNT.on, fast = ride ? sp > 4 : sp > 5.2, ground = PL.ground !== false && !PL.swim;
+      if (fast && ground && sp < 40) { dustAcc += dt * (ride ? 26 : 10); const n = dustAcc | 0; if (n) { dustAcc -= n; const y = LIB.height(PL.x, PL.z) + 0.1; burst(S.dust, n, PL.x, y, PL.z); ST.dust += n; } }
+      for (const c of CAMPS) { if (!c.g) continue; const d = Math.hypot(c.g.position.x - PL.x, c.g.position.z - PL.z); let a = smokes.get(c) || 0;
+        if (d < 140) { a += dt * 3; const n = a | 0; if (n) { a -= n; burst(S.smoke, n, c.g.position.x, c.g.position.y + 0.9, c.g.position.z); ST.smoke += n; } } smokes.set(c, a); }
+      br.update(dt); } catch (e) { if (!ST.err) { ST.err = String(e && e.stack || e).slice(0, 300); console.warn('[v42] FX42 tick', e); } } }
+  function sparks(x, z, y) { if (!ST.ok) return; try { burst(S.sparks, 14, x, y != null ? y : LIB.height(x, z) + 1.2, z); ST.sparks++; } catch (e) {} }
+  window.FX42 = { ST, tick, sparks }; return window.FX42; })();
+
+/* ═══ v42 PHYS42 (Rapier): صناديق وبراميل بتوقع وبتتدحرج وبتنزاح لما تمشي فيها، وزر G (أو زر «ارمِ» عالموبايل) بيرمي صندوق لقدّام — مطفي افتراضياً، يشتغل بـ ?phys=rapier ═══ */
+const PHYS42 = (() => { const on = /[?&]phys=rapier/.test(location.search) || (() => { try { return localStorage.getItem('ow_phys') === 'rapier'; } catch (e) { return false; } })();
+  const ST = { on, ok: false, err: null, bodies: 0, thrown: 0, ground: 0, steps: 0, maxStepMs: 0 }; if (!on) { window.PHYS42 = { ST, tick() {} }; return window.PHYS42; }
+  let R = null, world = null, ply = null, gnd = null, gc = null, acc = 0; const objs = [];
+  const wood = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'); g.fillStyle = '#8a5a2b'; g.fillRect(0, 0, 64, 64);
+    g.strokeStyle = '#5e3a17'; g.lineWidth = 3; for (let i = 0; i < 64; i += 16) { g.beginPath(); g.moveTo(0, i + 8); g.lineTo(64, i + 8); g.stroke(); } g.strokeRect(1, 1, 62, 62);
+    const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return new THREE.MeshStandardMaterial({ map: t, roughness: 0.85 }); })();
+  const GEO = { box: new THREE.BoxGeometry(0.8, 0.8, 0.8), barrel: new THREE.CylinderGeometry(0.38, 0.38, 0.9, 12) };
+  function groundAt(cx, cz) {                     // heightfield 48×48 م حول اللاعب (يتحدّث لما يبعد اللاعب ١٦ م)
+    if (gnd) world.removeRigidBody(gnd); const N = 25, S = 48, H = new Float32Array(N * N);
+    for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) { const x = cx - S / 2 + S * i / (N - 1), z = cz - S / 2 + S * j / (N - 1); H[i * N + j] = LIB.height(x, z); }
+    gnd = world.createRigidBody(R.RigidBodyDesc.fixed().setTranslation(cx, 0, cz)); world.createCollider(R.ColliderDesc.heightfield(N - 1, N - 1, H, { x: S, y: 1, z: S }).setFriction(0.9), gnd);
+    gc = { x: cx, z: cz }; ST.ground++; }
+  function spawn(kind, x, y, z, vx, vy, vz) { const m = new THREE.Mesh(GEO[kind], wood); m.castShadow = true; scene.add(m);
+    const b = world.createRigidBody(R.RigidBodyDesc.dynamic().setTranslation(x, y, z).setLinvel(vx || 0, vy || 0, vz || 0).setAngularDamping(0.4).setLinearDamping(0.05).setCcdEnabled(true));
+    world.createCollider(kind === 'box' ? R.ColliderDesc.cuboid(0.4, 0.4, 0.4).setDensity(0.6).setFriction(0.8) : R.ColliderDesc.cylinder(0.45, 0.38).setDensity(0.5).setFriction(0.5).setRestitution(0.1), b);
+    objs.push({ m, b }); ST.bodies = objs.length; if (objs.length > 40) { const o = objs.shift(); scene.remove(o.m); world.removeRigidBody(o.b); } return b; }
+  function throwOne() { if (!ST.ok) return; const fx = -Math.sin(PL.face), fz = -Math.cos(PL.face), y = LIB.height(PL.x, PL.z) + 1.6;
+    spawn(Math.random() < 0.5 ? 'box' : 'barrel', PL.x + fx * 1.2, y, PL.z + fz * 1.2, fx * 9, 3.5, fz * 9); ST.thrown++; }
+  function scatter() { for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2, r = 4 + (i % 3); const x = PL.x + Math.cos(a) * r, z = PL.z + Math.sin(a) * r; spawn(i % 2 ? 'barrel' : 'box', x, LIB.height(x, z) + 1.5 + i * 0.3, z); } }
+  (window.__RAP42 || (window.__RAP42 = import('./vendor/rapier/rapier.es.js').then(async M => { await (M.init || M.default.init)(); return M; }))).then(async M => { R = M; world = new R.World({ x: 0, y: -9.81, z: 0 });
+    ply = world.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(PL.x, PL.y + 0.9, PL.z)); world.createCollider(R.ColliderDesc.capsule(0.5, 0.35), ply);
+    groundAt(PL.x, PL.z); ST.ok = true; scatter();
+    addEventListener('keydown', e => { if (e.code === 'KeyG' && !e.repeat && !(document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName))) throwOne(); });
+    if (matchMedia('(pointer: coarse)').matches) { const bt = document.createElement('button'); bt.textContent = 'ارمِ'; bt.style.cssText = 'position:fixed;left:12px;bottom:46%;z-index:30;padding:10px 14px;border-radius:12px;border:1px solid #c9a24a;background:rgba(20,16,10,.7);color:#f6dd95;font:600 15px system-ui'; bt.onclick = throwOne; document.body.appendChild(bt); }
+    console.info('[v42] PHYS42 rapier ready'); }).catch(e => { ST.err = String(e && e.message || e).slice(0, 200); console.warn('[v42] PHYS42', e); });
+  function tick(dt) { if (!ST.ok || !(dt > 0)) return; try { const t0 = performance.now();
+      if (Math.hypot(PL.x - gc.x, PL.z - gc.z) > 16) groundAt(PL.x, PL.z);
+      const gy = Math.max(PL.y, LIB.height(PL.x, PL.z)); ply.setNextKinematicTranslation({ x: PL.x, y: gy + 0.9, z: PL.z });
+      acc = Math.min(acc + dt, 0.1); let n = 0; while (acc >= 1 / 60 && n < 4) { world.timestep = 1 / 60; world.step(); acc -= 1 / 60; n++; ST.steps++; }
+      for (let i = objs.length - 1; i >= 0; i--) { const o = objs[i], p = o.b.translation(), q = o.b.rotation();
+        if (Math.hypot(p.x - PL.x, p.z - PL.z) > 60 || p.y < LIB.height(p.x, p.z) - 5) { scene.remove(o.m); world.removeRigidBody(o.b); objs.splice(i, 1); continue; }
+        o.m.position.set(p.x, p.y, p.z); o.m.quaternion.set(q.x, q.y, q.z, q.w); }
+      ST.bodies = objs.length; ST.maxStepMs = Math.max(ST.maxStepMs, performance.now() - t0); } catch (e) { if (!ST.err) { ST.err = String(e && e.stack || e).slice(0, 300); console.warn('[v42] PHYS42 tick', e); } } }
+  window.PHYS42 = { ST, tick, throwOne, scatter, objs: () => objs.map(o => { const p = o.b.translation(); return [+p.x.toFixed(2), +p.y.toFixed(2), +p.z.toFixed(2)]; }) }; return window.PHYS42; })();
+
+/* ═══ v42 NAV42 (recast-navigation): أهل البلد بيمشوا على navmesh حقيقي (بيلفّوا حول البيوت والأسوار) بدل شبكة A* — مطفي افتراضياً، يشتغل بـ ?nav=recast؛ لو فشل أي شي بيرجع للـ A* القديم ═══ */
+const NAV42 = (() => { const on = /[?&]nav=recast/.test(location.search) || (() => { try { return localStorage.getItem('ow_nav') === 'recast'; } catch (e) { return false; } })();
+  const ST = { on, ok: false, err: null, meshes: 0, polys: [], buildMs: [], paths: 0, fallbacks: 0, pending: 0 }; if (!on) { window.NAV42 = { ST, path() { return null; } }; return window.NAV42; }
+  let C = null, G = null; const cache = new Map();
+  Promise.all([import('@recast-navigation/core'), import('@recast-navigation/generators')]).then(async ([c, g]) => { await c.init(); C = c; G = g; ST.ok = true; console.info('[v42] NAV42 recast ready'); })
+    .catch(e => { ST.err = String(e && e.message || e).slice(0, 200); console.warn('[v42] NAV42', e); });
+  function build(L) { const t0 = performance.now(); let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9; const ob = L.obst || [];
+    for (const o of ob) { x0 = Math.min(x0, o[0]); x1 = Math.max(x1, o[0]); z0 = Math.min(z0, o[1]); z1 = Math.max(z1, o[1]); }
+    if (!(x1 > x0)) return null; x0 -= 25; x1 += 25; z0 -= 25; z1 += 25; const cx = (x0 + x1) / 2, cz = (z0 + z1) / 2, hw = Math.min(200, (x1 - x0) / 2), hd = Math.min(200, (z1 - z0) / 2);
+    x0 = cx - hw; x1 = cx + hw; z0 = cz - hd; z1 = cz + hd;
+    const P = [], I = [], st = 2, nx = Math.ceil((x1 - x0) / st), nz = Math.ceil((z1 - z0) / st);
+    for (let i = 0; i <= nx; i++) for (let j = 0; j <= nz; j++) { const x = x0 + i * st, z = z0 + j * st; P.push(x, LIB.height(x, z), z); }
+    for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) { const a = i * (nz + 1) + j, b = a + 1, c2 = a + nz + 1, d = c2 + 1; I.push(a, b, c2, b, d, c2); }
+    const box = (x, z, hx, hz, c, s) => { const y0 = LIB.height(x, z) - 1, y1 = y0 + 5, base = P.length / 3; const cs = c == null ? 1 : c, sn = s == null ? 0 : s;
+      for (const [u, w] of [[-hx, -hz], [hx, -hz], [hx, hz], [-hx, hz]]) { const px = x + u * cs + w * sn, pz = z - u * sn + w * cs; P.push(px, y0, pz); P.push(px, y1, pz); }
+      const q = k => base + k; for (let k = 0; k < 4; k++) { const a = q(2 * k), b = q(2 * k + 1), c3 = q((2 * k + 2) % 8), d = q((2 * k + 3) % 8); I.push(a, c3, b, b, c3, d); }
+      I.push(q(1), q(3), q(5), q(1), q(5), q(7)); };
+    for (const o of ob) { if (o[0] < x0 || o[0] > x1 || o[1] < z0 || o[1] > z1) continue; if (o.length < 6) box(o[0], o[1], o[2], o[2]); else box(o[0], o[1], o[3], o[4], o[6], o[7]); }
+    if (L.castle) { const k = L.castle; for (let a = 0; a < 16; a++) { const an = a / 16 * Math.PI * 2, R1 = k.R + 1; box(k.x + Math.cos(an) * R1, k.z + Math.sin(an) * R1, 2.2, 2.2); } }   // الحرم: سور افتراضي (الحرس جوّاته بيرجعوا للـ A*)
+    const r = G.generateSoloNavMesh(new Float32Array(P), new Uint32Array(I), { cs: 0.5, ch: 0.25, walkableSlopeAngle: 42, walkableHeight: 7, walkableClimb: 2, walkableRadius: 1, maxEdgeLen: 24, maxSimplificationError: 1.3, minRegionArea: 8, mergeRegionArea: 20, maxVertsPerPoly: 6, detailSampleDist: 6, detailSampleMaxError: 1 });
+    const ms = Math.round(performance.now() - t0); ST.buildMs.push(ms);
+    if (!r || !r.success) { ST.err = 'navmesh build failed: ' + (r && r.error); return null; }
+    const q = new C.NavMeshQuery(r.navMesh); ST.meshes++; try { ST.polys.push(r.navMesh.getMaxTiles ? r.navMesh.getMaxTiles() : 1); } catch (e) {}
+    return { nm: r.navMesh, q, x0, x1, z0, z1 }; }
+  function path(L, sx, sz, tx, tz) { if (!ST.ok || !L) return null; let e = cache.get(L);
+    if (e === undefined) { cache.set(L, null); ST.pending++; setTimeout(() => { try { cache.set(L, build(L)); } catch (er) { ST.err = String(er && er.message || er).slice(0, 200); cache.set(L, false); } ST.pending--; }, 0); return null; }
+    if (!e) { ST.fallbacks++; return null; }
+    if (sx < e.x0 || sx > e.x1 || sz < e.z0 || sz > e.z1 || tx < e.x0 || tx > e.x1 || tz < e.z0 || tz > e.z1) { ST.fallbacks++; return null; }
+    try { const r = e.q.computePath({ x: sx, y: LIB.height(sx, sz), z: sz }, { x: tx, y: LIB.height(tx, tz), z: tz }, { halfExtents: { x: 3, y: 4, z: 3 } });
+      if (!r.success || !r.path || r.path.length < 2) { ST.fallbacks++; return null; }
+      const end = r.path[r.path.length - 1]; if (Math.hypot(end.x - tx, end.z - tz) > 2.5) { ST.fallbacks++; return null; }
+      ST.paths++; return r.path.slice(1).map(p => [p.x, p.z]); } catch (er) { ST.fallbacks++; if (!ST.err) ST.err = String(er && er.message || er).slice(0, 200); return null; } }
+  window.NAV42 = { ST, path, cache }; return window.NAV42; })();
+
+/* ═══ v42 SFX42 (Howler): صوت ضربة السيف والتلويح، خطوات (عشب/حجر)، حوافر الحصان ونخرته — مطفي افتراضياً، يشتغل بـ ?sfx=howler ═══ */
+const SFX42 = (() => { const on = /[?&]sfx=howler/.test(location.search) || (() => { try { return localStorage.getItem('ow_sfx') === 'howler'; } catch (e) { return false; } })();
+  const SS = { on, ok: false, err: null, loaded: 0, total: 0, unlocked: false, played: { hit: 0, swing: 0, grass: 0, stone: 0, hoof: 0, snort: 0 } };
+  if (!on) { window.SFX42 = { ST: SS, tick() {}, hit() {}, swing() {} }; return window.SFX42; }
+  const N = { hit: 3, swing: 2, grass: 4, stone: 4, hoof: 4, snort: 1 }, VOL = { hit: 0.8, swing: 0.45, grass: 0.3, stone: 0.35, hoof: 0.5, snort: 0.35 }, S = {};
+  let px = null, pz = null, stepAcc = 0, hoofAcc = 0, hoofI = 0, snortT = 9, last = {};
+  for (const k in N) SS.total += N[k];
+  const sc = document.createElement('script'); sc.src = './vendor/howler/howler.core.min.js?v=2.2.4';
+  sc.onload = () => { try { for (const k in N) { S[k] = []; for (let i = 1; i <= N[k]; i++) S[k].push(new Howl({ src: ['./v42/sfx/' + k + '-' + i + '.mp3?v=1'], volume: VOL[k], preload: true, pool: k === 'hoof' || k === 'grass' || k === 'stone' ? 6 : 4,
+          onload: () => { SS.loaded++; if (SS.loaded === SS.total) SS.ok = true; }, onloaderror: (id, e) => { SS.err = 'load ' + k + '-' + i + ': ' + e; } })); }
+      const un = () => { SS.unlocked = !!(window.Howler && Howler.ctx && Howler.ctx.state === 'running'); }; setInterval(un, 2000); } catch (e) { SS.err = String(e).slice(0, 200); } };
+  sc.onerror = () => { SS.err = 'howler script failed'; }; document.head.appendChild(sc);
+  function play(k, vol, rate) { const a = S[k]; if (!a || !a.length) return; const now = performance.now(); if (last[k] && now - last[k] < 35) return; last[k] = now;
+    try { const h = a[(Math.random() * a.length) | 0]; const id = h.play(); h.volume(Math.max(0, Math.min(1, (vol == null ? 1 : vol) * VOL[k])), id); h.rate(rate || (0.92 + Math.random() * 0.16), id); SS.played[k]++; } catch (e) { SS.err = String(e).slice(0, 200); } }
+  const fall = (x, z) => { if (x == null || typeof PL === 'undefined') return 1; const d = Math.hypot(x - PL.x, z - PL.z); return Math.max(0, 1 - d / 32); };
+  function tick(dt) { if (!SS.ok || typeof PL === 'undefined' || !(dt > 0)) return; if (px == null) { px = PL.x; pz = PL.z; return; }
+    const d = Math.hypot(PL.x - px, PL.z - pz); px = PL.x; pz = PL.z; if (d > 15) return; const sp = d / Math.max(dt, 1e-3);
+    const mounted = typeof MNT !== 'undefined' && !!MNT.on;
+    if (mounted) { stepAcc = 0; if (sp > 0.4) { const gal = sp > 7; const iv = gal ? [0.07, 0.07, 0.07, 0.24] : [0.18, 0.22, 0.18, 0.22]; hoofAcc += dt * Math.min(1.6, Math.max(0.6, sp / (gal ? 10 : 4)));
+        if (hoofAcc >= iv[hoofI % 4]) { hoofAcc = 0; hoofI++; play('hoof', gal ? (hoofI % 4 === 0 ? 1 : 0.8) : 0.75); } }
+      snortT -= dt; if (snortT <= 0) { snortT = 10 + Math.random() * 14; play('snort', 0.9); } return; }
+    const air = typeof ST !== 'undefined' && ST && (ST.cur === 'jump' || ST.cur === 'fall');
+    if (sp > 0.6 && !air) { stepAcc += dt; const iv = Math.max(0.26, Math.min(0.6, 0.95 / Math.sqrt(sp))); if (stepAcc >= iv) { stepAcc = 0;
+        const city = typeof CITYV !== 'undefined' && Math.hypot(PL.x - CITYV.x, PL.z - CITYV.z) < (CITYV.R || 0); play(city ? 'stone' : 'grass', Math.min(1, 0.6 + sp / 12)); } } else stepAcc = 0.2; }
+  window.SFX42 = { ST: SS, tick, play, hit: (x, z) => play('hit', fall(x, z)), swing: () => play('swing', 1), selftest: () => { for (const k in N) play(k, 0.01); last = {}; return { played: Object.assign({}, SS.played), ctx: window.Howler && Howler.ctx ? Howler.ctx.state : null, loaded: SS.loaded, total: SS.total }; } }; return window.SFX42; })();
+
+/* ═══ v42 HIT42 (Rapier): ضربة السيف بصندوق إصابة حقيقي بيكنس قوس قدّام اللاعب بدل المخروط، مع قوس ضوئي للضربة وحلقة عند الإصابة — مطفي افتراضياً، يشتغل بـ ?combat=rapier ═══ */
+const HIT42 = (() => { const on = /[?&]combat=rapier/.test(location.search) || (() => { try { return localStorage.getItem('ow_combat') === 'rapier'; } catch (e) { return false; } })();
+  const HS = { on, ok: false, err: null, swings: 0, hits: 0, misses: 0, fallbackCone: 0, maxMs: 0, last: null, vfx: 0 };
+  if (!on) { window.HIT42 = { ST: HS, tick() {} }; return window.HIT42; }
+  let R = null, world = null, blade = null; const fxs = [];
+  (window.__RAP42 || (window.__RAP42 = import('./vendor/rapier/rapier.es.js').then(async M => { await (M.init || M.default.init)(); return M; }))).then(async M => { R = M; world = new R.World({ x: 0, y: 0, z: 0 }); blade = new R.Cuboid(0.55, 0.55, 0.95); HS.ok = true; }).catch(e => { HS.err = String(e).slice(0, 200); });
+  const arcMat = new THREE.MeshBasicMaterial({ color: 0xfff1d0, transparent: true, opacity: 0.0, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending });
+  const arcGeo = new THREE.RingGeometry(1.05, 1.85, 28, 1, Math.PI * 0.5 - 1.15, 2.3), ringGeo = new THREE.RingGeometry(0.25, 0.42, 24);
+  function vfxArc() { const m = new THREE.Mesh(arcGeo, arcMat.clone()); m.rotation.order = 'YXZ'; m.rotation.set(-Math.PI / 2 + 0.2, PL.face, 0); m.position.set(PL.x, LIB.height(PL.x, PL.z) + 1.15, PL.z);
+    scene.add(m); fxs.push({ m, t: 0, d: 0.2, a: 0.75, grow: 0.12 }); HS.vfx++; }
+  function vfxRing(x, y, z) { const m = new THREE.Mesh(ringGeo, arcMat.clone()); m.material.color.setHex(0xffd27a); m.position.set(x, y, z); m.lookAt(camera.position); scene.add(m); fxs.push({ m, t: 0, d: 0.28, a: 0.9, grow: 2.2 }); HS.vfx++; }
+  function tick(dt) { for (let i = fxs.length - 1; i >= 0; i--) { const f = fxs[i]; f.t += dt || 0.016; const k = f.t / f.d; if (k >= 1) { scene.remove(f.m); f.m.material.dispose(); fxs.splice(i, 1); continue; }
+      f.m.material.opacity = f.a * (1 - k) * (1 - k); const s = 1 + f.grow * k; f.m.scale.set(s, s, s); } }
+  /* candidates near the player as capsules; the blade is a cuboid swept over 3 angles of the swing; Rapier answers which capsules the blade intersects */
+  function query(face, ox, oz) { const t0 = performance.now(); const x0 = ox == null ? PL.x : ox, z0 = oz == null ? PL.z : oz, h0 = LIB.height(x0, z0);
+    const cand = []; const add = (o, kind, r, hh, yo) => { if (o.dead || o.sleeping) return; if (Math.hypot(o.x - x0, o.z - z0) > 4.2) return; cand.push({ o, kind, r, hh, yo }); };
+    for (const w of WOLVES) add(w, 'wolf', 0.42, 0.35, 0.55); for (const n of NPCS) add(n, 'npc', 0.36, 0.55, 0.95); for (const a of ANIMALS) add(a, 'animal', 0.55, 0.45, 0.75);
+    const cols = cand.map(c => { const y = (c.o.y != null && isFinite(c.o.y) ? c.o.y : LIB.height(c.o.x, c.o.z)) + c.yo; return world.createCollider(R.ColliderDesc.capsule(c.hh, c.r).setTranslation(c.o.x, y, c.o.z).setSensor(true)); });
+    const hit = new Set(); world.step();
+    for (const da of [-0.65, 0, 0.65]) { const a = face + da, fx = -Math.sin(a), fz = -Math.cos(a); const q = { x: 0, y: Math.sin(a / 2), z: 0, w: Math.cos(a / 2) };
+      world.intersectionsWithShape({ x: x0 + fx * 1.35, y: h0 + 1.0, z: z0 + fz * 1.35 }, q, blade, col => { const k = cols.indexOf(col); if (k >= 0) hit.add(k); return true; }); }
+    for (const c of cols) world.removeCollider(c, false);
+    const ms = performance.now() - t0; HS.maxMs = Math.max(HS.maxMs, +ms.toFixed(2)); return [...hit].map(k => cand[k]); }
+  function swing() { HS.swings++; if (window.SFX42) SFX42.swing(); vfxArc(); const hits = query(PL.face); HS.last = { hits: hits.map(h => h.kind) };
+    if (!hits.length) { HS.misses++; return; } HS.hits += hits.length;
+    for (const h of hits) { const o = h.o, dx = o.x - PL.x, dz = o.z - PL.z, d = Math.hypot(dx, dz) || 1, kb = h.kind === 'animal' ? 1.5 : 1.2;
+      if (h.kind === 'wolf') hitWolf(o, ST.dmg, dx / d * kb, dz / d * kb, true); else if (h.kind === 'npc') hitNPC(o, ST.dmg, dx / d * kb, dz / d * kb); else hitAnimal(o, ST.dmg, dx / d * kb, dz / d * kb, true);
+      vfxRing(o.x, LIB.height(o.x, o.z) + h.yo + 0.2, o.z); } }
+  
+  function selftest() { const alive = NPCS.filter(n => !n.dead && !n.sleeping); if (!alive.length) return { err: 'no npc' };
+    alive.sort((a, b) => Math.hypot(a.x - PL.x, a.z - PL.z) - Math.hypot(b.x - PL.x, b.z - PL.z)); const n = alive[0], out = {};
+    for (const [name, dist, flip] of [['front1.6', 1.6, 0], ['back1.6', 1.6, 1], ['front3.6', 3.6, 0], ['front2.4', 2.4, 0]]) {
+      const ang = Math.random() * Math.PI * 2, ox = n.x + Math.sin(ang) * dist, oz = n.z + Math.cos(ang) * dist;   // stand at ox,oz; face toward n (forward = -sin,-cos)
+      const face = Math.atan2(ox - n.x, oz - n.z) + (flip ? Math.PI : 0); const hs = query(face, ox, oz); out[name] = hs.some(h => h.o === n); }
+    return { npcAt: +Math.hypot(n.x - PL.x, n.z - PL.z).toFixed(1), res: out, pass: out['front1.6'] && !out['back1.6'] && !out['front3.6'], maxMs: HS.maxMs }; }
+  window.HIT42 = { ST: HS, tick, query, swing, selftest }; return window.HIT42; })();
+/* v42 phase 6 hooks: sword swing + hit sounds, Rapier hitbox (each a no-op unless its flag is on) */
+{ const _w = (f, xy) => function (o) { const was = o && o.dead; const r = f.apply(this, arguments); if (window.SFX42 && SFX42.ST.ok && o && !was) SFX42.hit(o.x, o.z); return r; };
+  hitNPC = _w(hitNPC); hitWolf = _w(hitWolf); hitAnimal = _w(hitAnimal); banHit = _w(banHit);
+  const _mh = meleeHit; meleeHit = function () { if (window.HIT42 && HIT42.ST.ok) { banditMelee(); return HIT42.swing(); } if (window.HIT42 && HIT42.ST.on) HIT42.ST.fallbackCone++; if (window.SFX42) SFX42.swing(); return _mh.apply(this, arguments); }; }
+
+;/* ═══ v42 LATE42: موديل وصل متأخر ← يتبدّل لحاله. أهل القرى والمدينة والحرس يلي طلعوا بالشكل القديم (لأن ملفهم ما كان وصل) بياخدوا الموديل الحقيقي أول ما يجهز. وما في أبداً رجّال مكان بنت ═══ */
+const LATE42 = (() => { const ST = { swapped: 0, byKind: {}, last: null, ticks: 0 };
+  function swap(n, gm) { while (n.piv.children.length) n.piv.remove(n.piv.children[0]); n.piv.add(gm.inst); n.gm = gm; n.mat = gm.mat; n.rb = null; n.hipY = 0; n.posed = false;
+    ST.swapped++; const k = (n.v && n.v.city ? 'city/' : 'village/') + (n.guard ? 'guard' : n.kind); ST.byKind[k] = (ST.byKind[k] || 0) + 1; ST.last = k; }
+  function tick() { ST.ticks++; try { if (!MODELS.ready) return;
+    for (const n of NPCS) { if (n.dead || n.shop || !n.piv) continue;
+      if (!n.gm) { const gm = n.guard ? (n._o42 ? grdGlbInstance(n._o42) : null) : npcGlbInstance(n.kind); if (gm) swap(n, gm); }
+      else if (n.guard && n.gm.grd && n._o42 && n.gm.key !== 'grdSp' && n.gm.key !== 'grdSw' && false) {} } } catch (e) { if (!ST.err) { ST.err = String(e && e.stack || e).slice(0, 300); console.warn('[v42] late swap', e); } } }
+  setInterval(tick, 1500); window.__late42 = { ST, tick }; return { ST, tick }; })();
