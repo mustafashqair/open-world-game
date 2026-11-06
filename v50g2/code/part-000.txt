@@ -1,5 +1,6 @@
 
 import * as THREE from 'three';
+import { installTierTextures } from './v50g4/textures.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as skClone } from 'three/addons/utils/SkeletonUtils.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
@@ -196,6 +197,7 @@ try { Object.assign(S, JSON.parse(localStorage.getItem('ow_settings2') || '{}'))
   window.__LOWAUTO = { weak, gpu, mem: navigator.deviceMemory || null };
   if (weak && (S.preset === 'medium' || S.preset === 'custom' && !localStorage.getItem('ow_settings2'))) { Object.assign(S, PRESETS.low, { preset: 'low' }); try { localStorage.setItem('ow_settings2', JSON.stringify(S)); } catch (e) {} }
 } catch (e) { console.warn('[lowauto]', e); } })();
+installTierTextures(THREE, KTX2Loader, () => S.preset, () => renderer);
 const saveSettings = () => { try { localStorage.setItem('ow_settings2', JSON.stringify(S)); } catch (e) {} };
 /* ═══ QUALITY TIERS: إعدادات العارض حسب الفئة — «عالية» = مستوى «عالٍ» (دقة ×2، ظلال 2048 ناعمة، رؤية أبعد، تنعيم الحواف)؛ «خفيفة» = إعدادات اليوم كما هي ═══ */
 (function qTierDefaults() {
