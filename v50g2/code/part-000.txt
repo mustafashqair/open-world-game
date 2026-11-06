@@ -13,6 +13,12 @@ import { Water } from 'three/addons/objects/Water.js';
 /* ═══ v42 GLB42: محمّل واحد لكل ملفات GLB — نفس المفكّكات (Meshopt/DRACO/KTX2) لكل اللوادر، إعادة محاولة للملف كله مع مهلة متزايدة، فحص بعد التحميل، وسجل لكل ملف ═══ */
 const Q4 = new URLSearchParams(location.search), V4ON = k => Q4.get(k) !== '0', VL4 = () => S.preset === 'vlow';   // v50d4
 const G2ON = !/[?&]v50g2=0\b/.test(location.search), G2V = k => G2ON && S.preset === 'vlow' && Q4.get('g2' + k) !== '0';   /* v50g2 G2V: تحسينات المدينة على «منخفضة جدا» بس؛ ?v50g2=0 = v50g بالضبط، ?g2city=0 ?g2pal=0 ?g2npc=0 ?g2mm=0 ?g2cull=0 ?g2pre=0 كل وحدة لحالها */
+// v50g4-4: LOW/very-low only; ?v50g4p=0 (or ?v50g4=0) restores legacy pacing.
+const G4P = () => Q4.get('v50g4') !== '0' && Q4.get('v50g4p') !== '0' && (S.preset === 'low' || S.preset === 'vlow');
+function g4PixelRatio() {
+  const pr = Math.min(S.pr, devicePixelRatio || 1), cap = Number(Q4.get('g4pixels'));
+  return G4P() && cap > 0 && Number.isFinite(cap) ? Math.min(pr, Math.sqrt(cap / Math.max(1, innerWidth * innerHeight))) : pr;
+}
 const G2C = { k: 0, d: 0, fog: Math.max(40, +(Q4.get('g2fog') || 80)), pald: Math.max(0, +(Q4.get('g2pald') || 0)), st: {} }; window.__G2C = G2C;
 const FRAME4 = { n: 0, t0: 0, tl: 0, tr: 0, ft: [], lg: [], rd: [] };
 const VLSAVED4 = (() => { try { return JSON.parse(localStorage.getItem('ow_settings2') || '{}').preset === 'vlow'; } catch (e) { return false; } })();

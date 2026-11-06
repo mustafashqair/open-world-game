@@ -3605,10 +3605,31 @@ const PRF = (() => { const on = /[?&]prof=1\b/.test(location.search), now = perf
   api.end = function (tStart) { const c = this.cur, r = renderer.info.render; c.total = now() - tStart; c.mix = this.mixT; c.mixN = this.mixN; c.mixU = this.mixSeen ? this.mixSeen.size : 0; c.skel = this.skT; c.skN = this.skN; c.mw = this.mwT; c.calls = r.calls; c.tris = r.triangles; c.t = tStart; this.fr.push(c); if (this.fr.length > 4000) this.fr.shift(); };
   return api; })();
 let FCAP_T = 0; const FCAP_ON = !/[?&]fcap=0\b/.test(location.search);
-function frame() {
+// Absolute deadlines preserve the fractional remainder at 60/90/120 Hz.
+const G4PACE = { deadline: 0, last: null, interval: 0, rawDt: 0, frames: 0 };
+window.__g4Pacing = G4PACE;
+addEventListener('visibilitychange', () => { G4PACE.deadline = 0; G4PACE.last = null; });
+function frame(stamp) {
   requestAnimationFrame(frame);
-  { const fc5 = window.__G50ON === true ? (window.__G50FC | 0) : 0, cap5 = fc5 ? (fc5 < 50 ? 25 : 12) : (S.preset === 'vlow' ? 25 : 0); if (FCAP_ON && cap5) { const tn = performance.now(); if (tn - FCAP_T < cap5) return; FCAP_T = tn; } }   // v50d3 + v50g: حد الإطارات من الإعدادات (تلقائي = منخفضة جدا ٣٠ متل قبل)   // v50d3: «منخفضة جدا» = ٣٠ إطار ثابتة (أنعم من ٣٥–٥٠ متقلّبة وأبرد عالجهاز)
-  const rawDt = clock.getDelta(), dt = uiLock() ? 0 : Math.min(0.05, rawDt);
+  const g4p = G4P(), tn4 = Number.isFinite(stamp) ? stamp : performance.now();
+  if (g4p) {
+    const fc = window.__G50ON === true ? (window.__G50FC | 0) : 0;
+    const interval = FCAP_ON ? 1000 / (fc >= 50 ? 60 : 30) : 0;
+    if (interval !== G4PACE.interval) { G4PACE.interval = interval; G4PACE.deadline = 0; }
+    if (interval) {
+      if (tn4 + 0.01 < G4PACE.deadline) return;
+      if (!G4PACE.deadline) G4PACE.deadline = tn4;
+      G4PACE.deadline += (Math.floor(Math.max(0, tn4 - G4PACE.deadline) / interval) + 1) * interval;
+    }
+  } else {
+    G4PACE.deadline = 0; G4PACE.last = null;
+    const fc5 = window.__G50ON === true ? (window.__G50FC | 0) : 0, cap5 = fc5 ? (fc5 < 50 ? 25 : 12) : (S.preset === 'vlow' ? 25 : 0);
+    if (FCAP_ON && cap5) { const tn = performance.now(); if (tn - FCAP_T < cap5) return; FCAP_T = tn; }
+  }
+  const clockDt = clock.getDelta();
+  const rawDt = g4p && G4PACE.last !== null ? Math.max(0, (tn4 - G4PACE.last) / 1000) : clockDt;
+  if (g4p) { G4PACE.last = tn4; G4PACE.rawDt = rawDt; G4PACE.frames++; }
+  const dt = uiLock() ? 0 : Math.min(0.05, rawDt);
   if (HUDFIX) { fpsRA += rawDt; fpsRN++; if (fpsRA >= 1) { fpsReal = Math.round(fpsRN / fpsRA); fpsRA = fpsRN = 0; } }   // v50g2: FPS حقيقي (الـ dt المقصوص ٠٫٠٥ كان يوقّف العدّاد عند ~٢٠)
   if (G50.st.idle) { loadUpdate(rawDt); G50.menu(rawDt); return; }   // v50g: شاشة البداية جاهزة → منطق اللعبة واقف لحد «لعب»؛ بس تحليق الكاميرا فوق المدينة (ما عدا منخفضة جدا)
   { const tn = performance.now(); if (FRAME4.t0) FRAME4.ft.push(tn - FRAME4.t0); FRAME4.t0 = tn; FRAME4.n++; FRAME4.vl = VL4(); FRAME4.lw = FRAME4.vl || (S.preset === 'low' && V4ON('low5')); FRAME4.md = S.preset === 'medium' && V4ON('med5'); FRAME4.hid = (FRAME4.lw || FRAME4.md) && FRAME4.hidOn; FRAME4.mc = ((FRAME4.lw && !FRAME4.vl) || FRAME4.md) && MC5ON; FRAME4.cc5 = ((FRAME4.lw && !FRAME4.vl) || FRAME4.md) && CC5ON; if (FRAME4.ft.length > 240) FRAME4.ft.shift(); }
@@ -3621,7 +3642,7 @@ function frame() {
   chunkT += dt; if (chunkT > 0.25) { chunkT = 0; updateChunks(); }
   pump(); if (pON) pT = PRF.lap('chunks', pT);
   // قياس الأداء والجودة التلقائية
-  fpsAcc += dt; fpsN++;
+  fpsAcc += g4p ? rawDt : dt; fpsN++;
   if (fpsAcc >= 1) { fpsShown = Math.round(fpsN / fpsAcc); fpsAcc = fpsN = 0;
     if (S.auto && chunks.size > 20) { lowCount = fpsShown < 24 ? lowCount + 1 : 0; if (lowCount >= 4) { lowCount = 0; stepDown(); } } }
   hudT += HUDFIX ? rawDt : dt; if (hudT > 0.4) { hudT = 0; const fl = $('fpsL'); if (fl) { fl.hidden = !S.fps; if (S.fps) fl.textContent = 'FPS: ' + (HUDFIX ? fpsReal : fpsShown) + ' · ' + NAMES[S.preset]; } }
