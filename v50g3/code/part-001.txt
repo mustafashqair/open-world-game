@@ -3551,8 +3551,13 @@ function lineBlocked(L, x0, z0, x1, z1) {         // فحص سريع لخط مس
     for (const o of L.solid) if (Math.abs(x - o[0]) < o[2] + 1 && Math.abs(z - o[1]) < o[2] + 1 && sdist(o, x, z) < 0.6) return true; }
   return false;
 }
+const VLWALK = { on: (() => { const q = new URLSearchParams(location.search); return q.get('vlwalk') !== '0' && q.get('v50g5') !== '0'; })(), treeOb: [], busy: false };
 function npcWalk(n, tx, tz, sp, dt) {
-  const L = n.L, treeOb = []; gatherTreeSolids(n.x, n.z, 50, treeOb); const ws5 = FRAME4.cc5, walkSolid = ws5 ? null : L.solid.concat(treeOb); navGoal(n, tx, tz); tx = n.gx; tz = n.gz; const nkI = NPCK.must(n) ? NPCK.exitGoal(n) : null; if (nkI) { tx = nkI[0]; tz = nkI[1]; }   // npck: غاطس جوّا المنطقة → أقرب مخرج أول
+  const vlwalk = VLWALK.on && S.preset === 'vlow', borrowed = vlwalk && !VLWALK.busy;
+  if (borrowed) VLWALK.busy = true;
+  const treeOb = borrowed ? VLWALK.treeOb : []; // Nested calls get their own array; no scratch escapes this call.
+  try {
+  const L = n.L; gatherTreeSolids(n.x, n.z, 50, treeOb); const ws5 = FRAME4.cc5 || vlwalk, walkSolid = ws5 ? null : L.solid.concat(treeOb); navGoal(n, tx, tz); tx = n.gx; tz = n.gz; const nkI = NPCK.must(n) ? NPCK.exitGoal(n) : null; if (nkI) { tx = nkI[0]; tz = nkI[1]; }   // npck: غاطس جوّا المنطقة → أقرب مخرج أول
   const dd = Math.hypot(tx - n.x, tz - n.z); if (dd < 1.3) return true;
   if (!n.path || Math.hypot(n.pg[0] - tx, n.pg[1] - tz) > 3) { let p = null;
     if (dd > 6 || lineBlocked(L, n.x, n.z, tx, tz)) {
@@ -3572,6 +3577,7 @@ function npcWalk(n, tx, tz, sp, dt) {
     if (ws5) pushOut2(n, NPC_R, L.solid, treeOb, 2); else pushOut(n, NPC_R, walkSolid, 2); if (!n.guard && L.castle) keepOutZone(n, L.castle, 0.5); if (L.nav18) V18.unstick(n, L); if (NPCK.must(n)) NPCK.keep(n);
     n.face = aLerp(n.face, Math.atan2(-ux, -uz), Math.min(1, dt * 8)); n.mv = true; n.spd = sp; }
   return false;
+  } finally { if (borrowed) { treeOb.length = 0; VLWALK.busy = false; } }
 }
 function pickPOI(n) {                             // نقطة اهتمام جديدة بحسب الوقت والوظيفة (تنويع الأولويات)
   const L = n.L, T = ENV.T, P = L.poi, wood = /حطّاب|نجّار|صيّاد/.test(n.job), work = L.big ? (n.farmer ? P.field : P.plaza) : (wood ? P.wood : P.field), W = [];
