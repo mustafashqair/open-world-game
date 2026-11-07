@@ -1,6 +1,6 @@
 /* العالم المفتوح — offline service worker: cache-first for everything on this site */
-const CACHE = 'ow-offline-v50g2';
-const CORE = ["./", "manifest.webmanifest", "offline-ui42.js", "icon-192.png", "icon-512.png", "v50g2/code/part-000.txt", "v50g2/code/part-001.txt", "v50g2/code/part-002.txt", "v50g2/menu1.jpg", "v50g2/menu2.jpg", "v42/emb/e-000.txt", "v42/emb/e-001.txt", "v42/emb/e-002.txt", "v42/emb/e-003.txt", "v42/emb/e-004.txt", "v42/emb/e-005.txt", "v42/emb/e-006.txt", "v42/emb/e-007.txt", "v42/emb/e-008.txt", "v42/emb/e-009.txt", "v42/emb/e-010.txt", "v42/emb/e-011.txt", "v42/emb/e-012.txt", ];
+const CACHE = 'ow-offline-v50g3';
+const CORE = ["./", "manifest.webmanifest", "offline-ui42.js", "icon-192.png", "icon-512.png", "v50g3/code/part-000.txt", "v50g3/code/part-001.txt", "v50g3/code/part-002.txt", "v50g3/menu1.jpg", "v50g3/menu2.jpg", "v42/emb/e-000.txt", "v42/emb/e-001.txt", "v42/emb/e-002.txt", "v42/emb/e-003.txt", "v42/emb/e-004.txt", "v42/emb/e-005.txt", "v42/emb/e-006.txt", "v42/emb/e-007.txt", "v42/emb/e-008.txt", "v42/emb/e-009.txt", "v42/emb/e-010.txt", "v42/emb/e-011.txt", "v42/emb/e-012.txt", ];
 self.addEventListener('install', e => { self.skipWaiting(); e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).catch(() => {})); });
 /* v50d: الترقية ما عادت توقّف فتح اللعبة: التفعيل بس بياخد الصفحات وبيعيد تحميلها مرة وحدة فوراً؛ نسخ الملفات من الكاش القديم بيصير بالخلفية، ولحد ما يخلص الطلبات بتنجاب من الكاش القديم */
 const SKIP = /\/(index\.html|sw\.js|offline-ui\.js|manifest\.webmanifest|assets(-phone)?\.json)$|\/v\w+\/code\/|\/$/;
