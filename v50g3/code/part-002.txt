@@ -2968,11 +2968,11 @@ const LAM = (() => { const tw = new Map(), st = { n: 0, skip: 0 }; let t = 0, on
   return { tick, st, apply, check3, L3, pend }; })();
 window.__LAM = LAM;
 /* v50g2 G2L: على «منخفضة جدا» عدد أضواء النقطة بالمشهد ثابت (أقرب ٤ حقيقية، والناقص أضواء وهمية شدتها صفر) → نفس الشيدرات بكل مكان، ولا بناء شيدر جديد لما تتغير الأضواء (القرية ٤، المدينة ٩). ?g2pre=0 يطفيه، ?g2pl=N العدد */
-const G2L = (() => { const L3 = G3V('lights'), on = G2V('pre') || L3, N = L3 ? 0 : Math.max(1, Math.min(9, +(Q4.get('g2pl') || 4))),   /* v50g3: بلا أضواء نقطية حية على «منخفضة جدا» */ set = new Set(), dum = [], hid = [], vis = [], v3 = new THREE.Vector3(); const api = { on, N, L3, set, pre() {}, post() {}, st: { real: 0, hid: 0, dum: 0 } }; window.G2L = api; if (!on) return api;
+const G2L = (() => { const L3 = G3V('lights'), on0 = G2V('pre') || L3, on = on0 || G4S(), N = L3 ? 0 : G4S() && S.preset === 'low' ? 12 : Math.max(1, Math.min(9, +(Q4.get('g2pl') || 4))),   /* v50g4-1: LOW gets a fixed 12 point lights (no recompiles when the count changes); on0 = exactly v50g3 */   /* v50g3: بلا أضواء نقطية حية على «منخفضة جدا» */ set = new Set(), dum = [], hid = [], vis = [], v3 = new THREE.Vector3(); const api = { on, N, L3, set, pre() {}, post() {}, st: { real: 0, hid: 0, dum: 0 } }; window.G2L = api; if (!on) return api;
   try { const PP = THREE.PointLight.prototype; Object.defineProperty(PP, 'visible', { configurable: true, get() { return this._g2v; }, set(v) { this._g2v = v; if (!this._g2r) { this._g2r = 1; set.add(this); } } }); } catch (e) { console.warn('[v50g2] lights', e); }
   scene.traverse(o => { if (o.isPointLight) set.add(o); });
   for (let i = 0; i < N; i++) { const l = new THREE.PointLight(0x000000, 0, 0.01, 2); l.userData.g2d = 1; l.position.set(0, -5000, 0); l.visible = false; set.delete(l); dum.push(l); scene.add(l); }
-  api.pre = cam => { vis.length = 0; for (const l of set) { if (!l.parent || !l.visible) continue; let p = l.parent, ok = true; while (p) { if (!p.visible) { ok = false; break; } if (!p.parent) { if (p !== scene) ok = false; break; } p = p.parent; } if (ok && (!cam || l.layers.test(cam.layers))) vis.push(l); }
+  api.pre = cam => { if (!on0 && !G4S()) { for (const l of dum) l.visible = false; return; } vis.length = 0; for (const l of set) { if (!l.parent || !l.visible) continue; let p = l.parent, ok = true; while (p) { if (!p.visible) { ok = false; break; } if (!p.parent) { if (p !== scene) ok = false; break; } p = p.parent; } if (ok && (!cam || l.layers.test(cam.layers))) vis.push(l); }
     if (vis.length > N) { if (cam) cam.getWorldPosition(v3); const e = l => { const m = l.matrixWorld.elements; return (m[12] - v3.x) ** 2 + (m[13] - v3.y) ** 2 + (m[14] - v3.z) ** 2; }; vis.sort((a, b) => e(a) - e(b)); for (let i = N; i < vis.length; i++) { vis[i].visible = false; hid.push(vis[i]); } }
     const need = N - Math.min(N, vis.length); for (let i = 0; i < N; i++) dum[i].visible = i < need; api.st.real = vis.length; api.st.hid = hid.length; api.st.dum = need;
     if (set.size > 600) for (const l of set) if (!l.parent) set.delete(l); };
@@ -3426,7 +3426,7 @@ const G50 = (() => {
   const PC = new Map(), L0 = GLTFLoader.prototype.load, kOf = (ld, u) => (ld.path || '') + String(u).replace(/^\.\//, '').split('?')[0];
   GLTFLoader.prototype.load = function (url, onLoad, onProgress, onError) {
     const k = kOf(this, url), e = PC.get(k);
-    if (e) { PC.delete(k); if (e.st === 'ok') { setTimeout(() => { try { onLoad && onLoad(e.g); } catch (x) { console.error('[v50g] onLoad ' + k, x); } }, 0); return; } if (e.st === 'loading') { e.cbs.push([onLoad, onProgress, onError, this, url]); return; } }
+    if (e) { PC.delete(k); if (e.st === 'ok') { setTimeout(() => { try { if (G4S()) G4UPLOAD.add(() => onLoad && onLoad(e.g), g4Bytes(e.g.scene)); else onLoad && onLoad(e.g); } catch (x) { console.error('[v50g] onLoad ' + k, x); } }, 0); return; } if (e.st === 'loading') { e.cbs.push([onLoad, onProgress, onError, this, url]); return; } }
     return L0.call(this, url, onLoad, onProgress, onError); };
   let PL0 = null; const pLoader = () => { if (!PL0) { PL0 = new GLTFLoader(); PL0.setMeshoptDecoder(MeshoptDecoder); } return PL0; };
   function prefetch(url) { const ld = pLoader(), k = kOf(ld, url); if (PC.has(k)) return; const e = { st: 'loading', cbs: [] }; PC.set(k, e); st.pre.n++;
@@ -3452,16 +3452,16 @@ const G50 = (() => {
   // وحدات الرسم: كل شي تحت نفس «الأب المخفي» الأعلى بينرسم سوا (لما الأب يبين، كل اللي تحته بيبين) → كل وحدة بتنرسم مرة وحدة بس
   function buildItems() { const U = new Map(); lights = []; scene.traverse(o => { if (o.isLight) { lights.push(o); return; } if (!isDraw(o) || skip(o)) return;
       let top = null; for (let p = o; p && p !== scene; p = p.parent) if (!p.visible) top = p;
-      const key = top || o; let u = U.get(key); if (!u) U.set(key, u = { root: key, meshes: [], v: 0 }); u.meshes.push(o); u.v += vcount(o); });
+      const key = G4S() ? o : top || o; let u = U.get(key); if (!u) U.set(key, u = { root: key, meshes: [], v: 0 }); u.meshes.push(o); u.v += vcount(o); });
     return [...U.values()]; }
   const BUD = () => (S.preset === 'vlow' ? 250000 : S.preset === 'low' ? 350000 : 600000);
   const force = (o, stop) => { for (let p = o; p && p !== stop; p = p.parent) { if (!p.visible) { saved.push([p, 0, false]); p.visible = true; forced.add(p); } if (p.isLOD && p.autoUpdate) { saved.push([p, 2, true]); p.autoUpdate = false; } } };
-  api.pre = function () { if (BL.on) blendPre(); if (FZ.list.length && (ORG.x !== FZ.ox || ORG.z !== FZ.oz)) fzSweep(); if (ph !== 'warm' || !items) return; const t0 = RN(); forced = new Set(); let v = 0, n = 0; const b = BUD();
-    while (ki < items.length && (n === 0 || v + items[ki].v <= b)) { const u = items[ki++]; if (!u.root.parent) continue;
+  api.pre = function () { if (BL.on) blendPre(); if (FZ.list.length && (ORG.x !== FZ.ox || ORG.z !== FZ.oz)) fzSweep(); if (ph !== 'warm' || !items) return; if (G4S()) G4UPLOAD.resume(); const t0 = RN(); forced = new Set(); let v = 0, n = 0; const b = BUD();
+    while (ki < items.length && (n === 0 || v + items[ki].v <= b)) { const next = items[ki]; if (G4S() && !G4UPLOAD.allow(next.v * 32)) break; const u = items[ki++]; if (!u.root.parent) continue;
       force(u.root, scene); for (const o of u.meshes) { if (!o.parent) continue; force(o, u.root); if (o.frustumCulled) { saved.push([o, 1, true]); o.frustumCulled = false; } }
       v += u.v; n++; }
     if (forced.size) for (const l of lights) { if (!l.visible) continue; let p = l.parent, f = false; while (p && p !== scene) { if (forced.has(p)) { f = true; break; } p = p.parent; } if (f) { saved.push([l, 0, true]); l.visible = false; } }   // عدد الأضواء ما بيتغيّر → نفس الشيدرات
-    st.warm.n = ki; st.warm.verts += v; st.warm.frames++; st.warm.ms += RN() - t0; };
+    st.warm.n = ki; st.warm.verts += v; st.warm.frames++; st.warm.ms += RN() - t0; if (G4S()) G4UPLOAD.pause(); };
   api.post = function () { if (BL.r) blendPost(); if (FZ.on) fzTick(); if (!saved.length) return; for (let i = saved.length - 1; i >= 0; i--) { const [o, k, v] = saved[i]; if (k === 0) o.visible = v; else if (k === 1) o.frustumCulled = v; else o.autoUpdate = v; } saved.length = 0; forced = null; };
   function texOf(root, set) { root.traverse(o => { if (!o.material) return; for (const m of (Array.isArray(o.material) ? o.material : [o.material])) { if (!m) continue; for (const k in m) { const t = m[k]; if (t && t.isTexture) set.add(t); } if (m.uniforms) for (const k in m.uniforms) { const t = m.uniforms[k] && m.uniforms[k].value; if (t && t.isTexture) set.add(t); } } }); }
   api.gpuEst = function () { const tx = new Set(), ge = new Set(); const roots = [scene, ...(tpl || templates())];
@@ -3469,6 +3469,67 @@ const G50 = (() => {
     let tb = 0, gb = 0; for (const t of tx) { const im = t.image; if (t.isCompressedTexture && t.mipmaps) { for (const m of t.mipmaps) tb += (m.data && m.data.byteLength) || 0; continue; } const w = (im && (im.width || im.videoWidth)) || 0, h = (im && (im.height || im.videoHeight)) || 0; tb += w * h * 4 * (t.generateMipmaps !== false && !t.isDataTexture ? 1.333 : 1); }
     for (const g of ge) { for (const k in g.attributes) gb += g.attributes[k].array ? g.attributes[k].array.byteLength : 0; if (g.index) gb += g.index.array.byteLength; }
     return { texMB: +(tb / 1048576).toFixed(1), geoMB: +(gb / 1048576).toFixed(1), textures: tx.size, geometries: ge.size, programs: renderer.info.programs ? renderer.info.programs.length : null, heapMB: performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1048576) : null }; };
+  const g4ShaderState = { variants: 0, links: 0, playLinks: 0, atPlay: 0 };
+  window.__g4Shaders = { st: g4ShaderState };
+  if (G4S()) { const gl = renderer.getContext(), link = gl.linkProgram.bind(gl); gl.linkProgram = program => { g4ShaderState.links++; if (st.played) g4ShaderState.playLinks++; return link(program); }; }
+  function g4Compile(roots, done) {
+    // v50g4-1 (Tab port): signatures persist across passes (G4SEEN), so the finish pass only queues what is new;
+    // the signature is taken from the ORIGINAL object + variant kind BEFORE the variant clone is built.
+    const textures = new Set(), linear = G4SLIN ? new THREE.WebGLRenderTarget(1, 1) : null;
+    const materialKey = m => JSON.stringify([m.type, m.customProgramCacheKey(),
+      Object.entries(m).filter(([k, v]) => typeof v === 'boolean').sort(),
+      Object.entries(m).filter(([k, v]) => v?.isTexture).map(([k, v]) => [k, v.mapping, v.colorSpace, v.image?.height]),
+      ['side','shadowSide','blending','combine','depthPacking','normalMapType','precision','glslVersion','vertexShader','fragmentShader','defines','extensions'].map(k => m[k]),
+      ['alphaTest','transmission','clearcoat','sheen','iridescence','anisotropy','dispersion'].map(k => !!m[k]), m.clippingPlanes?.length || 0]);
+    const sigOf = (object, kind) => { const mats = [].concat(object.material), geo = object.geometry;
+      return kind + '#' + mats.map(m => m ? materialKey(m) : '-').join(',') + '|' + Object.entries(geo.attributes).map(([k,a])=>k+':'+a.itemSize).join(',') + '|' + !!object.isSkinnedMesh + '|' + !!object.isInstancedMesh + '|' + !!object.instanceColor + '|' + !!geo.morphTargetsRelative + '|' + Object.entries(geo.morphAttributes).map(([k,a])=>k+':'+a.length).join(','); };
+    const enqueue = (source, kind, make) => {
+      if (!source.material || !source.geometry) return;
+      for (const m of [].concat(source.material)) if (m) for (const t of Object.values(m)) if (t?.isTexture) textures.add(t);
+      let sig; try { sig = sigOf(source, kind); } catch (e) { return; }
+      if (G4SEEN.has(sig)) return; G4SEEN.add(sig);
+      const object = make(); if (!object || !object.material) return;
+      // Compile the framebuffer (sRGB) variant, plus the linear offscreen/reflection variant only with ?g4slin=1.
+      for (const target of (linear ? [null, linear] : [null])) G4UPLOAD.add(() => {
+        const previous = renderer.getRenderTarget();
+        try { renderer.setRenderTarget(target); renderer.compile(object, camera, scene); g4ShaderState.variants++; }
+        finally { renderer.setRenderTarget(previous); }
+      });
+    };
+    const matsForEnv = material => {
+      const change = m => { if (!m?.envMap || !('envMapIntensity' in m)) return m;
+        const c = m.clone(); c.onBeforeCompile = m.onBeforeCompile; c.customProgramCacheKey = m.customProgramCacheKey; c.envMap = null; return c; };
+      return Array.isArray(material) ? material.map(change) : change(material);
+    };
+    const hasEnv = material => [].concat(material).some(m => m?.envMap && 'envMapIntensity' in m);
+    // PMREM disposes its temporary background material after every sky update.
+    // Keep one identical program reference alive across those updates.
+    if (!api.g4Background) {
+      api.g4Background = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshBasicMaterial({ name: 'PMREM.Background', side: THREE.BackSide, depthWrite: false, depthTest: false }));
+      const bgTarget = new THREE.WebGLRenderTarget(1, 1);
+      G4UPLOAD.add(() => { const target = renderer.getRenderTarget(), tone = renderer.toneMapping;
+        try { renderer.setRenderTarget(bgTarget); renderer.toneMapping = THREE.NoToneMapping;
+          renderer.compile(api.g4Background, camera, new THREE.Scene());
+        } finally { renderer.toneMapping = tone; renderer.setRenderTarget(target); bgTarget.dispose(); }
+      });
+    }
+    for (const root of roots) root.traverse(o => {
+      if (!(o.isMesh || o.isPoints || o.isLine || o.isSprite)) return;
+      // Do not reparent live objects. Clones retain skin/morph/instance attributes.
+      enqueue(o, 'n', () => o.clone(false));
+      if (o.isSkinnedMesh && [].concat(o.material).some(m => m && /^(CityMan|CityMan_Hands|village_girl_v7|hands_v8|cuff_lining_v7)$/.test(m.name))) {
+        let hem = null; const mkHem = () => hem || (hem = (() => { const h = o.clone(false); VWORK.warmHem(h); return h; })());
+        enqueue(o, 'hem', mkHem);
+        enqueue(o, 'hemsky', () => { const s = mkHem().clone(false); s.material = matsForEnv(s.material); return s; });
+      }
+      if (o.isMesh) {
+        enqueue(o, 'lam', () => { const lam = o.clone(false); LAM.apply(lam); return lam.material !== o.material ? lam : null; });
+        // V40 clears room envMaps lazily on village/character materials.
+        if (hasEnv(o.material)) enqueue(o, 'env', () => { const env = o.clone(false); env.material = matsForEnv(o.material); return env; });
+      }
+    });
+    G4UPLOAD.add(() => { if (linear) linear.dispose(); if (!G4FAIL) done(); });
+  }
   function stepTxt() { const m = MODELS.ready ? 1 : 0; if (!m) return 'تحميل الشخصيات والمباني'; if (!TREESET.ready) return 'تحميل الأشجار'; if (chunks.size < 12) return 'بناء الأرض'; if (!cityReady()) return 'بناء المدينة والمحلات'; return 'زيارة المدينة والقرية لتجهيز الرسوم'; }
   api.gate = function () {
     try {
@@ -3484,17 +3545,17 @@ const G50 = (() => {
         if (!(a && b && c && d)) return false;
         phase('compile', 'تجهيز الشيدرات (المؤثرات والمواد)'); st.tc0 = RN(); tpl = templates(); const grp = new THREE.Group(); grp.name = 'g50tpl'; for (const r of tpl) grp.add(r);
         const done = () => { compDone = true; st.compileMs = Math.round(RN() - st.tc0); for (const r of tpl) grp.remove(r); };
-        try { const p1 = renderer.compileAsync ? renderer.compileAsync(scene, camera) : Promise.resolve(renderer.compile(scene, camera));
+        try { if (G4S()) { g4Compile([scene, ...tpl, ...G4ROOTS], done); return false; } const p1 = renderer.compileAsync ? renderer.compileAsync(scene, camera) : Promise.resolve(renderer.compile(scene, camera));
           const p2 = tpl.length ? (renderer.compileAsync ? renderer.compileAsync(grp, camera, scene) : Promise.resolve(renderer.compile(grp, camera, scene))) : Promise.resolve();
           Promise.all([p1, p2]).then(done, e => { st.err = 'compile ' + (e && e.message); done(); }); } catch (e) { st.err = 'compile ' + (e && e.message); done(); }
         return false; }
-      if (ph === 'compile') { st.p = 0.75 + 0.1 * Math.min(1, (RN() - tPh) / 20000); if (!waitOk('compile', compDone, 90000)) return false;
+      if (ph === 'compile') { st.p = 0.75 + 0.1 * Math.min(1, (RN() - tPh) / 20000); if (!waitOk('compile', compDone, G4S() ? G4TOMS : 90000)) return false;   /* v50g4-1: the compile wait keeps a timeout on every preset (90 s, ?g4toms= on LOW/very-low); queued compiles keep running after it */
         items = buildItems(); ki = 0; st.warm.tot = items.length; phase('warm', 'رفع المدينة لكرت الشاشة'); return false; }
       if (ph === 'warm') { st.p = 0.85 + 0.1 * (items.length ? ki / items.length : 1); st.step = 'رفع المدينة لكرت الشاشة ' + Math.round(100 * ki / Math.max(1, items.length)) + '%';
         if (ki < items.length && !(RN() - tPh > 240000 && (st.timeouts.push('warm'), true))) return false;
         items = null; const s = new Set(); for (const r of (tpl || [])) texOf(r, s); texList = [...s]; ti = 0; st.tex.tot = texList.length; phase('tex', 'رفع صور الحيوانات والشخصيات'); return false; }
-      if (ph === 'tex') { const t0 = RN(); while (ti < texList.length && RN() - t0 < 12) { try { renderer.initTexture(texList[ti]); } catch (e) {} ti++; } st.tex.n = ti; st.p = 0.95 + 0.05 * (texList.length ? ti / texList.length : 1);
-        if (ti < texList.length) return false;
+      if (ph === 'tex') { const t0 = RN(); while (ti < texList.length && RN() - t0 < (G4S() ? 2 : 12)) { const t = texList[ti++]; if (G4S()) g4Texture(t); else try { renderer.initTexture(t); } catch (e) {} } st.tex.n = ti; st.p = 0.95 + 0.05 * (texList.length ? ti / texList.length : 1);
+        if (ti < texList.length || (G4S() && !waitOk('g4queue', !G4UPLOAD.pending, G4TOMS))) return false;
         texList = null; if (QS.get('g50visit') === '1' && window.EST50 && EST50.st && EST50.st.on && EST50.st.X) { VS = { k: -1, fr: 0, t: 0, home: { x: PL.x, z: PL.z, face: PL.face, yaw: CAM.yaw, pitch: CAM.pitch }, pts: [[EST50.st.X, EST50.st.Z + 40], [EST50.st.X + 45, EST50.st.Z - 30], [EST50.st.X - 45, EST50.st.Z - 30]] }; phase('visit', 'جولة بالقصر والحديقة لتجهيز الرسوم'); return false; }
         return finish(); }
       if (ph === 'visit') { if (!visit()) { st.p = 0.97 + 0.03 * Math.max(0, VS.k) / VS.pts.length; return false; } return finish(); }
@@ -3515,7 +3576,10 @@ const G50 = (() => {
   function g2pre() { if (!G2V('pre') || st.g2pre) return; st.g2pre = { n: 0, ms: 0, err: 0 }; const t0 = RN(), roots = templates();
     for (const r of roots) { try { r.updateMatrixWorld(true); renderer.compile(r, camera, scene); const c = r.clone(true); LAM.apply(c); c.updateMatrixWorld(true); renderer.compile(c, camera, scene); st.g2pre.n++; } catch (e) { st.g2pre.err++; } }
     st.g2pre.ms = Math.round(RN() - t0); }
+  let g4Final = 0;
   function finish() {
+    if (G4S() && G4SFIN && g4Final !== 2 && !waitOk('g4final', false, G4TOMS)) { if (!g4Final) { g4Final = 1; phase('final', st.step); g4Compile([scene, ...templates(), ...G4ROOTS], () => { g4Final = 2; }); } return false; }   /* v50g4-1: second pass = only signatures not queued yet; bounded by its own timeout (G4TOMS) */
+    if (G4S()) G4ROOTS.clear();
     if (PP1('sh') && PP1LOW() && !st.finalCompile) { st.finalCompile = { done: false, ms: 0, err: '' }; phase('final', st.step); const t0 = RN();   /* pp1 11c5308 */
       try { g2pre(); } catch (e) { console.warn('[v50g2] pre', e); }
       const grp = new THREE.Group(); const roots = [scene, ...templates()];
@@ -3532,7 +3596,7 @@ const G50 = (() => {
     if (st.finalCompile && !st.finalCompile.done) return false;
     if (!st.finalCompile) try { g2pre(); } catch (e) { console.warn('[v50g2] pre', e); }
         st.p = 1; st.ready = true; st.idle = true; st.tReady = Math.round(RN() - st.t0); st.step = 'جاهز'; phase('ready', 'جاهز'); try { st.gpu = api.gpuEst(); } catch (e) {} try { window.dispatchEvent(new Event('g50ready')); } catch (e) {} return false; }
-  api.play = function () { if (!st.ready || st.played) return false; st.played = true; st.idle = false; st.tPlay = Math.round(RN() - st.t0); st.forceVW = false;
+  api.play = function () { if (!st.ready || st.played) return false; st.played = true; g4ShaderState.atPlay = g4ShaderState.links; st.idle = false; st.tPlay = Math.round(RN() - st.t0); st.forceVW = false;
     if (M.live && M.frames > 0) { BL.p0.copy(camera.position); BL.q0.copy(camera.quaternion); BL.t0 = MT(); BL.on = true; }
     M.live = false; st.menu = { frames: M.frames, ms: +M.ema.toFixed(1), iv: M.iv, err: M.err }; fzPlan(); return true; };
   /* ═══ شاشة البداية الحية: تحليق سينمائي بطيء فوق المدينة والقصر (رسم اللعبة الحقيقي)، بس قبل «لعب» — بعد «لعب» ما في ولا سطر منه بيشتغل.
@@ -3650,6 +3714,7 @@ function frame(rafTime) {
   let frameMs = rawDt * 1000; if (PP1FPS) { const stamp = Number.isFinite(rafTime) ? rafTime : performance.now(); frameMs = perfStamp === null ? 0 : stamp - perfStamp; perfStamp = stamp;
     if (frameMs > 0) { fpsRA += frameMs; fpsRN++; if (fpsRA >= 400) { fpsReal = Math.round(1000 * fpsRN / fpsRA); fpsRA = fpsRN = 0; } } perfRead(frameMs); }
   else if (HUDFIX) { fpsRA += rawDt; fpsRN++; if (fpsRA >= 1) { fpsReal = Math.round(fpsRN / fpsRA); fpsRA = fpsRN = 0; } }   // v50g2: FPS حقيقي (الـ dt المقصوص ٠٫٠٥ كان يوقّف العدّاد عند ~٢٠)
+  if (G4S()) { if (globalThis.__g4Budget) globalThis.__g4Budget.ms = G50.st.played ? 2 : G4SLOADMS; G4UPLOAD.begin(); G4UPLOAD.pump(); }   // v50g4-1: queue pump — 2 ms/frame after Play, G4SLOADMS (?g4sload=, default 12) while the loading screen is up
   if (G50.st.idle) { loadUpdate(rawDt); G50.menu(rawDt); return; }   // v50g: شاشة البداية جاهزة → منطق اللعبة واقف لحد «لعب»؛ بس تحليق الكاميرا فوق المدينة (ما عدا منخفضة جدا)
   { const tn = performance.now(); if (FRAME4.t0) FRAME4.ft.push(tn - FRAME4.t0); FRAME4.t0 = tn; FRAME4.n++; FRAME4.vl = VL4(); FRAME4.lw = FRAME4.vl || (S.preset === 'low' && V4ON('low5')); FRAME4.md = S.preset === 'medium' && V4ON('med5'); FRAME4.hid = (FRAME4.lw || FRAME4.md) && FRAME4.hidOn; FRAME4.mc = ((FRAME4.lw && !FRAME4.vl) || FRAME4.md) && MC5ON; FRAME4.cc5 = ((FRAME4.lw && !FRAME4.vl) || FRAME4.md) && CC5ON; if (FRAME4.ft.length > 240) FRAME4.ft.shift(); }
   const pON = PRF.on, pT0 = pON ? PRF.begin() : 0; let pT = pT0;
