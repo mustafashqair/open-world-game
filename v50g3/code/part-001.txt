@@ -4893,7 +4893,10 @@ function loadUpdate(dt) {
   const pct = Math.floor(LOADX.p * 100);
   if (pct !== LOADX.shown) { LOADX.shown = pct; $('lBar').style.width = pct + '%'; $('lPct').textContent = pct + '%'; }
   const ready = chunks.size >= 12 && MODELS.ready && TREESET.ready && cityReady();
-  if (ready && LOADX.p >= 0.999 && WARM2.ok() && G50.gate()) {   // v50g: بعد الشاشة القديمة: تحميل المدينة كاملة + زر «لعب»
+  const load1 = (S.preset === 'low' || S.preset === 'vlow') && Q4.get('load1') !== '0' && Q4.get('v50g5') !== '0';
+  // Keep the full tour; only stop re-gating its active visits on terrain residency after each teleport.
+  const warmReady = (ready || (load1 && WARM2.st.phase === 'run' && MODELS.ready && TREESET.ready && cityReady())) && LOADX.p >= 0.999 && WARM2.ok();
+  if (ready && LOADX.p >= 0.999 && warmReady && G50.gate()) {   // v50g: بعد الشاشة القديمة: تحميل المدينة كاملة + زر «لعب»
     LOADX.done = true; LOADX.p = 1; $('lBar').style.width = '100%'; $('lPct').textContent = '100%';
     const ld = $('load'); if (ld) { ld.style.opacity = 0; setTimeout(() => ld.remove(), 900); }
   }
