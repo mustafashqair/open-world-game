@@ -3470,14 +3470,18 @@ const G50 = (() => {
     for (const g of ge) { for (const k in g.attributes) gb += g.attributes[k].array ? g.attributes[k].array.byteLength : 0; if (g.index) gb += g.index.array.byteLength; }
     return { texMB: +(tb / 1048576).toFixed(1), geoMB: +(gb / 1048576).toFixed(1), textures: tx.size, geometries: ge.size, programs: renderer.info.programs ? renderer.info.programs.length : null, heapMB: performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1048576) : null }; };
   function stepTxt() { const m = MODELS.ready ? 1 : 0; if (!m) return 'تحميل الشخصيات والمباني'; if (!TREESET.ready) return 'تحميل الأشجار'; if (chunks.size < 12) return 'بناء الأرض'; if (!cityReady()) return 'بناء المدينة والمحلات'; return 'زيارة المدينة والقرية لتجهيز الرسوم'; }
+  let w2ran = false; function wave2() { if (w2ran) return; w2ran = true;   /* v50g5 pre2: الموجة الثانية مرة واحدة — أوّل مَن يطلبها يشغّلها (الإقلاع على LOW/vlow أو شاشة البداية) */
+    try { VWORK.preload && VWORK.preload(); } catch (e) {} try { FAUNA.preload && FAUNA.preload(); } catch (e) {}
+    try { const L = hi() ? '' : '-lite'; for (const f of ['horse-bay', 'horse-black', 'horse-cream', 'horse-chestnut']) prefetch('horses37/' + f + L + '.glb'); prefetch('shops/stable-v6-horse-clips.glb'); if (!hi()) { prefetch('animals36/cow-lite.glb'); prefetch('animals36/sheep-lite.glb'); } import('./shops/stable-v6-horses.js').catch(() => {}); } catch (e) {}
+  }
+  api.wave2 = wave2;   /* v50g5 pre2: يسمح للإقلاع بتشغيلها مبكراً على LOW/vlow */
   api.gate = function () {
     try {
       if (st.played) return true;
       if (ph === 'final') return finish();
       if (ph === 'base') { st.tBase = Math.round(RN() - st.t0); phase('force', 'تحميل القصر والحديقة وأهل القرية والحيوانات');
         st.forcePal = true; st.forceVW = true;
-        try { VWORK.preload && VWORK.preload(); } catch (e) {} try { FAUNA.preload && FAUNA.preload(); } catch (e) {}
-        try { const L = hi() ? '' : '-lite'; for (const f of ['horse-bay', 'horse-black', 'horse-cream', 'horse-chestnut']) prefetch('horses37/' + f + L + '.glb'); prefetch('shops/stable-v6-horse-clips.glb'); if (!hi()) { prefetch('animals36/cow-lite.glb'); prefetch('animals36/sheep-lite.glb'); } import('./shops/stable-v6-horses.js').catch(() => {}); } catch (e) {}
+        wave2();   /* v50g5 pre2: نفس جُمل الموجة الثانية نفسها (مرة واحدة — قد شغّلها الإقلاع قبلها على LOW) */
         return false; }
       if (ph === 'force') { const a = waitOk('palace', palOk(), 150000), b = waitOk('villagers', vwOk(), 120000), c = waitOk('animals', faOk(), 120000), d = waitOk('horses', preBusy() === 0, 90000);
         st.p = 0.62 + 0.13 * ((a ? 1 : 0) + (b ? 1 : 0) + (c ? 1 : 0) + (d ? 1 : 0)) / 4;
@@ -4200,6 +4204,7 @@ window.V41 = (() => {
 
 
 loadTreeModels(); updateChunks(); frame();
+try { if (window.G50 && G50.wave2 && (S.preset === 'low' || S.preset === 'vlow') && !/[?&](v50g5|pre2)=0\b/.test(location.search)) G50.wave2(); } catch (e) {}   /* v50g5 pre2: موجّة G50 الثانية من الإقلاع على LOW/vlow فقط؛ ?pre2=0 أو ?v50g5=0 = v50g3 بالضبط */
 
 /* ═══ v42 FX42 (three.quarks): غبار تحت الأقدام والحصان، شرار ضربة السيف، دخان نار المخيمات — مطفي افتراضياً، يشتغل بـ ?fx=quarks ═══ */
 const FX42 = (() => { const on = /[?&]fx=quarks/.test(location.search) || (() => { try { return localStorage.getItem('ow_fx') === 'quarks'; } catch (e) { return false; } })();
