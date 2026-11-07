@@ -551,7 +551,7 @@ body:has(#dlg.shop) #toast{top:calc(10px + var(--safeT));z-index:6}
 #ehpW .ehp .f{background:linear-gradient(180deg,#ff7a6c,#c92a22 55%,#7e0d0b);box-shadow:inset 0 1px 0 rgba(255,220,210,.6)}
 @media (max-width:520px){#bars.hp2{width:calc(min(30vw,210px) + 22px)!important}#bars.hp2 .bar{height:14px!important}#bars.hp2 #hpTxt{font-size:10px}}
 </style>
-<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#12203a"><script>/* v50g-label: شارة الإصدار */(function(){var V='v50g2',n=0;function s(){try{document.title=document.title.replace(/\s*v4\d-test$/,'').replace(/\s*v50[a-z]\d?$/,'')+' '+V;var b=document.getElementById('v40badge');if(b)b.textContent=V+(/\(off\)/.test(b.textContent)?' (off)':'');}catch(e){}if(++n<30)setTimeout(s,1000);}setTimeout(s,500);})();</script>
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="theme-color" content="#12203a"><script>/* v50g-label: شارة الإصدار */(function(){var V='v50g3',n=0;function s(){try{document.title=document.title.replace(/\s*v4\d-test$/,'').replace(/\s*v50[a-z]\d?$/,'')+' '+V;var b=document.getElementById('v40badge');if(b)b.textContent=V+(/\(off\)/.test(b.textContent)?' (off)':'');}catch(e){}if(++n<30)setTimeout(s,1000);}setTimeout(s,500);})();</script>
 <script src="offline-ui42.js" defer></script>
 <script>/* v50g */window.__G50ON=(function(){try{return new URLSearchParams(location.search).get('v50g')!=='0';}catch(e){return true;}})();try{performance.setResourceTimingBufferSize(6000);}catch(e){}</script>
 <style id="sg50css">
@@ -1218,7 +1218,7 @@ setTimeout(function(){if(!window.__ow)owMsg('لم يبدأ سكربت اللعب
 <script>
 /* نسخة الاستضافة فقط: كود اللعبة نفسه بلا تغيير، مقسوم على 3 ملفاً لأن خادم النشر يرفع الملفات الكبيرة على أجزاء؛ نجمعها وننفّذها كسكربت module داخلي (نفس الـ importmap) */
 window.__ow = true;
-Promise.all(Array.from({length: 3}, (_, i) => (function f(n) { return fetch('v50g2/code/part-' + String(i).padStart(3, '0') + '.txt?v=v50g2').then(r => { if (!r.ok && n > 0) throw new Error('HTTP ' + r.status); return r; }).catch(e => { if (n > 0) return new Promise(z => setTimeout(z, 800)).then(() => f(n - 1)); throw e; }); })(3).then(r => { if (!r.ok) throw new Error('part ' + i + ' HTTP ' + r.status); return r.text(); })))
+Promise.all(Array.from({length: 3}, (_, i) => (function f(n) { return fetch('v50g3/code/part-' + String(i).padStart(3, '0') + '.txt?v=v50g3').then(r => { if (!r.ok && n > 0) throw new Error('HTTP ' + r.status); return r; }).catch(e => { if (n > 0) return new Promise(z => setTimeout(z, 800)).then(() => f(n - 1)); throw e; }); })(3).then(r => { if (!r.ok) throw new Error('part ' + i + ' HTTP ' + r.status); return r.text(); })))
   .then(a => { const s = document.createElement('script'); s.type = 'module'; s.textContent = a.join(''); document.body.appendChild(s); })
   .catch(e => owMsg('خطأ بتحميل اللعبة: ' + e.message));
 </script>
