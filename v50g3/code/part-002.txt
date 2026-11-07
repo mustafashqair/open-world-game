@@ -3888,23 +3888,43 @@ window.V40 = (() => {
     for (const k of ['gtao', 'bloom', 'smaa', 'fxaa']) if (X[k]) { try { X[k].dispose(); } catch (e) {} X[k] = null; }
     if (X.comp) { X.comp.dispose(); X.comp = null; } if (X.quad) { X.quad.dispose(); X.quad = null; } X.tier = '';
   }
+  // gpuprof7: per-pass GPU timing, ONLY with ?gpuprof=1 (EXT_disjoint_timer_query_webgl2). Without the flag GP7 is null and fxRender runs the v50g3 path.
+  const GP7 = Q4.get('gpuprof') === '1' ? (() => { let gl = null, ext = null, el = null, ok = false, init = false, cur = null, frame = null, last = 0; const pend = [], acc = {}, order = [];
+    const setup = () => { init = true; gl = renderer.getContext(); ext = gl.getExtension && gl.getExtension('EXT_disjoint_timer_query_webgl2'); el = document.createElement('div'); el.id = 'gpuprof7';
+      el.style.cssText = 'position:fixed;right:4px;top:40px;z-index:99999;background:rgba(0,0,0,.6);color:#ff0;font:11px/1.25 monospace;padding:4px 6px;pointer-events:none;white-space:pre;direction:ltr;text-align:left';
+      document.body.appendChild(el); ok = !!ext && typeof gl.createQuery === 'function'; if (!ok) el.textContent = 'gpuprof: EXT_disjoint_timer_query_webgl2 not available on this GPU/browser'; };
+    const avg = a => a && a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0;
+    const P = {
+      begin(name) { if (!init) setup(); if (!ok) return; if (cur) P.end(); const q = gl.createQuery(); gl.beginQuery(ext.TIME_ELAPSED_EXT, q); cur = { name, q }; },
+      end() { if (!ok || !cur) return; gl.endQuery(ext.TIME_ELAPSED_EXT); (frame || (frame = [])).push(cur); cur = null; },
+      frameEnd() { if (!ok) return; P.end(); if (frame) { pend.push(frame); frame = null; }
+        while (pend.length > 12) for (const sq of pend.shift()) gl.deleteQuery(sq.q);
+        if (gl.getParameter(ext.GPU_DISJOINT_EXT)) { for (const f of pend) for (const sq of f) gl.deleteQuery(sq.q); pend.length = 0; return; }
+        while (pend.length) { const f = pend[0]; if (!f.every(sq => gl.getQueryParameter(sq.q, gl.QUERY_RESULT_AVAILABLE))) break; pend.shift(); let tot = 0;
+          for (const sq of f) { const ms = gl.getQueryParameter(sq.q, gl.QUERY_RESULT) / 1e6; gl.deleteQuery(sq.q); tot += ms; (acc[sq.name] || (acc[sq.name] = [])).push(ms); if (order.indexOf(sq.name) < 0) order.push(sq.name); }
+          (acc.total || (acc.total = [])).push(tot); }
+        const now = performance.now(); if (now - last < 1000) return; last = now; const n = (acc.total || []).length; if (!n) return;
+        let txt = 'GPU ms avg (' + n + ' frames, ' + S.preset + ')\n'; for (const k of order) txt += k.padEnd(7) + avg(acc[k]).toFixed(2) + '\n'; txt += 'total  ' + avg(acc.total).toFixed(2); el.textContent = txt;
+        window.__gpuprof = { preset: S.preset, frames: n, avgMs: Object.fromEntries([...order, 'total'].map(k => [k, +avg(acc[k]).toFixed(3)])) }; for (const k in acc) acc[k].length = 0; } };
+    return P; })() : null;
   function fxRender() {
-    const g = X.gtao, oldAC = renderer.autoClear;
+    const g = X.gtao, oldAC = renderer.autoClear, P7 = GP7;
+    if (P7) P7.begin('scene');   // includes shadow maps (CSM) + water reflection, both rendered inside renderer.render
     renderer.setRenderTarget(X.sRT); renderer.render(scene, camera);
     st.stats = { calls: renderer.info.render.calls, tris: renderer.info.render.triangles, pts: renderer.info.render.points, geos: renderer.info.memory.geometries, tex: renderer.info.memory.textures };
-    if (g) {
+    if (g) { if (P7) P7.begin('gtao');
       const gm = g.gtaoMaterial.uniforms; gm.cameraNear.value = camera.near; gm.cameraFar.value = camera.far;
       gm.cameraProjectionMatrix.value.copy(camera.projectionMatrix); gm.cameraProjectionMatrixInverse.value.copy(camera.projectionMatrixInverse); gm.cameraWorldMatrix.value.copy(camera.matrixWorld);
       g.renderPass(renderer, g.gtaoMaterial, g.gtaoRenderTarget, 0xffffff, 1.0);
       g.pdMaterial.uniforms.cameraProjectionMatrixInverse.value.copy(camera.projectionMatrixInverse);
       g.renderPass(renderer, g.pdMaterial, g.pdRenderTarget, 0xffffff, 1.0);
     }
-    let src = X.sRT; try { if (window.V41) src = V41.post(X) || X.sRT; } catch (e) { warn('v41 post', e); }
+    if (P7) P7.begin('atmos'); let src = X.sRT; try { if (window.V41) src = V41.post(X) || X.sRT; } catch (e) { warn('v41 post', e); }
     X.comp.uniforms.tScene.value = src.texture;
-    if (X.bloom) X.bloom.render(renderer, null, src, 0, false);
-    renderer.setRenderTarget(X.lRT); X.quad.render(renderer);
-    if (X.smaa) X.smaa.render(renderer, null, X.lRT, 0, false); else X.fxaa.render(renderer, null, X.lRT, 0, false);
-    renderer.setRenderTarget(null); renderer.autoClear = oldAC;
+    if (X.bloom) { if (P7) P7.begin('bloom'); X.bloom.render(renderer, null, src, 0, false); }
+    if (P7) P7.begin('comp'); renderer.setRenderTarget(X.lRT); X.quad.render(renderer);
+    if (P7) P7.begin(X.smaa ? 'smaa' : 'fxaa'); if (X.smaa) X.smaa.render(renderer, null, X.lRT, 0, false); else X.fxaa.render(renderer, null, X.lRT, 0, false);
+    renderer.setRenderTarget(null); renderer.autoClear = oldAC; if (P7) P7.frameEnd();
   }
   function fxTick() {
     const want = fxWant(); st.fxWant = want;
