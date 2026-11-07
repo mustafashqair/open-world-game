@@ -1516,7 +1516,10 @@ const FAUNA = (() => {
   }
   // ── الإطار ──
   const FR = new THREE.Frustum(), M4 = new THREE.Matrix4(), SPH = new THREE.Sphere(); let fN = 0, started = 0;
-  F.preload = () => { for (const k of [...Object.keys(F36), 'eagle']) need(k, () => {}); }; F.pending = () => Q.length + active;   // v50g: كل أنواع الحيوانات قبل اللعب
+  const CORE5 = ['cow', 'bull', 'sheep', 'ram', 'woolsheep', 'chicken', 'goose', 'peacock', 'raven'];   /* v50g5 faun1: نواة أنواع المزارع والمدينة (farmFor/cityFarm/peacocks) — تُحمَّل قبل اللعب على LOW/vlow والبقية عند الحاجة */
+  const FAUN1 = () => (S.preset === 'low' || S.preset === 'vlow') && !/[?&](faun1|v50g5)=0\b/.test(location.search);   /* v50g5 faun1: ?faun1=0 أو ?v50g5=0 = v50g3 بالضبط */
+  F.faun1 = FAUN1; F.core5 = () => CORE5.every(k => TPL[k] || BAD[k]);   /* v50g5 faun1: جاهزية النواة — بوابة «animals» بتستناها على LOW/vlow بدل كل الأنواع */
+  F.preload = () => { for (const k of (FAUN1() ? CORE5 : [...Object.keys(F36), 'eagle'])) need(k, () => {}); }; F.pending = () => Q.length + active;   // v50g: كل أنواع الحيوانات قبل اللعب — v50g5 faun1: على LOW/vlow النواة فقط
   function tick(dt) {
     if (!started) { if (!LOADX.done || !MODELS.ready) return; started = performance.now(); F.started = true; return; }
     if (performance.now() - started < 1500) return;          // تحميل كسول بعد بدء اللعب بقليل
@@ -3437,7 +3440,7 @@ const G50 = (() => {
   const waitOk = (name, ok, maxMs) => { if (ok) return true; const w = st.waits[name] || (st.waits[name] = RN()); if (RN() - w > maxMs) { if (st.timeouts.indexOf(name) < 0) st.timeouts.push(name); return true; } return false; };
   const palOk = () => { try { if (!window.EST50 || !EST50.st.on || !EST50.g50) return true; const s = EST50.g50(); return s.inited && s.n >= 2 && s.c4 === 0 && s.far !== 'loading'; } catch (e) { return true; } };
   const vwOk = () => { try { const s = VWORK.st; return !VWORK.on || /[?&]novwork\b/.test(location.search) || (s.need > 0 && s.loaded >= s.need); } catch (e) { return true; } };
-  const faOk = () => { try { return !FAUNA.pending || FAUNA.pending() === 0; } catch (e) { return true; } };
+  const faOk = () => { try { if (FAUNA.faun1 && FAUNA.faun1()) return FAUNA.core5(); return !FAUNA.pending || FAUNA.pending() === 0; } catch (e) { return true; } };   /* v50g5 faun1: على LOW/vlow بوابة «animals» بتستنى النواة فقط */
   const hi = () => window.__QUALITY === 'high';
   let ph = 'base', tPh = 0, items = null, ki = 0, saved = [], forced = null, lights = null, compDone = false, texList = null, ti = 0, tpl = null;
   const phase = (n, s) => { ph = st.phase = n; st.step = s; tPh = RN(); };
