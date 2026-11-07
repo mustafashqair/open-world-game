@@ -1,6 +1,10 @@
 # Rebuilt split models (tab/v50g3) - measured
 
-Measured 2026-11-07: all 205 parts downloaded from raw.githubusercontent.com (branch tab/v50g3), each part size checked against the git tree, then joined with tools/join_large_files.py from this PR. sha256 is of the joined file.
+Measured 2026-11-07: all 206 parts listed in the GitHub API tree (`git/trees/tab/v50g3?recursive=1`, not truncated) downloaded from raw.githubusercontent.com (branch tab/v50g3), each part size matched the tree, then joined with tools/join_large_files.py. sha256 is of the joined file.
+
+Result: 72 of 72 files OK, 0 bad.
+
+Correction: an earlier version of this table reported wagon/merchant-wagon.glb as truncated. That was wrong. The part merchant-wagon.glb.5 (323,888 bytes) exists in the repo; my download script skipped the last line of its file list (no trailing newline). Re-checked via the API tree (size 323888, blob c2eb1725) and the raw file (HTTP 200, 323888 bytes, same blob sha).
 
 | # | file | bytes | sha256 | result |
 |---|---|---|---|---|
@@ -75,4 +79,4 @@ Measured 2026-11-07: all 205 parts downloaded from raw.githubusercontent.com (br
 | 69 | `village/village-house-3-lite-v3b.glb` | 1093460 | `38f6aa79896ec9a5b52235a51119b4a51ddd4483d848220e43b1f791fcd74fd0` | ok (2 parts) |
 | 70 | `village/village-house-3-v3b.glb` | 4845468 | `931485933c5dab68248305e78157747b46a05e0e8149b9bab762ba4bd0d2eb04` | ok (6 parts) |
 | 71 | `wagon/merchant-wagon-lite.glb` | 1152584 | `269ff04a6f06f56e7658145db43ea26d53c5b24406ea85e05c822ebf22c3e902` | ok (2 parts) |
-| 72 | `wagon/merchant-wagon.glb` | 4400000 | `b242ffbd331ca0fd5cddba84822defbc95a1df5fc78454b8852967d700b4b2e0` | BAD GLB: header length 4723888 != size 4400000 (5 parts) |
+| 72 | `wagon/merchant-wagon.glb` | 4723888 | `dd3c6a527396c7545fcc936473f92600e839e6c14a6f4a891b12b87a15c6a9bc` | ok (6 parts) |
