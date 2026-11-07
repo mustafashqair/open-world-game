@@ -1459,8 +1459,12 @@ const PMQ = (() => {
   function tex(name, srgb) {                     // خامة تُحمَّل كسولاً؛ نسخة -hq للجودة العالية وإلا الأساسية؛ فشل التحميل = لون المادة فقط
     if (TEX[name]) return TEX[name];
     const t = new THREE.Texture(); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = AN; if (srgb !== false) t.colorSpace = THREE.SRGBColorSpace; TEX[name] = t;
-    const done = img => { t.image = img; t.needsUpdate = true; for (const k in MATS) { const m = MATS[k]; if (m.userData.tx && m.userData.tx.includes(name) && !m.userData.on) { m.userData.on = 1; m.color.copy(m.userData.c1); m.needsUpdate = true; } } };
-    const load = (u, fb) => TLD.load(u, x => done(x.image), undefined, () => { if (fb) load(fb, null); });
+    const done = img => { if (img) { t.image = img; t.needsUpdate = true; } for (const k in MATS) { const m = MATS[k]; if (m.userData.tx && m.userData.tx.includes(name) && !m.userData.on) { m.userData.on = 1; m.color.copy(m.userData.c1); m.needsUpdate = true; } } };
+    const adopt = x => {   // v50g4-2: a compressed (KTX2) result cannot be copied by .image — use the texture itself in t's place
+      x.wrapS = t.wrapS; x.wrapT = t.wrapT; x.anisotropy = t.anisotropy; x.colorSpace = t.colorSpace; TEX[name] = x;
+      for (const k in MATS) { const m = MATS[k]; let hit = 0; for (const s of ['map', 'normalMap', 'roughnessMap', 'aoMap', 'emissiveMap', 'alphaMap']) if (m[s] === t) { m[s] = x; hit = 1; } if (hit) m.needsUpdate = true; }
+      done(null); };
+    const load = (u, fb) => TLD.load(u, x => { if (x && x.isCompressedTexture) adopt(x); else done(x.image); }, undefined, () => { if (fb) load(fb, null); });
     if (HQ && HQSET.has(name)) load(TB + name + '-hq.webp', TB + name + '.webp'); else load(TB + name + '.webp', null);
     return t;
   }
