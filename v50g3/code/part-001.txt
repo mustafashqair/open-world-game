@@ -4354,7 +4354,7 @@ $('gear').onclick = () => { if (window.__G50ON && window.SG50) SG50.open(true); 
 function toast(t) { const el = $('toast'); el.textContent = t; el.style.opacity = 1; clearTimeout(toast.t); toast.t = setTimeout(() => el.style.opacity = 0, 2500); }
 function setPreset(p) { S.preset = p; if (p !== 'custom') Object.assign(S, PRESETS[p]); applySettings(); buildPanel(); }
 function applySettings() {
-  renderer.setPixelRatio(Math.min(S.pr, devicePixelRatio || 1)); renderer.setSize(innerWidth, innerHeight);
+  renderer.setPixelRatio(g4PixelRatio()); renderer.setSize(innerWidth, innerHeight);
   const far = S.view * CFG.CH; scene.fog.near = far * 0.45; scene.fog.far = far * 0.95;
   sun.castShadow = S.shadow > 0;
   if (S.shadow > 0) { sun.shadow.mapSize.set(S.shadow, S.shadow); sun.shadow.map?.dispose(); sun.shadow.map = null; }
@@ -4415,7 +4415,7 @@ function stepDown() {                           // خفض الجودة تلقا�
   if (i > 0) { setPreset(ORDER[i - 1]); toast('خُفِّضت الجودة تلقائياً إلى: ' + NAMES[S.preset]); }
   else if (S.preset === 'custom' && S.view > 3) { S.view--; S.pr = Math.max(0.5, S.pr - 0.25); applySettings(); toast('خُفِّضت الجودة تلقائياً'); }
 }
-addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); if (G4P()) renderer.setPixelRatio(g4PixelRatio()); renderer.setSize(innerWidth, innerHeight); });
 
 /* ═══════════ ٩. حلقة اللعبة ═══════════ */
 /* ═══════════ ٧ج. الحقيبة والشريط السريع والمخزون والخرائط (واجهة الجوال) ═══════════ */
