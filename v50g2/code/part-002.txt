@@ -3507,7 +3507,7 @@ const G50 = (() => {
 
       }
     });
-    G4UPLOAD.add(() => { linear.dispose(); done(); });
+    G4UPLOAD.add(() => { linear.dispose(); if (Q4.get('g4failcompile') !== '1') done(); });   // test-only: ?g4failcompile=1 = shader compile never finishes
   }
   function stepTxt() { const m = MODELS.ready ? 1 : 0; if (!m) return 'تحميل الشخصيات والمباني'; if (!TREESET.ready) return 'تحميل الأشجار'; if (chunks.size < 12) return 'بناء الأرض'; if (!cityReady()) return 'بناء المدينة والمحلات'; return 'زيارة المدينة والقرية لتجهيز الرسوم'; }
   api.gate = function () {
@@ -3527,7 +3527,7 @@ const G50 = (() => {
           const p2 = tpl.length ? (renderer.compileAsync ? renderer.compileAsync(grp, camera, scene) : Promise.resolve(renderer.compile(grp, camera, scene))) : Promise.resolve();
           Promise.all([p1, p2]).then(done, e => { st.err = 'compile ' + (e && e.message); done(); }); } catch (e) { st.err = 'compile ' + (e && e.message); done(); }
         return false; }
-      if (ph === 'compile') { st.p = 0.75 + 0.1 * Math.min(1, (RN() - tPh) / 20000); if (G4S() ? !compDone : !waitOk('compile', compDone, 90000)) return false;
+      if (ph === 'compile') { st.p = 0.75 + 0.1 * Math.min(1, (RN() - tPh) / 20000); if (G4S() && Q4.get('g4to') === '0' ? !compDone : !waitOk('compile', compDone, G4S() ? Math.max(1000, +(Q4.get('g4toms') || 90000)) : 90000)) return false;   /* g4to: hard timeout on low/vlow too; ?g4to=0 = PR #5 exactly, ?g4toms=N (test) */
         items = buildItems(); ki = 0; st.warm.tot = items.length; phase('warm', 'رفع المدينة لكرت الشاشة'); return false; }
       if (ph === 'warm') { st.p = 0.85 + 0.1 * (items.length ? ki / items.length : 1); st.step = 'رفع المدينة لكرت الشاشة ' + Math.round(100 * ki / Math.max(1, items.length)) + '%';
         if (ki < items.length && !(RN() - tPh > 240000 && (st.timeouts.push('warm'), true))) return false;
@@ -3555,7 +3555,7 @@ const G50 = (() => {
     for (const r of roots) { try { r.updateMatrixWorld(true); renderer.compile(r, camera, scene); const c = r.clone(true); LAM.apply(c); c.updateMatrixWorld(true); renderer.compile(c, camera, scene); st.g2pre.n++; } catch (e) { st.g2pre.err++; } }
     st.g2pre.ms = Math.round(RN() - t0); }
   let g4Final = 0;
-  function finish() { if (G4S() && g4Final !== 2) { if (!g4Final) { g4Final = 1; g4Compile([scene, ...templates(), ...G4ROOTS], () => { g4Final = 2; }); } return false; } try { g2pre(); } catch (e) { console.warn('[v50g2] pre', e); }
+  function finish() { if (G4S() && g4Final !== 2) { if (!g4Final) { g4Final = 1; g4Compile([scene, ...templates(), ...G4ROOTS], () => { g4Final = 2; }); } if (Q4.get('g4to') === '0' || !waitOk('g4final', false, Math.max(1000, +(Q4.get('g4toms') || 90000)))) return false; } try { g2pre(); } catch (e) { console.warn('[v50g2] pre', e); }
         G4ROOTS.clear(); st.p = 1; st.ready = true; st.idle = true; st.tReady = Math.round(RN() - st.t0); st.step = 'جاهز'; phase('ready', 'جاهز'); try { st.gpu = api.gpuEst(); } catch (e) {} try { window.dispatchEvent(new Event('g50ready')); } catch (e) {} return false; }
   api.play = function () { if (!st.ready || st.played) return false; st.played = true; g4ShaderState.atPlay = g4ShaderState.links; st.idle = false; st.tPlay = Math.round(RN() - st.t0); st.forceVW = false;
     if (M.live && M.frames > 0) { BL.p0.copy(camera.position); BL.q0.copy(camera.quaternion); BL.t0 = MT(); BL.on = true; }
