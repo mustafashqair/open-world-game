@@ -244,7 +244,14 @@ function tb24Tick() {
     for (const m of list) if (!m.userData.tb24) { m.layers.set(1); m.userData.tb24 = 1; } n += list.length; }
   TB24.n = n;
 }
-(function tb24Loop() { requestAnimationFrame(tb24Loop); try { tb24Tick(); } catch (e) { if (!TB24.err) { TB24.err = 1; console.warn('[v24] tb', e); } } })();
+/* v50g5 raf5: على «منخفض» و«منخفضة جدا» الحلقات الجانبية (دمج الأرض tb24، أزرار القتال btn20، نار الأفران) بتشتغل بس بالإطارات اللي frame() رسمها فعلاً (سقف ٣٠ إطار)، مش بكل إطار شاشة. frame() بيشغّلها من راسه بعد بوابة السقف؛ إذا frame() وقف أكتر من نص ثانية بترجع تشتغل لحالها. متوسط/عالي: نفس v50g3 بالضبط. ?raf5=0 أو ?v50g5=0 = v50g3 بالضبط */
+const RAF5 = { on: !/[?&]v50g5=0\b/.test(location.search) && !/[?&]raf5=0\b/.test(location.search), fr: 0, tl: -1e9, jobs: [] }; window.__raf5 = RAF5;
+RAF5.low = () => RAF5.on && (S.preset === 'low' || S.preset === 'vlow');
+RAF5.own = () => RAF5.low() && performance.now() - RAF5.tl < 500;   // frame() عم يسوق الحلقات الجانبية
+RAF5.job = (name, fn) => { const j = { name, fn, ts: -1, nl: 0, nd: 0, dead: 0 }; RAF5.jobs.push(j); return j; };
+RAF5.drive = ts => { RAF5.fr++; RAF5.tl = performance.now(); if (!RAF5.low()) return; const J = RAF5.jobs; for (let i = 0; i < J.length; i++) { const j = J[i]; if (j.dead || j.ts === ts) continue; j.ts = ts; j.nd++; j.fn(); } };
+const TB24J = RAF5.job('tb24', () => { try { tb24Tick(); } catch (e) { if (!TB24.err) { TB24.err = 1; console.warn('[v24] tb', e); } } });
+(function tb24Loop(ts) { requestAnimationFrame(tb24Loop); if (RAF5.own()) return; TB24J.ts = ts; TB24J.nl++; try { tb24Tick(); } catch (e) { if (!TB24.err) { TB24.err = 1; console.warn('[v24] tb', e); } } })();
 const CT = { n: 0, ms: 0 };
 function makeWorkers() {                        // Web Worker من Blob؛ عند الفشل نعمل في الخيط الرئيسي
   try {
