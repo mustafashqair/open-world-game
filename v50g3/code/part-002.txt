@@ -4158,8 +4158,10 @@ window.V41 = (() => {
         else if (m.map !== NT.hT) { m.map = NT.hT; m.size = NT.hS; m.color.setHex(NT.hC); m.needsUpdate = true; } } } catch (e) { warn('halos', e); }
   }
   function atmoUse(X) { return F.atmo && st.atmoReady && X && X.sRT && X.tier && X.tier !== 'none'; }
+  const ATMO5 = { on: !/[?&]v50g5=0\b/.test(location.search) && !/[?&]atmo5=0\b/.test(location.search), skip: 0, deferred: 0, loads: 0 }; window.__atmo5 = ATMO5;   /* v50g5 atmo5: على «منخفض» و«منخفضة جدا» الجو الفيزيائي ما بيترسم أبداً (fxWant() = 'none' و atmoUse بدها tier غير none) → ما منحمّل مكتباته وقوامه (~10MB) إلا لما تصير الجودة أعلى (بيتحمّل لحاله عند التبديل). ?atmo5=0 أو ?v50g5=0 = v50g3 بالضبط */
+  const atmoDead5 = X => ATMO5.on && (S.preset === 'low' || S.preset === 'vlow') && !(X && X.tier && X.tier !== 'none');
   function pre(X) {                                          // قبل الرسم: إذا الجو الفيزيائي شغّال، الضباب القديم يبتعد لطرف مسافة الرؤية فقط
-    if (F.atmo && !A.L && !(S.preset === 'vlow' && V4ON('atmo4'))) atmoLoad();
+    if (F.atmo && !A.L && !(S.preset === 'vlow' && V4ON('atmo4'))) { if (atmoDead5(X)) ATMO5.skip++; else { if (!A.loading) ATMO5.loads++; atmoLoad(); } }
     const on = st.atmoOn = !!atmoUse(X);
     if (on) { V40U.fogV[2].x = 0; const f = scene.fog; if (f) { f.near = f.far * 0.82; } }
     nightFix(on);
@@ -4194,7 +4196,7 @@ window.V41 = (() => {
     } catch (e) { warn('panel', e); }
   }
   function tick(dt) { A.dt = dt; try { waterTick(dt); } catch (e) { warn('water', e); } }
-  if (F.atmo && !(VLSAVED4 && V4ON('atmo4'))) setTimeout(atmoLoad, 50);
+  if (F.atmo && !(VLSAVED4 && V4ON('atmo4'))) { if (atmoDead5(null)) ATMO5.deferred = 1; else setTimeout(atmoLoad, 50); }
   return { st, F, tick, pre, post, panel, A, WS };
 })();
 
