@@ -68,7 +68,8 @@ uniform float uTrans; uniform vec3 uTransColor; uniform float uMipAlpha;`).repla
       undefined, () => { T.loading--; T.failed.push(url); console.warn('[v34] تعذّر تحميل', url); });
   }
   // ── اللوحة البعيدة: صورة كل نموذج متوسط التفصيل تُخبز مرة واحدة في أطلس (٨ خانات)، وتُرسم كلوحة واحدة تواجه الكاميرا (ليست تقاطعاً) ──
-  const NT = 12, NC = 8, TW = 256, TH = 512;   // ١٢ خانة: ٨ أعمدة × صفّان
+  const BILL1 = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](billatlas|v50g5)=0\b/.test(location.search);   /* v50g5 billatlas: تصغير أطلس اللوحات على LOW/vlow بس — ?billatlas=0 أو ?v50g5=0 = v50g3 بالضبط */
+  const NT = 12, NC = 8, TW = BILL1 ? (S.preset === 'vlow' ? 128 : 192) : 256, TH = BILL1 ? (S.preset === 'vlow' ? 256 : 384) : 512;   // ١٢ خانة: ٨ أعمدة × صفّان — v50g5 billatlas: 192×384 على «منخفض» و128×256 على «منخفضة جدا» (نفس النسبة)، والباقي 256×512
   function bakeBill() {
     const keys = []; for (const sp of SPEC) for (const size of SIZES) keys.push(sp + '-' + size);
     if (T.bill || keys.some(k => !T.sets[k].lods[1])) return;
