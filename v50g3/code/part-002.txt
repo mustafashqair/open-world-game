@@ -3642,6 +3642,12 @@ const PRF = (() => { const on = /[?&]prof=1\b/.test(location.search), now = perf
   api.begin = function () { this.cur = {}; this.mixN = this.mixT = this.skN = this.skT = this.mwT = 0; if (this.mixSeen) this.mixSeen.clear(); return now(); };
   api.end = function (tStart) { const c = this.cur, r = renderer.info.render; c.total = now() - tStart; c.mix = this.mixT; c.mixN = this.mixN; c.mixU = this.mixSeen ? this.mixSeen.size : 0; c.skel = this.skT; c.skN = this.skN; c.mw = this.mwT; c.calls = r.calls; c.tris = r.triangles; c.t = tStart; this.fr.push(c); if (this.fr.length > 4000) this.fr.shift(); };
   return api; })();
+G4RES = createResidency(THREE, G4R, () => scene, () => renderer,
+  () => { const mb = Number(Q4.get('g4mb')); return (Number.isFinite(mb) && mb > 0 ? mb : S.preset === 'vlow' ? 192 : 256) * 1048576; });
+window.__g4Residency = G4RES;
+{ const parse0 = GLTFLoader.prototype.parse;   // v50g4-3: remember every loaded GLB root (hidden templates count too); pass-through when off
+  GLTFLoader.prototype.parse = function (data, path, onLoad, onError) { return parse0.call(this, data, path, g => { if (G4R() && g && g.scene) G4RES.remember(g.scene); return onLoad(g); }, onError); }; }
+let g4ResT = 0;
 let FCAP_T = 0; const FCAP_ON = !/[?&]fcap=0\b/.test(location.search);
 function frame(rafTime) {
   requestAnimationFrame(frame);
@@ -3659,6 +3665,7 @@ function frame(rafTime) {
   water.position.set(PL.x - ORG.x, CFG.SEA, PL.z - ORG.z);
   updateEnv(dt); if (window.V20) V20.tick(dt); goldSave20(dt); if (pON) pT = PRF.lap('env', pT);
   chunkT += dt; if (chunkT > 0.25) { chunkT = 0; updateChunks(); }
+  if (G4R() && G50.st.played && (g4ResT += rawDt) >= G4RES.interval() && G4RES.maybeScan()) g4ResT = 0;   // v50g4-3: every 1 s (3 s when well under budget), inside the shared frame budget
   pump(); if (pON) pT = PRF.lap('chunks', pT);
   // قياس الأداء والجودة التلقائية
   fpsAcc += dt; fpsN++;
