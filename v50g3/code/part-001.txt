@@ -190,6 +190,7 @@ function inst(geo, mat, a, cast, flat) {        // InstancedMesh من مصفوف
 }
 function killChunk(c) { scene.remove(c.mesh); c.mesh.geometry.dispose(); if (c.mesh.userData.rd) c.mesh.userData.rd.dispose(); c.mesh.children.forEach(o => { o.dispose?.(); if (o.userData && o.userData.own) o.geometry.dispose(); }); }
 function addChunk(cx, cz, res, r, gr) {         // بناء شبكة القطعة من البيانات الجاهزة
+  if (G4RES && g4Reject(r)) return;   // v50g4-3: stale result (checked at the attach itself)
   const k = cx + ',' + cz; pending.delete(k);
   const cur = chunks.get(k);
   if (Math.abs(cx - PL.cx) > S.view + 1 || Math.abs(cz - PL.cz) > S.view + 1) return;
@@ -245,11 +246,47 @@ function tb24Tick() {
   TB24.n = n;
 }
 (function tb24Loop() { requestAnimationFrame(tb24Loop); try { tb24Tick(); } catch (e) { if (!TB24.err) { TB24.err = 1; console.warn('[v24] tb', e); } } })();
+// v50g4-3: request identity = world revision, quality, vegetation, LOD and grass. The check runs where the chunk is
+// actually ATTACHED (addChunk), so a chunk whose attach is deferred (v50g4-1 upload queue) is re-validated then.
+let g4WorldEpoch = 0, g4JobId = 0;
+const g4Flights = new Map(), g4Wanted = new Map(), g4Arrived = new WeakMap();
+function g4Valid(j) {
+  const want = g4Wanted.get(j.k);
+  return Math.abs(j.cx - PL.cx) <= S.view + 1 && Math.abs(j.cz - PL.cz) <= S.view + 1 && !!want && want.res === j.res && want.gr === j.gr && j.epoch === g4WorldEpoch && j.veg === S.veg && j.preset === S.preset;
+}
+function g4Reject(r) {   // true = drop this worker result at attach time
+  if (!g4Arrived.has(r)) return false;
+  const j = g4Arrived.get(r); g4Arrived.delete(r);
+  if (j) { if ((G4R() || j.preset !== S.preset) && !g4Valid(j)) { G4RES.st.stale++; pending.delete(j.k); return true; } return false; }
+  if (G4R()) { G4RES.st.stale++; return true; }   // posted before v50g4-3 was active: identity unknown
+  return false;
+}
+function g4Chunks() {   // same rings/LOD as updateChunks(); the radius steps down one ring at a time under memory pressure (floor: LOW 3, very-low 2)
+  const R = G4RES.terrainRadius(S.view, S.preset === 'low' ? 3 : 2), jobs = []; g4Wanted.clear();
+  for (let dz = -R; dz <= R; dz++) for (let dx = -R; dx <= R; dx++) {
+    const d2 = dx * dx + dz * dz, cx = PL.cx + dx, cz = PL.cz + dz;
+    if (d2 > R * R + R || cx < -39 || cx > 39 || cz < -39 || cz > 39) continue;
+    const d = Math.max(Math.abs(dx), Math.abs(dz)), res = S.preset === 'vlow' && V4ON('ter4') ? (d <= 1 ? 32 : d <= 2 ? 16 : 8) : d <= 2 ? 32 : d <= 5 ? 16 : 8;
+    const k = cx + ',' + cz, gr = d <= 1 ? 1 : 0, c = chunks.get(k);
+    const j = { cx, cz, k, gr, res, d2, veg: S.veg, epoch: g4WorldEpoch, preset: S.preset };
+    g4Wanted.set(k, j);
+    if ((!c || c.res !== res || c.gr !== gr) && !g4Flights.has(k)) jobs.push(j);
+  }
+  queue = jobs.sort((a, b) => a.d2 - b.d2); pending.clear();
+  for (const j of queue) pending.add(j.k);
+  for (const k of g4Flights.keys()) pending.add(k);
+  for (const [k, c] of chunks) if (Math.abs(c.cx - PL.cx) > R + 1 || Math.abs(c.cz - PL.cz) > R + 1) { killChunk(c); chunks.delete(k); }   // same keep-ring as updateChunks()
+}
+function g4WrapWorkers() {   // record each result's job identity (validated later, at attach) without touching the worker handlers
+  for (const w of workers) { if (!w || w.g4w) continue; w.g4w = 1; const om = w.onmessage, oe = w.onerror;
+    w.onmessage = e => { const d = e.data, j = d && d.job; if (d && d.r && (j || G4R())) g4Arrived.set(d.r, j || null); if (j && g4Flights.get(j.k) === j.id) { g4Flights.delete(j.k); } return om.call(w, e); };
+    w.onerror = ev => { if (w.g4job) { g4Flights.delete(w.g4job.k); pending.delete(w.g4job.k); } return oe && oe.call(w, ev); }; }
+}
 const CT = { n: 0, ms: 0 };
 function makeWorkers() {                        // Web Worker من Blob؛ عند الفشل نعمل في الخيط الرئيسي
   try {
     const src = `const L=(${terrainLib})();onmessage=e=>{const d=e.data;if(d.world){L.setWorld(d.world);return;}L.init(d.seed);const r=L.chunk(d.cx,d.cz,d.res,d.ch,d.veg,d.gr);` +
-      `postMessage({cx:d.cx,cz:d.cz,res:d.res,gr:d.gr,r},[r.pos.buffer,r.nor.buffer,r.col.buffer,r.rk.buffer,r.rp.buffer,r.ri.buffer,r.rq.buffer,r.cl.buffer]);}`;
+      `postMessage({cx:d.cx,cz:d.cz,res:d.res,gr:d.gr,job:d.job,r},[r.pos.buffer,r.nor.buffer,r.col.buffer,r.rk.buffer,r.rp.buffer,r.ri.buffer,r.rq.buffer,r.cl.buffer]);}`;
     const url = URL.createObjectURL(new Blob([src], { type: 'text/javascript' }));
     const n = Math.min(3, Math.max(1, (navigator.hardwareConcurrency || 4) - 2));
     for (let i = 0; i < n; i++) {
@@ -260,17 +297,20 @@ function makeWorkers() {                        // Web Worker من Blob؛ عند
     }
   } catch (err) { useWorker = false; }
 }
-makeWorkers();
+makeWorkers(); g4WrapWorkers();
 function pump() {                               // توزيع المهام
   if (useWorker && workers.length) {
     for (const w of workers) { if (w.busy || !queue.length) continue;
       const j = queue.shift(); w.busy = true; w.t0 = performance.now();
-      w.postMessage({ seed: CFG.SEED, cx: j.cx, cz: j.cz, res: j.res, ch: CFG.CH, veg: S.veg, gr: j.gr }); }
+      if (G4R()) { j.id = ++g4JobId; g4Flights.set(j.k, j.id); w.g4job = j; }
+      w.postMessage({ job: G4R() ? j : null, seed: CFG.SEED, cx: j.cx, cz: j.cz, res: j.res, ch: CFG.CH, veg: S.veg, gr: j.gr }); }
   } else if (queue.length) {                    // بديل: قطعة واحدة في كل إطار
-    const j = queue.shift(); addChunk(j.cx, j.cz, j.res, LIB.chunk(j.cx, j.cz, j.res, CFG.CH, S.veg, j.gr), j.gr);
+    const j = queue.shift(); if (G4R() && j.epoch !== undefined && !g4Valid(j)) { pending.delete(j.k); G4RES.st.stale++; return; }   // v50g4-3: only jobs made by g4Chunks() are checked; HIGH/MEDIUM never reach this
+    addChunk(j.cx, j.cz, j.res, LIB.chunk(j.cx, j.cz, j.res, CFG.CH, S.veg, j.gr), j.gr);
   }
 }
 function updateChunks() {
+  if (G4R()) return g4Chunks();
   const R = S.view, list = [];
   for (let dz = -R; dz <= R; dz++) for (let dx = -R; dx <= R; dx++) {
     const d2 = dx * dx + dz * dz; if (d2 > R * R + R) continue;
@@ -700,6 +740,7 @@ function setupMountains() {          // يُنفَّذ مرة واحدة بعد 
   const E = new Float32Array(N); for (let k = 0; k < N; k++) Er[k] = Math.min(Er[k], 0.7 * F[k]);          // ميل الحافة ≤ 0.7 قرب كل ما هو محمي
   for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) { let s = 0, w = 0; for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) { const a = i + di, b = j + dj; if (a < 0 || b < 0 || a >= n || b >= n) continue; const ww = di || dj ? 1 : 2; s += Er[b * n + a] * ww; w += ww; } E[j * n + i] = s / w; }
   WORLD.mt = { n, cell: CELL, E, ranges: spines.length };
+  g4WorldEpoch++;
   for (const w of workers) if (w) w.postMessage({ world: WORLD });
   let mx = 0, cells = 0; for (let k = 0; k < N; k++) { if (E[k] > mx) mx = E[k]; if (E[k] > 5) cells++; }
   console.info('[الجبال] سلاسل: ' + spines.length + ' | أعلى غلاف: ' + mx.toFixed(0) + ' م | مساحة المرتفعات: ' + (cells * CELL * CELL / 1e6).toFixed(1) + ' كم² | ' + (performance.now() - t0).toFixed(0) + ' م.ث');
@@ -5156,6 +5197,7 @@ function buildSpurRoads() {
     const path = banSpurPath(v.x, v.z, best[0], best[1]);
     if (path) { WORLD.roads.push(Float32Array.from(path)); added++; }
   }
+  g4WorldEpoch++;
   WORLD.rclip = [CITY.x, CITY.z, CITY_WR + 10]; WORLD.vclip = []; for (const v of VILLAGES) if (!v.city) WORLD.vclip.push(v.x, v.z, (v.R || 62) - 1);   // v14: الطرق الطويلة تتوقف عند شوارع المدينة، والفرعية عند درب قريتها
   for (const w of workers) if (w) w.postMessage({ world: WORLD });     // العمّال يحتاجون الطرق الجديدة
   console.info('[الطرق] طرق القرى الجديدة:', added);

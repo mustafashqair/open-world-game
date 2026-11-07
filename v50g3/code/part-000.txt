@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as skClone } from 'three/addons/utils/SkeletonUtils.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { createResidency } from './v50g4/residency.js';
 import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { CSM } from 'three/addons/csm/CSM.js';
@@ -21,6 +22,9 @@ const VLSAVED4 = (() => { try { return JSON.parse(localStorage.getItem('ow_setti
 const VLOW4B = new Set(["bandit/bandit-lite.glb", "guard/guard-spear-lite.glb", "guard/guard-sword-lite.glb", "npcs/vwork/city-man-new-v3f-lite.glb", "npcs/vwork/village-girl-new-v9-lite.glb", "royal-guard/royal-archer-lite.glb", "royal-guard/royal-guard-v2-lite.glb", "royal-guard/royal-swordsman-lite.glb", "shops/blacksmith-npc-lite.glb", "shops/food-vendor-lite.glb", "shops/potion-seller-lite.glb", "shops/stable-keeper-lite.glb", "shops/supply-seller-lite.glb"]);   // v50d4b: مقصوصات الشخصيات المصلّحة
 const VLOW4 = (() => { const S0 = new Set(["bandit/bandit-lite.glb", "guard/guard-spear-lite.glb", "guard/guard-sword-lite.glb", "horses/fauna-horse-bay-lite.glb", "horses/fauna-horse-black-lite.glb", "horses/fauna-horse-grey-lite.glb", "horses37/horse-bay-lite.glb", "horses37/horse-black-lite.glb", "horses37/horse-chestnut-lite.glb", "horses37/horse-cream-lite.glb", "npcs/vwork/city-man-new-v3f-lite.glb", "npcs/vwork/village-girl-new-v9-lite.glb", "palace3d/palace-far.glb", "palace3d/palace-garden-far.glb", "palace3d/palace-garden-v15-lite.glb", "palace3d/palace-v13-lite.glb", "royal-guard/royal-archer-lite.glb", "royal-guard/royal-guard-v2-lite.glb", "royal-guard/royal-swordsman-lite.glb", "shops/barn-v41-lite.glb", "shops/blacksmith-npc-lite.glb", "shops/blacksmith-v7-lite.glb", "shops/food-v5-lite.glb", "shops/food-vendor-lite.glb", "shops/potion-seller-lite.glb", "shops/stable-keeper-lite.glb", "shops/stable-v6-lite.glb", "shops/supply-seller-lite.glb", "village/v4/gate-v5-lite.glb", "village/v4/house-w1-lite.glb", "village/v4/house-w3-lite.glb", "village/v4/house-w4-lite.glb", "village/v4/road-props-lite.glb", "village/v4/village-props-v4-lite.glb", "village/village-fence-1-lite-v3b.glb", "village/village-house-1-lite-v3b.glb", "village/village-house-3-lite-v3b.glb", "village/village-kiosk-1-v5-lite.glb", "village/village-kiosk-2-v5-lite.glb", "village/village-kiosk-3-v5-lite.glb", "village/village-kiosk-4-v5-lite.glb"]), q = new URLSearchParams(location.search); const s = { n: 0, has: k => S0.has(k), list: S0,   // v50d4: نسخ «منخفضة جدا» (مثلثات أقل، نفس الهيكل والحركات والصور)
   on() { if (q.get('vmdl') === '0' || (window.__QUALITY || 'mobile') === 'high') return false; try { return JSON.parse(localStorage.getItem('ow_settings2') || '{}').preset === 'vlow'; } catch (e) { return false; } } }; window.__VLOW4 = s; return s; })();
+// v50g4-3: LOW/very-low only; ?v50g4r=0 (or ?v50g4=0) = v50g3 streaming exactly; ?g4mb=N overrides the budget (MiB)
+let G4RES = null;
+const G4R = () => G4RES !== null && Q4.get('v50g4') !== '0' && Q4.get('v50g4r') !== '0' && ['low', 'vlow'].includes(S.preset);
 const GLB42 = (() => {
   const reg = new Map(), _load = GLTFLoader.prototype.load; let draco = null, ktx2 = null;
   const now = () => (performance.timeOrigin ? Date.now() - performance.timeOrigin : Date.now());
