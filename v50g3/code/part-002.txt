@@ -3019,15 +3019,25 @@ const CULL23 = (() => {
         k++; }
       o.count = k; R.k = k; o.instanceMatrix.needsUpdate = true; if (o.instanceColor) o.instanceColor.needsUpdate = true; R.ver = o.instanceMatrix.version; }
   }
+  /* v50g5 gc5: مفتاح الكاميرا بأرقام بدل ٨ toFixed + دمج نصوص بكل إطار — نفس القرار حرفياً (الحالات الحدّية بترجع للنص الأصلي) */
+  const K5 = { c: [0, 0, 0, 0, 0, 0, 0, 0], l: [0, 0, 0, 0, 0, 0, 0, 0], cx: false, lx: true, ls: '', chkL: '' }, K5D = [1, 1, 1, 3, 3, 3, 3, 3];
+  function k5(x, m) { const ax = x < 0 ? -x : x, y = ax * m; if (y < 1e9) { const f = y - Math.floor(y); if (f < 0.4999 || f > 0.5001) { const n = Math.floor(y + 0.5); return x < 0 ? -n - 1 : n; } } return NaN; }   // = x.toFixed(d) كرقم (السالب الصفري "-0.0" = -1)؛ NaN = حالة حدّية
+  function k5s(c, d) { const neg = c < 0, n = neg ? -c - 1 : c; let s = String(n); if (s.length <= d) s = '0'.repeat(d + 1 - s.length) + s; return (neg ? '-' : '') + s.slice(0, s.length - d) + '.' + s.slice(s.length - d); }
+  function k5str(C) { let s = ''; for (let i = 0; i < 8; i++) s += (i ? ',' : '') + k5s(C[i], K5D[i]); return s; }
+  function k5base() { return cp.x.toFixed(1) + ',' + cp.y.toFixed(1) + ',' + cp.z.toFixed(1) + ',' + pm.elements[0].toFixed(3) + ',' + pm.elements[8].toFixed(3) + ',' + pm.elements[2].toFixed(3) + ',' + pm.elements[6].toFixed(3) + ',' + pm.elements[10].toFixed(3); }
+  function k5key() { const c = K5.c, e = pm.elements; c[0] = k5(cp.x, 10); c[1] = k5(cp.y, 10); c[2] = k5(cp.z, 10); c[3] = k5(e[0], 1000); c[4] = k5(e[8], 1000); c[5] = k5(e[2], 1000); c[6] = k5(e[6], 1000); c[7] = k5(e[10], 1000); let x = false; for (let i = 0; i < 8; i++) if (c[i] !== c[i]) x = true; K5.cx = x; }
+  function k5diff() { GC5.n.cull++; if (!K5.cx && !K5.lx) { const c = K5.c, l = K5.l; for (let i = 0; i < 8; i++) if (c[i] !== l[i]) return true; return false; } GC5.n.cullStr++; return k5base() !== (K5.lx ? K5.ls : k5str(K5.l)); }
+  function k5take() { if (K5.cx) { K5.ls = k5base(); K5.lx = true; } else { const c = K5.c, l = K5.l; for (let i = 0; i < 8; i++) l[i] = c[i]; K5.lx = false; } }
   function before() {
     if (window.__noCull23 || !mob()) return; fN++;
     camera.updateMatrixWorld(); pm.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse); fr.setFromProjectionMatrix(pm); camera.getWorldPosition(cp);
     const g2q = G2V('cull'), wP4 = window.PRF, pq = !!(wP4 && wP4.on); let tq = pq ? performance.now() : 0;
     if (fN - lastScan > (g2q ? 45 : FRAME4.lw && !watch.size ? 60 : 15)) { lastScan = fN; try { scan(); } catch (e) {} if (pq) tq = wP4.lap('c23_scan', tq); }
     kc4 = G2V('city') && G2C.k > 0 && scene.fog ? scene.fog.far + 4 : 0; pad4 = g2q;
-    const key = cp.x.toFixed(1) + ',' + cp.y.toFixed(1) + ',' + cp.z.toFixed(1) + ',' + pm.elements[0].toFixed(3) + ',' + pm.elements[8].toFixed(3) + ',' + pm.elements[2].toFixed(3) + ',' + pm.elements[6].toFixed(3) + ',' + pm.elements[10].toFixed(3);
-    let go4; if (g2q) { camera.getWorldDirection(fw4); go4 = fN - lp4 > 30 || cp.distanceToSquared(lpos4) > 2.25 || fw4.dot(lfw4) < 0.999; if (go4) { lp4 = fN; lpos4.copy(cp); lfw4.copy(fw4); } } else go4 = key !== lastKey || fN % 20 === 0;   // v50g2: تمريرة النسخ بس لما الكاميرا تتحرك 1.5م أو تلف ~2.5°
-    if (go4) { lastKey = key; try { instPass(); } catch (e) { console.warn('[v23] cull', e && e.message); } if (pq) tq = wP4.lap('c23_inst', tq); }
+    const key = GC5.on ? null : cp.x.toFixed(1) + ',' + cp.y.toFixed(1) + ',' + cp.z.toFixed(1) + ',' + pm.elements[0].toFixed(3) + ',' + pm.elements[8].toFixed(3) + ',' + pm.elements[2].toFixed(3) + ',' + pm.elements[6].toFixed(3) + ',' + pm.elements[10].toFixed(3);
+    let d5 = false; if (GC5.on) { k5key(); d5 = k5diff(); if (GC5.chk) { GC5.n.chk++; const kb = k5base(); if ((kb !== K5.chkL) !== d5) GC5.mis.cull++; if (!K5.cx && k5str(K5.c) !== kb) GC5.mis.str++; K5.kb = kb; } }
+    let go4; if (g2q) { camera.getWorldDirection(fw4); go4 = fN - lp4 > 30 || cp.distanceToSquared(lpos4) > 2.25 || fw4.dot(lfw4) < 0.999; if (go4) { lp4 = fN; lpos4.copy(cp); lfw4.copy(fw4); } } else go4 = (GC5.on ? d5 : key !== lastKey) || fN % 20 === 0;   // v50g2: تمريرة النسخ بس لما الكاميرا تتحرك 1.5م أو تلف ~2.5°
+    if (go4) { if (GC5.on) { k5take(); if (GC5.chk) K5.chkL = K5.kb; } else lastKey = key; try { instPass(); } catch (e) { console.warn('[v23] cull', e && e.message); } if (pq) tq = wP4.lap('c23_inst', tq); }
     hid.length = 0; const lim = mob() ? (lowOn ? 60 : 95) : 200;
     if (lowOn) { if (fN % 4 === 0) { far.length = 0; for (let i = 0; i < sm.length; i += 5) { const dx = sm[i + 1] - cp.x, dy = sm[i + 2] - cp.y, dz = sm[i + 3] - cp.z, r = sm[i + 4], d = Math.sqrt(dx * dx + dy * dy + dz * dz) - r, L = r < 1.5 ? (kc4 && G2C.k > 0.99 ? 30 : 55) : r < 5 ? (kc4 && G2C.k > 0.99 ? 60 : 100) : 160; if (d > L || (kc4 && d > kc4)) far.push(sm[i]); }
         if (kc4) for (let i = 0; i < bg.length; i += 5) { const dx = bg[i + 1] - cp.x, dy = bg[i + 2] - cp.y, dz = bg[i + 3] - cp.z; if (Math.sqrt(dx * dx + dy * dy + dz * dz) - bg[i + 4] > kc4) far.push(bg[i]); }   // v50g2: بالمدينة كل شي ورا الضباب ما بينرسم
