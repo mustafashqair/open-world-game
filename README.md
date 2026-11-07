@@ -20,7 +20,7 @@ Per-fix off flags (very-low only): `?g2city=0` `?g2pal=0` `?g2npc=0` `?g2mm=0` `
 ```bash
 git clone https://github.com/mustafashqair/open-world-game.git
 cd open-world-game
-python3 tools/join_large_files.py   # once: rebuilds the 31 files >3 MB from large-files/
+python3 tools/join_large_files.py   # once: rebuilds the 31 files >3 MB from large-files/ and the 70 split *.glb.N models
 python3 -m http.server 8000
 # open http://localhost:8000/
 ```
@@ -28,5 +28,5 @@ python3 -m http.server 8000
 ## Repo layout
 - game files at the repo root (`index.html`, `sw.js`, `assets.json`, asset folders)
 - `tools/` — publish/rollback scripts (`pubv9.py`, `pubfreshv9.py`) and the benchmark/pixel-test harness (`tools/h/*.mjs`). They reference paths on the build machine; kept for reference.
-- `large-files/` — the 31 files larger than 3 MB (e.g. `palace3d/palace-v13.glb`), split into 2.8 MB parts; `tools/join_large_files.py` puts them back in place and checks SHA-256
+- `large-files/` — the 31 files larger than 3 MB (e.g. `palace3d/palace-v13.glb`), split into 2.8 MB parts; `tools/join_large_files.py` puts them back in place and checks SHA-256. It also joins the 70 models committed as `name.glb.0`, `name.glb.1`, … next to where they belong (houses, shops, guards, bandits, wagon, trees33, animals36, horses37…) and checks each glTF header
 - `docs/v50g2-NOTES.md` — what v50g2 changed and measured results
