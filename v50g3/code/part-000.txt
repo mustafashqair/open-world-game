@@ -2138,7 +2138,7 @@ async function loadTreeModels(){        // النماذج مفكوكة مسبق�
 
 /* ═══ v34: الأشجار المعتمدة فقط — صنوبر v4 وقيقب v6 وصفصاف v4 (قرب الماء) (ملفات GLB بثلاث درجات تفصيل + لوحة بعيدة مخبوزة منها) في كل العالم. النماذج القديمة حُذفت نهائياً ═══ */
 const T33 = (() => {
-  const Q = window.__QUALITY || 'mobile', LOW = Q === 'low';
+  const Q = window.__QUALITY || 'mobile', LOW = Q === 'low', lowTreeFix = V4ON('lowtree') && V4ON('v50g5');
   const SIZES = ['small', 'medium', 'large', 'dense'], SPEC = ['pine', 'maple', 'oak'], OFF = { pine: 0, maple: 4, oak: 8, willow: 4 };   /* v36: سنديان (بلوط) fix1 بثلاث درجات + قيقب fix7 */   // v36: الصفصاف محذوف بطلب مصطفى — أماكنه صنوبر/قيقب
   let R_HI = 18, R_MID = 45, R_LITE = LOW ? 70 : 95, R_BILL = 560, R_NAT = 380, HYS = 2, MAX_HI = LOW ? 0 : 4, NB = 6000; const R0_33 = [R_MID, R_LITE, R_BILL, MAX_HI];
-  const vl33 = () => { const v = S.preset === 'vlow' && V4ON('tree4'); R_MID = v ? 26 : R0_33[0]; R_LITE = v ? 48 : R0_33[1]; R_BILL = v ? 420 : R0_33[2]; MAX_HI = v ? 0 : R0_33[3]; };   // v50d4
+  const vl33 = () => { const v = S.preset === 'vlow' && V4ON('tree4'); R_MID = v ? 26 : R0_33[0]; R_LITE = v ? 48 : R0_33[1]; R_BILL = v ? 420 : R0_33[2]; MAX_HI = (v || (S.preset === 'low' && lowTreeFix)) ? 0 : R0_33[3]; };   // v50d4
