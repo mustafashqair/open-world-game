@@ -2676,6 +2676,7 @@ const SHOP20 = (() => {
     try { beasts37(grp, Mt); } catch (e) { console.warn('[v37] beasts ' + e); }
     ST.barn37 = { x: +A.x.toFixed(1), z: +A.z.toFixed(1), yaw: +yaw.toFixed(3), slope: +(gmax - gy).toFixed(2), cols: (Mt.COL || []).length }; return true; }
   const FIRE36 = []; let fireMod = null, fireLoop = false;
+  const FIRE5 = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](fire5|v50g5)=0\b/.test(location.search);   /* v50g5 fire5: بلا تحديث لنارٍ مخفية على LOW/vlow — ?fire5=0 أو ?v50g5=0 = v50g3 بالضبط */
 
   // v38: محل الحداد v7 — مبنى يُدخل إليه (بلا دمج: ملف النار يحتاج العقد بأسمائها)، الحداد يشتغل جوّا: ينفخ الكير ويدق بالمطرقة بإيديه الاثنتين والشرر يطير
   function bs38Prep(g) { g.scene.updateMatrixWorld(true); const box = new THREE.Box3(), bx = new THREE.Box3(), COL = [], SKIP = [], mk = {}, v = new THREE.Vector3(), q = new THREE.Quaternion(), s = new THREE.Vector3(); let tris = 0, calls = 0;
@@ -2705,7 +2706,7 @@ const SHOP20 = (() => {
   function fire36(grp, Mt) { if (!Mt.mk || !Mt.mk.fire_bed) return; const root = new THREE.Group(); root.name = 'food36_markers'; grp.add(root);
     for (const nm in Mt.mk) { const o = new THREE.Object3D(); o.name = nm; o.position.fromArray(Mt.mk[nm].p); o.userData = Mt.mk[nm].ud; root.add(o); }
     (fireMod || (fireMod = import('./shops/food-v5-fire.js'))).then(m => { try { const f = m.addOvenFire(root, {}); FIRE36.push({ f, grp }); ST.fire36 = FIRE36.length;
-        if (!fireLoop) { fireLoop = true; const P = new THREE.Vector3(); const tick = () => { const t = performance.now() / 1000; for (const F of FIRE36) { const cam = typeof camera !== 'undefined' ? camera : null; if (cam) { F.grp.getWorldPosition(P); F.f.group.visible = P.distanceToSquared(cam.position) < 90 * 90; } F.f.update(t); } requestAnimationFrame(tick); }; requestAnimationFrame(tick); } }
+        if (!fireLoop) { fireLoop = true; const P = new THREE.Vector3(); const tick = () => { const t = performance.now() / 1000; for (const F of FIRE36) { const cam = typeof camera !== 'undefined' ? camera : null; if (cam) { F.grp.getWorldPosition(P); F.f.group.visible = P.distanceToSquared(cam.position) < 90 * 90; } if (FIRE5 && !F.f.group.visible) continue; F.f.update(t); } requestAnimationFrame(tick); }; requestAnimationFrame(tick); } }
       catch (e) { console.warn('[v36] food fire: ' + (e && e.message || e)); ST.fireErr = String(e); } }).catch(e => { console.warn('[v36] food fire load: ' + e); ST.fireErr = String(e); }); }
   function buildSeller(k, g) {
     const clips = {}; for (const c of g.animations) { const nm = c.name.includes('|') ? c.name.split('|').pop() : c.name; c.name = nm; clips[nm] = c; }
