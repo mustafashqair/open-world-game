@@ -60,6 +60,8 @@ Do not modify these systems or add their proposed flags/resources as phase-2 pre
 
 ### Implementation hold and repository verification
 
+**integration base = tab/v50g3**. Coordinator update (2026-11-07): this GitHub branch is based on `e9d41bb` and contains `v50g3/code/part-000/001/002.txt`, `index.html` and `sw.js`; main remains at `e9d41bb` without v50g3. This supersedes the earlier main-based phase-2 branch instruction. The five v50g4 PRs are back in fixes following Tab's residency/KTX2/timeout review; the implementation gate remains closed. This records the coordinator's update, not a new source audit.
+
 Implementation remains stopped until the five v50g4 PRs **#1–#5** have been reviewed and stabilized, and the coordinating agent sends a **later explicit release message**. Their becoming merged/closed alone is not permission to start. No implementation branch, runtime edit or implementation rebase is allowed now. This amendment changes only `ULTRA_PLAN.md` on the research branch.
 
 Fetched `origin/main` on 2026-11-07: HEAD is **`e9d41bbba849dac22b134055e502ed928d08b5a7`**, subject `docs/research: add 1-peer-matrix.csv`. **v50g3 does not appear in this fetched main snapshot:** `index.html:1221` still loads `v50g2/code/part-*.txt?v=v50g2`; the top-level tree has v50g/v50g2 and no v50g3 directory; COMMA_TASKS.md explicitly says v50g3 is not on main yet. This is a source-snapshot conclusion, not a claim about unretrieved historical commits (the clone is shallow).
@@ -78,7 +80,7 @@ These shared files are untouched by this documentation amendment. Refresh main a
 
 ### Delivery after a later explicit implementation release
 
-Create **`comma/ultra-preset`** from the then-current main after the required baseline refresh/rebase; open **one draft PR**. Deliver HIGH-versus-ULTRA screenshots in **city, market, forest and village**, desktop FPS results with hardware/method, exact pixel evidence that **`?ultra=0` equals HIGH**, and **zero changed pixels** for HIGH, MEDIUM, LOW and very-low against the pinned baseline. Tab reviews and tests before any merge. **This agent must never merge.** These are future delivery requirements; none is claimed as completed by this research update.
+Create **`comma/ultra-preset`** from the approved `tab/v50g3` integration base after the required baseline refresh/rebase; open **one draft PR**. Deliver HIGH-versus-ULTRA screenshots in **city, market, forest and village**, desktop FPS results with hardware/method, exact pixel evidence that **`?ultra=0` equals HIGH**, and **zero changed pixels** for HIGH, MEDIUM, LOW and very-low against the pinned baseline. Tab reviews and tests before any merge. **This agent must never merge.** These are future delivery requirements; none is claimed as completed by this research update.
 
 ## Baseline audit and integration map
 
@@ -313,8 +315,10 @@ Capability gates: WebGL2, `EXT_color_buffer_float` framebuffer completeness, usa
 
 ## Execution slices — only after an explicit release of the hold
 
+**Follow-up before implementation:** revalidate every `part-*.txt` path, symbol anchor and line number against `v50g3/code/part-*.txt` on `tab/v50g3`; the v50g2 anchors below/above remain historical audit evidence, not verified v50g3 edit locations. Implement and prove the `?ultra=0` exact-HIGH fallback first when execution is released.
+
 1. **Now:** documentation amendment and read-only baseline/PR checks only. Do not create `comma/ultra-preset`, modify game files or perform an implementation rebase.
-2. **After release:** fetch then-current main, review the stabilized v50g4 changes and v50g3 baseline, refresh/rebase as required, and create `comma/ultra-preset`. Record deterministic legacy-preset screenshots before implementation.
+2. **After release:** fetch the approved `tab/v50g3` integration base, review the stabilized v50g4 changes and refresh/rebase as required, then create `comma/ultra-preset`. Record deterministic legacy-preset screenshots before implementation.
 3. Reconcile the single `ultra` key/new Arabic UI, capability/resource ownership and early kill-switch. Implement **rank 1 only**: isolated HDR, exposure, grade and LUT; preserve the existing effects without expanding them.
 4. Implement **rank 2** bounded PMREM/sky agreement, then **rank 3** analytic height haze. Measure desktop frame times/FPS and validate colour/atmosphere integration.
 5. Deliver the one draft PR and required city/market/forest/village comparisons, exact HIGH kill-switch comparison, and zero legacy-preset pixel changes for Tab review. Do not merge. **Ranks 4–15 and ULTRA-lite stay deferred.**
