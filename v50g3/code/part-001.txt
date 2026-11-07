@@ -223,19 +223,28 @@ function tb24Build(list, ax, az) {
     ov += cnt; }
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(P, 3)); g.setAttribute('normal', new THREE.BufferAttribute(N, 3)); g.setAttribute('color', new THREE.BufferAttribute(Cc, 3)); g.setIndex(new THREE.BufferAttribute(I, 1)); g.computeBoundingSphere();
   return g; }
+/* v50g5 gc5: نفس الشغل بالضبط بلا تخصيص ذاكرة بكل إطار (Map/مصفوفات/نصوص مفاتيح) — كل الأجهزة، نفس القرارات حرفياً. ?gc5=0 أو ?v50g5=0 = v50g3 بالضبط؛ ?gc5chk=1 بيحسب الطريقتين وبيعدّ أي اختلاف */
+const GC5 = { on: !/[?&]v50g5=0\b/.test(location.search) && !/[?&]gc5=0\b/.test(location.search), chk: /[?&]gc5chk=1\b/.test(location.search), far: new Map(), near: [], pool: new Map(), bk: new WeakMap(), vc: [], n: { tb: 0, gc: 0, vcb: 0, cull: 0, cullStr: 0, chk: 0 }, mis: { bk: 0, sig: 0, gc: 0, cull: 0, str: 0 } }; window.__gc5 = GC5;
+function gc5Bk(c, BS) { let e = GC5.bk.get(c); if (!e || e[0] !== c.cx || e[1] !== c.cz || e[2] !== BS) { e = [c.cx, c.cz, BS, Math.floor(c.cx / BS) + ',' + Math.floor(c.cz / BS)]; GC5.bk.set(c, e); } if (GC5.chk && e[3] !== Math.floor(c.cx / BS) + ',' + Math.floor(c.cz / BS)) GC5.mis.bk++; return e[3]; }
+function gc5Arr(bk) { let a = GC5.pool.get(bk); if (a) a.length = 0; else { if (GC5.pool.size > 512) GC5.pool.clear(); GC5.pool.set(bk, a = []); } return a; }
+function gc5SigEq(s, list) {   // 1 = s هو نفس sig اللي كان رح ينبني (قطع uuid بطول ٨ ثابت)، 0 = مختلف، -1 = ما فينا نحكم بلا بناء النص
+  for (let i = 0; i < list.length; i++) { const u = list[i].geometry.uuid; if (typeof u !== 'string' || u.length < 8) return -1; }
+  if (typeof s !== 'string' || s.length !== list.length * 8) return 0;
+  for (let i = 0; i < list.length; i++) { const u = list[i].geometry.uuid, o = i * 8; for (let k = 0; k < 8; k++) if (u.charCodeAt(k) !== s.charCodeAt(o + k)) return 0; } return 1; }
 function tb24Tick() {
   TB24.fr++;
   if (TB24.sh2 && renderer.shadowMap.enabled) { renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = (TB24.fr & 1) === 0; }
   if (!TB24.on) return;
-  const far = new Map(), near = []; const BS = 3, CH = CFG.CH;   // كتل ٣×٣ قطع: نداء رسم لكل كتلة مع إبقاء الاستبعاد خارج مجال الرؤية
+  const far = GC5.on ? GC5.far : new Map(), near = GC5.on ? GC5.near : []; if (GC5.on) { far.clear(); near.length = 0; GC5.n.tb++; } const BS = 3, CH = CFG.CH;   // كتل ٣×٣ قطع: نداء رسم لكل كتلة مع إبقاء الاستبعاد خارج مجال الرؤية
   for (const c of chunks.values()) { const m = c.mesh; if (!m || !m.parent) continue; if (Math.abs(c.cx - PL.cx) <= 1 && Math.abs(c.cz - PL.cz) <= 1) { near.push(m); continue; }
-    const bk = Math.floor(c.cx / BS) + ',' + Math.floor(c.cz / BS); let a = far.get(bk); if (!a) far.set(bk, a = []); a.push(m); }
+    const bk = GC5.on ? gc5Bk(c, BS) : Math.floor(c.cx / BS) + ',' + Math.floor(c.cz / BS); let a = far.get(bk); if (!a) far.set(bk, a = GC5.on ? gc5Arr(bk) : []); a.push(m); }
   for (const m of near) if (m.userData.tb24) { m.layers.set(0); m.userData.tb24 = 0; }
   for (const [bk, B] of TB24.blocks) if (!far.has(bk)) { scene.remove(B.mesh); B.mesh.geometry.dispose(); TB24.blocks.delete(bk); }
   let n = 0;
-  for (const [bk, list] of far) { let sig = ''; for (const m of list) sig += m.geometry.uuid.slice(0, 8); let B = TB24.blocks.get(bk);
+  for (const [bk, list] of far) { let sig = null, B = TB24.blocks.get(bk); const q5 = GC5.on && list.length >= 2 && B ? gc5SigEq(B.sig, list) : -1;
+    if (!GC5.on || (list.length >= 2 && q5 !== 1) || GC5.chk) { sig = ''; for (const m of list) sig += m.geometry.uuid.slice(0, 8); if (GC5.chk && q5 >= 0 && (q5 === 1) !== (B.sig === sig)) GC5.mis.sig++; if (GC5.on && q5 === 1) sig = null; }
     if (list.length < 2) { if (B) { scene.remove(B.mesh); B.mesh.geometry.dispose(); TB24.blocks.delete(bk); } for (const m of list) if (m.userData.tb24) { m.layers.set(0); m.userData.tb24 = 0; } continue; }
-    if (!B || B.sig !== sig) { const [bx, bz] = bk.split(',').map(Number), ax = bx * BS * CH, az = bz * BS * CH, g = tb24Build(list, ax, az);
+    if (!B || (sig !== null && B.sig !== sig)) { const [bx, bz] = bk.split(',').map(Number), ax = bx * BS * CH, az = bz * BS * CH, g = tb24Build(list, ax, az);
       if (!B) { const mm = new THREE.Mesh(g, terrainMat); mm.name = 'terrain24'; mm.receiveShadow = true; mm.userData.a24 = [ax, az];
         mm.onBeforeRender = function () { this.matrixWorld.makeTranslation(this.userData.a24[0] - ORG.x, 0, this.userData.a24[1] - ORG.z); }; scene.add(mm); TB24.blocks.set(bk, B = { mesh: mm, sig }); }
       else { B.mesh.geometry.dispose(); B.mesh.geometry = g; B.sig = sig; }
@@ -5183,8 +5192,10 @@ function losClear(n, L) {
   return true;
 }
 // المطاردة تنتشر: الحرس الذي يطارد أو يبحث يجرّ الحراس القريبين، والباقون يهدأون عند انتهاء البحث
+function gc5VC() { const a = GC5.vc, n = VILLAGES.length; let ok = a.length === n + 1 && a[n] === CITYV; for (let i = 0; ok && i < n; i++) if (a[i] !== VILLAGES[i]) ok = false;   // v50g5 gc5: نفس [...VILLAGES, CITYV] بلا مصفوفة جديدة بكل إطار
+  if (!ok) { a.length = 0; for (let i = 0; i < n; i++) a.push(VILLAGES[i]); a.push(CITYV); GC5.n.vcb++; } GC5.n.gc++; return a; }
 function guardsCrowd(dt) {
-  for (const v of [...VILLAGES, CITYV]) {
+  for (const v of (GC5.on ? gc5VC() : [...VILLAGES, CITYV])) {
     const L = v.live; if (!L) continue;
     const active = [];
     for (const n of L.npcs) {
