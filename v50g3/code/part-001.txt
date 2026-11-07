@@ -130,35 +130,42 @@ uniform float uTrans; uniform vec3 uTransColor; uniform float uMipAlpha;`).repla
   // ── التحديث: توزيع كل شجرة على درجة تفصيل حسب المسافة، ثم تعبئة InstancedMesh لكل (ملف، جزء) واللوحات البعيدة ──
   const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _p = new THREE.Vector3(), _s = new THREE.Vector3(), _c = new THREE.Color(), _up = new THREE.Vector3(0, 1, 0);
   function pickLod(S0, want) { const L = S0.lods; if (L[want]) return want; if (want === 0) return L[1] ? 1 : L[2] ? 2 : -1; if (want === 1) return L[2] ? 2 : L[0] ? 0 : -1; return L[1] ? 1 : L[0] ? 0 : -1; }
+  /* v50g5 t3tick: على «منخفض» و«منخفضة جدا» التحديث الدوري (كل ٠٫٥ ث) بيضل يحسب كل شي متل قبل، بس ما بيعيد كتابة ولا رفع مصفوفات النسخ (instanceMatrix/instanceColor/لوحات بعيدة) إذا ما تغيّر فيها ولا رقم — نفس البايتات بالـ GPU بالضبط. والنسخ بتنعلّم noCull23 حتى CULL23 ما يتبنّاها لما تثبت (بـ v50g3 ما بتثبت أبداً). متوسط/عالي: v50g3 بالضبط. ?t3tick=0 أو ?v50g5=0 = v50g3 */
+  const T3 = { on: !/[?&]v50g5=0\b/.test(location.search) && !/[?&]t3tick=0\b/.test(location.search), was: false, passes: 0, upM: 0, upC: 0, upB: 0, skM: 0, skC: 0, skB: 0, wM: 0 }; window.__t3 = T3;
+  const f3 = Math.fround, t3d = (A, o, x, y, z, w, n) => A[o] !== f3(x) || (n > 1 && A[o + 1] !== f3(y)) || (n > 2 && A[o + 2] !== f3(z)) || (n > 3 && A[o + 3] !== f3(w));
+  const t3m = (A, o, E) => { for (let k = 0; k < 16; k++) if (A[o + k] !== f3(E[k])) return true; return false; };
   function tick(dt) {
     if (!T.ready) return; UP.uTime.value += dt;
     T.t -= dt; const mv = Math.hypot(PL.x - T.lx, PL.z - T.lz), om = ORG.x !== T.ox || ORG.z !== T.oz;
     natTrees();
     if (!(T.dirty || om || mv > 2.5 || T.t <= 0)) return; T.t = 0.5; T.dirty = false; T.lx = PL.x; T.lz = PL.z; T.ox = ORG.x; T.oz = ORG.z;
+    const T3A = T3.on && (S.preset === 'low' || S.preset === 'vlow') && T3.was; T3.was = T3.on && (S.preset === 'low' || S.preset === 'vlow'); T3.passes++;   // أول تمريرة بعد التبديل لمنخفض = رفع كامل متل v50g3
     const cand = [];
     for (const c of chunks.values()) { const L = c.mesh.userData.t33; if (!L) continue; for (const t of L) cand.push(t); }
     for (const t of T.nat) cand.push(t);
     for (const t of cand) t.d33 = Math.hypot(t.x - PL.x, t.z - PL.z);
     cand.sort((a, b) => a.d33 - b.d33);
-    vl33(); const B = {}; let hi = 0, nb = 0; T.n = [0, 0, 0, 0]; const BL = T.bill;
+    vl33(); const B = {}; let hi = 0, nb = 0, bch = 0; T.n = [0, 0, 0, 0]; const BL = T.bill;
     for (const t of cand) { if (t.d33 > R_BILL) break; const k0 = t.c33.sp + '-' + t.c33.size, S0 = T.sets[k0]; if (!S0) continue; const pv = t.l33;
       let want = 3; if (hi < MAX_HI && t.d33 < R_HI + (pv === 0 ? HYS : 0)) want = 0; else if (t.d33 < R_MID + (pv <= 1 ? HYS : 0)) want = 1; else if (t.c33.sp !== 'pine' && t.d33 < R_LITE + (pv <= 2 ? HYS * 3 : 0)) want = 2;   // الصنوبر المبسّط يبدو يابساً من بعيد: الصنوبر بعد ٤٥م لوحة مخبوزة من النموذج المتوسط
       if (want === 3 && BL) { if (nb < NB) { const ti = BL.keys.indexOf(k0), I = BL.info[ti], s = t.c33.s;
-          BL.iPos.setXYZ(nb, t.x - ORG.x, t.y - 0.05, t.z - ORG.z); const c3 = t.c33, sw = c3.sx ? (c3.sx + c3.sz) * 0.5 : 1, sh = c3.sy || 1; BL.iDat.setXYZW(nb, ti, I.w * s * sw * (c3.mir ? -1 : 1), I.h * s * sh, I.y0 * s * sh); BL.iTint.setX(nb, c3.tint + 4 * (c3.hue || 0)); nb++; } t.l33 = 3; T.n[3]++; continue; }
+          const c3 = t.c33, sw = c3.sx ? (c3.sx + c3.sz) * 0.5 : 1, sh = c3.sy || 1, px = t.x - ORG.x, py = t.y - 0.05, pz = t.z - ORG.z, dx = I.w * s * sw * (c3.mir ? -1 : 1), dy = I.h * s * sh, dz = I.y0 * s * sh, tn = c3.tint + 4 * (c3.hue || 0);
+          if (!T3A || t3d(BL.iPos.array, nb * 3, px, py, pz, 0, 3)) { BL.iPos.setXYZ(nb, px, py, pz); bch = 1; } if (!T3A || t3d(BL.iDat.array, nb * 4, ti, dx, dy, dz, 4)) { BL.iDat.setXYZW(nb, ti, dx, dy, dz); bch = 1; } if (!T3A || t3d(BL.iTint.array, nb, tn, 0, 0, 0, 1)) { BL.iTint.setX(nb, tn); bch = 1; } nb++; } t.l33 = 3; T.n[3]++; continue; }
       if (want === 3) want = 2;
       if (want === 0) { hi++; if (!S0.lods[0]) load(S0.sp, S0.size, 0); }
       const l = pickLod(S0, want); if (l < 0) continue; t.l33 = l; T.n[l]++;
       const k = k0 + '|' + l; (B[k] || (B[k] = { S0, l, list: [] })).list.push(t); }
-    if (BL) { BL.g.instanceCount = nb; BL.mesh.visible = nb > 0; for (const a of [BL.iPos, BL.iDat, BL.iTint]) { a.needsUpdate = true; a.clearUpdateRanges && a.clearUpdateRanges(); } }
+    if (BL) { BL.g.instanceCount = nb; BL.mesh.visible = nb > 0; if (!T3A || bch) { T3.upB++; for (const a of [BL.iPos, BL.iDat, BL.iTint]) { a.needsUpdate = true; a.clearUpdateRanges && a.clearUpdateRanges(); } } else T3.skB++; }
     const shOn = S.shadow > 0;
     for (const key in T.sets) { const S0 = T.sets[key]; for (let l = 0; l < 3; l++) { const LD = S0.lods[l]; if (!LD) continue; const b = B[key + '|' + l], n = b ? b.list.length : 0;
       for (const P of LD.parts) {
         if (n > P.cap) { if (P.im) { scene.remove(P.im); P.im.dispose(); } P.cap = Math.max(8, 1 << Math.ceil(Math.log2(n + 4))); P.im = new THREE.InstancedMesh(P.geo, P.mat, P.cap); P.im.frustumCulled = false; P.im.userData.t33 = true; scene.add(P.im); }
-        if (!P.im) continue; P.im.count = n; P.im.visible = n > 0;
+        if (!P.im) continue; P.im.count = n; P.im.visible = n > 0; if (T3.on) P.im.userData.noCull23 = T3.was;
         P.im.castShadow = shOn && (S0.sp === 'pine' ? l < 2 : (P.bark ? l < 2 : l === 0)); P.im.receiveShadow = !P.leaf;
+        let cm = 0, cc = 0; const AM = P.im.instanceMatrix.array;
         for (let i = 0; i < n; i++) { const t = b.list[i], c3 = t.c33; _q.setFromAxisAngle(_up, t.yaw); if (c3.lean) _q.premultiply(c3.lean); _p.set(t.x - ORG.x, t.y - 0.05, t.z - ORG.z); if (c3.sx) _s.set(c3.s * c3.sx, c3.s * c3.sy, c3.s * c3.sz); else _s.setScalar(c3.s);
-          _m.compose(_p, _q, _s).multiply(P.local); P.im.setMatrixAt(i, _m); if (c3.hue) { const h = HUE38[c3.hue]; _c.setRGB(c3.tint * h[0], c3.tint * h[1], c3.tint * h[2]); } else _c.setScalar(c3.tint); P.im.setColorAt(i, _c); }
-        if (n) { P.im.instanceMatrix.needsUpdate = true; if (P.im.instanceColor) P.im.instanceColor.needsUpdate = true; }
+          _m.compose(_p, _q, _s).multiply(P.local); if (!T3A || t3m(AM, i * 16, _m.elements)) { P.im.setMatrixAt(i, _m); cm = 1; } if (c3.hue) { const h = HUE38[c3.hue]; _c.setRGB(c3.tint * h[0], c3.tint * h[1], c3.tint * h[2]); } else _c.setScalar(c3.tint); const AC = P.im.instanceColor; if (!T3A || !AC || t3d(AC.array, i * 3, _c.r, _c.g, _c.b, 0, 3)) { P.im.setColorAt(i, _c); cc = 1; } }
+        if (n) { if (!T3A || cm) { P.im.instanceMatrix.needsUpdate = true; T3.upM++; } else T3.skM++; if (P.im.instanceColor) { if (!T3A || cc) { P.im.instanceColor.needsUpdate = true; T3.upC++; } else T3.skC++; } }
       } } }
   }
 
