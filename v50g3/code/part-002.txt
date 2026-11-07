@@ -2519,7 +2519,8 @@ const BTN20 = (() => {
   }
   try { initUI(); } catch (e) { console.warn('[v20] btn20 ui', e); }
   let tPrev = performance.now();
-  (function loop() { requestAnimationFrame(loop); const t = performance.now(); B.dt = Math.min(0.05, (t - tPrev) / 1000); tPrev = t; try { sync(); } catch (e) { if (!B.err) { B.err = 1; console.warn('[v20] btn20', e); } } })();
+  const BTNJ = RAF5.job('btn20', () => { try { sync(); } catch (e) { if (!B.err) { B.err = 1; console.warn('[v20] btn20', e); } } });   // v50g5 raf5: B.dt بضل ينحسب بكل إطار شاشة متل قبل؛ بس sync() بيمشي مع إطارات الرسم
+  (function loop(ts) { requestAnimationFrame(loop); const t = performance.now(); B.dt = Math.min(0.05, (t - tPrev) / 1000); tPrev = t; if (RAF5.own()) return; BTNJ.ts = ts; BTNJ.nl++; try { sync(); } catch (e) { if (!B.err) { B.err = 1; console.warn('[v20] btn20', e); } } })();
   recalcDmg(); sync();
   const api = {
     blockDmg, mode, isSpear, B, sync, equip: k => equipItem(k),
@@ -2705,7 +2706,7 @@ const SHOP20 = (() => {
   function fire36(grp, Mt) { if (!Mt.mk || !Mt.mk.fire_bed) return; const root = new THREE.Group(); root.name = 'food36_markers'; grp.add(root);
     for (const nm in Mt.mk) { const o = new THREE.Object3D(); o.name = nm; o.position.fromArray(Mt.mk[nm].p); o.userData = Mt.mk[nm].ud; root.add(o); }
     (fireMod || (fireMod = import('./shops/food-v5-fire.js'))).then(m => { try { const f = m.addOvenFire(root, {}); FIRE36.push({ f, grp }); ST.fire36 = FIRE36.length;
-        if (!fireLoop) { fireLoop = true; const P = new THREE.Vector3(); const tick = () => { const t = performance.now() / 1000; for (const F of FIRE36) { const cam = typeof camera !== 'undefined' ? camera : null; if (cam) { F.grp.getWorldPosition(P); F.f.group.visible = P.distanceToSquared(cam.position) < 90 * 90; } F.f.update(t); } requestAnimationFrame(tick); }; requestAnimationFrame(tick); } }
+        if (!fireLoop) { fireLoop = true; const P = new THREE.Vector3(); const body = () => { const t = performance.now() / 1000; for (const F of FIRE36) { const cam = typeof camera !== 'undefined' ? camera : null; if (cam) { F.grp.getWorldPosition(P); F.f.group.visible = P.distanceToSquared(cam.position) < 90 * 90; } F.f.update(t); } }; const FJ = RAF5.job('fire36', () => { try { body(); } catch (e) { FJ.dead = 1; setTimeout(() => { throw e; }); } });   /* v50g5 raf5: متل v50g3 — خطأ بيوقّف حلقة النار وبيطلع بالكونسول */ const tick = ts => { if (FJ.dead) return; if (!RAF5.own()) { FJ.ts = ts; FJ.nl++; body(); } requestAnimationFrame(tick); }; requestAnimationFrame(tick); } }
       catch (e) { console.warn('[v36] food fire: ' + (e && e.message || e)); ST.fireErr = String(e); } }).catch(e => { console.warn('[v36] food fire load: ' + e); ST.fireErr = String(e); }); }
   function buildSeller(k, g) {
     const clips = {}; for (const c of g.animations) { const nm = c.name.includes('|') ? c.name.split('|').pop() : c.name; c.name = nm; clips[nm] = c; }
@@ -3646,6 +3647,7 @@ let FCAP_T = 0; const FCAP_ON = !/[?&]fcap=0\b/.test(location.search);
 function frame(rafTime) {
   requestAnimationFrame(frame);
   { const fc5 = window.__G50ON === true ? (window.__G50FC | 0) : 0, cap5 = fc5 ? (fc5 < 50 ? 25 : 12) : (S.preset === 'vlow' ? 25 : 0); if (FCAP_ON && cap5) { const tn = performance.now(); if (tn - FCAP_T < cap5) return; FCAP_T = tn; } }   // v50d3 + v50g: حد الإطارات من الإعدادات (تلقائي = منخفضة جدا ٣٠ متل قبل)   // v50d3: «منخفضة جدا» = ٣٠ إطار ثابتة (أنعم من ٣٥–٥٠ متقلّبة وأبرد عالجهاز)
+  RAF5.drive(rafTime);   // v50g5 raf5: هاد الإطار عدّى السقف → الحلقات الجانبية بتشتغل هلق (على منخفض/منخفضة جدا بس)
   const rawDt = clock.getDelta(), dt = uiLock() ? 0 : Math.min(0.05, rawDt);
   let frameMs = rawDt * 1000; if (PP1FPS) { const stamp = Number.isFinite(rafTime) ? rafTime : performance.now(); frameMs = perfStamp === null ? 0 : stamp - perfStamp; perfStamp = stamp;
     if (frameMs > 0) { fpsRA += frameMs; fpsRN++; if (fpsRA >= 400) { fpsReal = Math.round(1000 * fpsRN / fpsRA); fpsRA = fpsRN = 0; } } perfRead(frameMs); }
