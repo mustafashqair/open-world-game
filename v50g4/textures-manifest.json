@@ -1,0 +1,217 @@
+{
+  "version": 1,
+  "assets": {
+    "city/banner.webp": {
+      "low": "v50g4/textures/low/city/banner.ktx2",
+      "vlow": "v50g4/textures/vlow/city/banner.ktx2"
+    },
+    "city/cobble.webp": {
+      "low": "v50g4/textures/low/city/cobble.ktx2",
+      "vlow": "v50g4/textures/vlow/city/cobble.ktx2"
+    },
+    "city/cobble_n.webp": {
+      "low": "v50g4/textures/low/city/cobble_n.ktx2",
+      "vlow": "v50g4/textures/vlow/city/cobble_n.ktx2"
+    },
+    "city/door.webp": {
+      "low": "v50g4/textures/low/city/door.ktx2",
+      "vlow": "v50g4/textures/vlow/city/door.ktx2"
+    },
+    "city/door_n.webp": {
+      "low": "v50g4/textures/low/city/door_n.ktx2",
+      "vlow": "v50g4/textures/vlow/city/door_n.ktx2"
+    },
+    "city/flag.webp": {
+      "low": "v50g4/textures/low/city/flag.ktx2",
+      "vlow": "v50g4/textures/vlow/city/flag.ktx2"
+    },
+    "city/flag_n.webp": {
+      "low": "v50g4/textures/low/city/flag_n.ktx2",
+      "vlow": "v50g4/textures/vlow/city/flag_n.ktx2"
+    },
+    "city/road.webp": {
+      "low": "v50g4/textures/low/city/road.ktx2",
+      "vlow": "v50g4/textures/vlow/city/road.ktx2"
+    },
+    "city/road_n.webp": {
+      "low": "v50g4/textures/low/city/road_n.ktx2",
+      "vlow": "v50g4/textures/vlow/city/road_n.ktx2"
+    },
+    "city/roof.webp": {
+      "low": "v50g4/textures/low/city/roof.ktx2",
+      "vlow": "v50g4/textures/vlow/city/roof.ktx2"
+    },
+    "city/roof_n.webp": {
+      "low": "v50g4/textures/low/city/roof_n.ktx2",
+      "vlow": "v50g4/textures/vlow/city/roof_n.ktx2"
+    },
+    "city/wallstone.webp": {
+      "low": "v50g4/textures/low/city/wallstone.ktx2",
+      "vlow": "v50g4/textures/vlow/city/wallstone.ktx2"
+    },
+    "city/wallstone_n.webp": {
+      "low": "v50g4/textures/low/city/wallstone_n.ktx2",
+      "vlow": "v50g4/textures/vlow/city/wallstone_n.ktx2"
+    },
+    "village/v4/bark-l.webp": {
+      "low": "v50g4/textures/low/village/v4/bark-l.ktx2",
+      "vlow": "v50g4/textures/vlow/village/v4/bark-l.ktx2"
+    },
+    "village/v4/bark.webp": {
+      "low": "v50g4/textures/low/village/v4/bark.ktx2",
+      "vlow": "v50g4/textures/vlow/village/v4/bark.ktx2"
+    },
+    "village/v4/bark_n.webp": {
+      "low": "v50g4/textures/low/village/v4/bark_n.ktx2",
+      "vlow": "v50g4/textures/vlow/village/v4/bark_n.ktx2"
+    },
+    "village/v4/dirt-l.webp": {
+      "low": "v50g4/textures/low/village/v4/dirt-l.ktx2",
+      "vlow": "v50g4/textures/vlow/village/v4/dirt-l.ktx2"
+    },
+    "village/v4/dirt.webp": {
+      "low": "v50g4/textures/low/village/v4/dirt.ktx2",
+      "vlow": "v50g4/textures/vlow/village/v4/dirt.ktx2"
+    },
+    "village/v4/dirt_n-l.webp": {
+      "low": "v50g4/textures/low/village/v4/dirt_n-l.ktx2",
+      "vlow": "v50g4/textures/vlow/village/v4/dirt_n-l.ktx2"
+    },
+    "village/v4/dirt_n.webp": {
+      "low": "v50g4/textures/low/village/v4/dirt_n.ktx2",
+      "vlow": "v50g4/textures/vlow/village/v4/dirt_n.ktx2"
+    },
+    "village/v4/gravel-l.webp": {
+      "low": "v50g4/textures/low/village/v4/gravel-l.ktx2",
+      "vlow": "v50g4/textures/vlow/village/v4/gravel-l.ktx2"
+    },
+    "village/v4/gravel_n-l.webp": {
+      "low": "v50g4/textures/low/village/v4/gravel_n-l.ktx2",
+      "vlow": "v50g4/textures/vlow/village/v4/gravel_n-l.ktx2"
+    },
+    "village/v4/gravel_n.webp": {
+      "low": "v50g4/textures/low/village/v4/gravel_n.ktx2",
+      "vlow": "v50g4/textures/vlow/village/v4/gravel_n.ktx2"
+    },
+    "village/v4/plank-l.webp": {
+      "low": "v50g4/textures/low/village/v4/plank-l.ktx2",
+      "vlow": "v50g4/textures/vlow/village/v4/plank-l.ktx2"
+    },
+    "village/v4/plank.webp": {
+      "low": "v50g4/textures/low/village/v4/plank.ktx2",
+      "vlow": "v50g4/textures/vlow/village/v4/plank.ktx2"
+    },
+    "village/v4/plaza-l.webp": {
+      "low": "v50g4/textures/low/village/v4/plaza-l.ktx2",
+      "vlow": "v50g4/textures/vlow/village/v4/plaza-l.ktx2"
+    },
+    "village/v4/plaza.webp": {
+      "low": "v50g4/textures/low/village/v4/plaza.ktx2",
+      "vlow": "v50g4/textures/vlow/village/v4/plaza.ktx2"
+    },
+    "village/v4/plaza_n-l.webp": {
+      "low": "v50g4/textures/low/village/v4/plaza_n-l.ktx2",
+      "vlow": "v50g4/textures/vlow/village/v4/plaza_n-l.ktx2"
+    },
+    "village/v4/plaza_n.webp": {
+      "low": "v50g4/textures/low/village/v4/plaza_n.ktx2",
+      "vlow": "v50g4/textures/vlow/village/v4/plaza_n.ktx2"
+    },
+    "village/v4/stone-l.webp": {
+      "low": "v50g4/textures/low/village/v4/stone-l.ktx2",
+      "vlow": "v50g4/textures/vlow/village/v4/stone-l.ktx2"
+    },
+    "village/v4/stone.webp": {
+      "low": "v50g4/textures/low/village/v4/stone.ktx2",
+      "vlow": "v50g4/textures/vlow/village/v4/stone.ktx2"
+    },
+    "village/v4/stone_n.webp": {
+      "low": "v50g4/textures/low/village/v4/stone_n.ktx2",
+      "vlow": "v50g4/textures/vlow/village/v4/stone_n.ktx2"
+    },
+    "landmarks/banner.webp": {
+      "low": "v50g4/textures/low/landmarks/banner.ktx2",
+      "vlow": "v50g4/textures/vlow/landmarks/banner.ktx2"
+    },
+    "landmarks/callig.webp": {
+      "low": "v50g4/textures/low/landmarks/callig.ktx2",
+      "vlow": "v50g4/textures/vlow/landmarks/callig.ktx2"
+    },
+    "landmarks/ceiling.webp": {
+      "low": "v50g4/textures/low/landmarks/ceiling.ktx2",
+      "vlow": "v50g4/textures/vlow/landmarks/ceiling.ktx2"
+    },
+    "landmarks/ceiling_n.webp": {
+      "low": "v50g4/textures/low/landmarks/ceiling_n.ktx2",
+      "vlow": "v50g4/textures/vlow/landmarks/ceiling_n.ktx2"
+    },
+    "landmarks/cream.webp": {
+      "low": "v50g4/textures/low/landmarks/cream.ktx2",
+      "vlow": "v50g4/textures/vlow/landmarks/cream.ktx2"
+    },
+    "landmarks/cream_n.webp": {
+      "low": "v50g4/textures/low/landmarks/cream_n.ktx2",
+      "vlow": "v50g4/textures/vlow/landmarks/cream_n.ktx2"
+    },
+    "landmarks/dome_in.webp": {
+      "low": "v50g4/textures/low/landmarks/dome_in.ktx2",
+      "vlow": "v50g4/textures/vlow/landmarks/dome_in.ktx2"
+    },
+    "landmarks/dome_in_n.webp": {
+      "low": "v50g4/textures/low/landmarks/dome_in_n.ktx2",
+      "vlow": "v50g4/textures/vlow/landmarks/dome_in_n.ktx2"
+    },
+    "landmarks/dome_tile.webp": {
+      "low": "v50g4/textures/low/landmarks/dome_tile.ktx2",
+      "vlow": "v50g4/textures/vlow/landmarks/dome_tile.ktx2"
+    },
+    "landmarks/dome_tile_n.webp": {
+      "low": "v50g4/textures/low/landmarks/dome_tile_n.ktx2",
+      "vlow": "v50g4/textures/vlow/landmarks/dome_tile_n.ktx2"
+    },
+    "landmarks/glass.webp": {
+      "low": "v50g4/textures/low/landmarks/glass.ktx2",
+      "vlow": "v50g4/textures/vlow/landmarks/glass.ktx2"
+    },
+    "landmarks/marble.webp": {
+      "low": "v50g4/textures/low/landmarks/marble.ktx2",
+      "vlow": "v50g4/textures/vlow/landmarks/marble.ktx2"
+    },
+    "landmarks/marble_n.webp": {
+      "low": "v50g4/textures/low/landmarks/marble_n.ktx2",
+      "vlow": "v50g4/textures/vlow/landmarks/marble_n.ktx2"
+    },
+    "landmarks/mashrabiya.webp": {
+      "low": "v50g4/textures/low/landmarks/mashrabiya.ktx2",
+      "vlow": "v50g4/textures/vlow/landmarks/mashrabiya.ktx2"
+    },
+    "landmarks/mihrab.webp": {
+      "low": "v50g4/textures/low/landmarks/mihrab.ktx2",
+      "vlow": "v50g4/textures/vlow/landmarks/mihrab.ktx2"
+    },
+    "landmarks/prayer.webp": {
+      "low": "v50g4/textures/low/landmarks/prayer.ktx2",
+      "vlow": "v50g4/textures/vlow/landmarks/prayer.ktx2"
+    },
+    "landmarks/runner.webp": {
+      "low": "v50g4/textures/low/landmarks/runner.ktx2",
+      "vlow": "v50g4/textures/vlow/landmarks/runner.ktx2"
+    },
+    "landmarks/stone.webp": {
+      "low": "v50g4/textures/low/landmarks/stone.ktx2",
+      "vlow": "v50g4/textures/vlow/landmarks/stone.ktx2"
+    },
+    "landmarks/stone_n.webp": {
+      "low": "v50g4/textures/low/landmarks/stone_n.ktx2",
+      "vlow": "v50g4/textures/vlow/landmarks/stone_n.ktx2"
+    },
+    "landmarks/zellige.webp": {
+      "low": "v50g4/textures/low/landmarks/zellige.ktx2",
+      "vlow": "v50g4/textures/vlow/landmarks/zellige.ktx2"
+    },
+    "landmarks/zellige_n.webp": {
+      "low": "v50g4/textures/low/landmarks/zellige_n.ktx2",
+      "vlow": "v50g4/textures/vlow/landmarks/zellige_n.ktx2"
+    }
+  }
+}
