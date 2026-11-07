@@ -3772,7 +3772,7 @@ window.V40 = (() => {
   /* ── ١. السماء كإضاءة وانعكاس للعالم: PMREM من قبة السماء نفسها (نفس الـ uniforms) → scene.environment ── */
   const E = { pm: null, sc: null, mat: null, rt: null, sig: '', t: -1e9, lastH: -99, uG: { value: new T.Color() }, uK: { value: F.envK } };
   function envInit() {
-    const fs0 = sky.material.fragmentShader;
+    const fs0 = (typeof SKY5 !== 'undefined' && SKY5.fs0) || sky.material.fragmentShader;   // v50g5 skylow: إضاءة السماء (PMREM) دايماً من الشيدر الأصلي
     const fs = fs0.replace('uniform vec3 uSun,uHor,uZen,uSunCol;', 'uniform vec3 uSun,uHor,uZen,uSunCol,uGround40; uniform float uEnvK40;')
       .replace('pow(s,600.)*6.', 'pow(s,600.)*2.')
       .replace('gl_FragColor=vec4(col,1.);', 'col=mix(col,uGround40,smoothstep(0.0,0.2,-d.y)); gl_FragColor=vec4(col*uEnvK40,1.);');
