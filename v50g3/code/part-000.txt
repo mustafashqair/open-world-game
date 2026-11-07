@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as skClone } from 'three/addons/utils/SkeletonUtils.js';
+import { createUploadQueue } from './v50g4/uploads.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
@@ -18,6 +19,19 @@ const G2C = { k: 0, d: 0, fog: Math.max(40, +(Q4.get('g2fog') || 80)), pald: Mat
 const PP1ON = G2ON && !/[?&]pp1=0\b/.test(location.search), PP1 = k => PP1ON && Q4.get('pp1' + k) !== '0', PP1LOW = () => S.preset === 'vlow' || S.preset === 'low';   /* v50g3 pp1 */
 const FRAME4 = { n: 0, t0: 0, tl: 0, tr: 0, ft: [], lg: [], rd: [] };
 const VLSAVED4 = (() => { try { return JSON.parse(localStorage.getItem('ow_settings2') || '{}').preset === 'vlow'; } catch (e) { return false; } })();
+// v50g4-1: LOW/very-low only; ?v50g4s=0 (or ?v50g4=0) = v50g3 loading exactly. linear-target (offscreen/reflection) variants are skipped before Play by default — ~12 s less loading on the emulator, worst case a one-time compile the first time such a material is drawn, as in v50g3; ?g4slin=1 brings them back. ?g4sfin=0 skips the finish pass.
+const G4S = () => Q4.get('v50g4') !== '0' && Q4.get('v50g4s') !== '0' && ['low', 'vlow'].includes(S.preset);
+const G4UPLOAD = createUploadQueue(G4S), G4ROOTS = new Set();
+window.__g4Uploads = G4UPLOAD.st;
+const G4TEX = new WeakSet();
+function g4Texture(t) {
+  // r170 keeps this handle until disposal/context loss. Do not charge byte
+  // admissions repeatedly for a texture which is already resident or queued.
+  if (G4TEX.has(t) || renderer.properties.get(t).__webglTexture) return;
+  G4TEX.add(t); G4UPLOAD.add(() => { try { renderer.initTexture(t); } finally { G4TEX.delete(t); } }, (t.image?.width || 0) * (t.image?.height || 0) * 16 / 3);
+}
+const G4SEEN = new Set(), G4SLIN = Q4.get('g4slin') === '1', G4SFIN = Q4.get('g4sfin') !== '0', G4SLOADMS = Math.max(2, +(Q4.get('g4sload') || 12)), G4TOMS = Math.max(1000, +(Q4.get('g4toms') || 90000)), G4FAIL = Q4.get('g4failcompile') === '1';   // ?g4toms=N: timeout of every v50g4-1 loading wait (default 90 s); ?g4failcompile=1: test switch — the queued compile never reports done   // v50g4-1 (Tab): shader signatures already queued — persists across the gate pass and the finish pass
+function g4Bytes(root) { let b = 0; root.traverse(o => { for (const a of Object.values(o.geometry?.attributes || {})) b += a.array?.byteLength || 0; }); return b; }
 const VLOW4B = new Set(["bandit/bandit-lite.glb", "guard/guard-spear-lite.glb", "guard/guard-sword-lite.glb", "npcs/vwork/city-man-new-v3f-lite.glb", "npcs/vwork/village-girl-new-v9-lite.glb", "royal-guard/royal-archer-lite.glb", "royal-guard/royal-guard-v2-lite.glb", "royal-guard/royal-swordsman-lite.glb", "shops/blacksmith-npc-lite.glb", "shops/food-vendor-lite.glb", "shops/potion-seller-lite.glb", "shops/stable-keeper-lite.glb", "shops/supply-seller-lite.glb"]);   // v50d4b: مقصوصات الشخصيات المصلّحة
 const VLOW4 = (() => { const S0 = new Set(["bandit/bandit-lite.glb", "guard/guard-spear-lite.glb", "guard/guard-sword-lite.glb", "horses/fauna-horse-bay-lite.glb", "horses/fauna-horse-black-lite.glb", "horses/fauna-horse-grey-lite.glb", "horses37/horse-bay-lite.glb", "horses37/horse-black-lite.glb", "horses37/horse-chestnut-lite.glb", "horses37/horse-cream-lite.glb", "npcs/vwork/city-man-new-v3f-lite.glb", "npcs/vwork/village-girl-new-v9-lite.glb", "palace3d/palace-far.glb", "palace3d/palace-garden-far.glb", "palace3d/palace-garden-v15-lite.glb", "palace3d/palace-v13-lite.glb", "royal-guard/royal-archer-lite.glb", "royal-guard/royal-guard-v2-lite.glb", "royal-guard/royal-swordsman-lite.glb", "shops/barn-v41-lite.glb", "shops/blacksmith-npc-lite.glb", "shops/blacksmith-v7-lite.glb", "shops/food-v5-lite.glb", "shops/food-vendor-lite.glb", "shops/potion-seller-lite.glb", "shops/stable-keeper-lite.glb", "shops/stable-v6-lite.glb", "shops/supply-seller-lite.glb", "village/v4/gate-v5-lite.glb", "village/v4/house-w1-lite.glb", "village/v4/house-w3-lite.glb", "village/v4/house-w4-lite.glb", "village/v4/road-props-lite.glb", "village/v4/village-props-v4-lite.glb", "village/village-fence-1-lite-v3b.glb", "village/village-house-1-lite-v3b.glb", "village/village-house-3-lite-v3b.glb", "village/village-kiosk-1-v5-lite.glb", "village/village-kiosk-2-v5-lite.glb", "village/village-kiosk-3-v5-lite.glb", "village/village-kiosk-4-v5-lite.glb"]), q = new URLSearchParams(location.search); const s = { n: 0, has: k => S0.has(k), list: S0,   // v50d4: نسخ «منخفضة جدا» (مثلثات أقل، نفس الهيكل والحركات والصور)
   on() { if (q.get('vmdl') === '0' || (window.__QUALITY || 'mobile') === 'high') return false; try { return JSON.parse(localStorage.getItem('ow_settings2') || '{}').preset === 'vlow'; } catch (e) { return false; } } }; window.__VLOW4 = s; return s; })();
@@ -55,7 +69,7 @@ const GLB42 = (() => {
       if (e.tries < 4 && +st !== 404 && +st !== 403) { const wait = [800, 2500, 6000][e.tries - 1] || 6000; console.warn('[v42] retry ' + key + ' #' + e.tries + ' (' + (err && err.message || err) + ')'); setTimeout(attempt, wait); return; }
       done = true; e.st = 'fail'; e.err = String(err && err.message || err).slice(0, 160); e.t1 = now(); console.warn('[v42] GLB failed after ' + e.tries + ' tries: ' + key); if (onError) onError(err); };
     const attempt = () => { e.tries++; _load.call(self, url, g => { if (done) return; const bad = check(g); if (bad) return fail(new Error(key + ': ' + bad)); done = true; e.st = 'ok'; e.t1 = now(); e.err = null;
-        const fin = () => { try { onLoad && onLoad(g); } catch (x) { console.error('[v42] onLoad ' + key, x); } }; if (TCAP.cap() || TCAP.capc()) TCAP.run(g, key).then(fin, fin); else fin(); }, onProgress, fail); };
+        const fin = () => { try { if (G4S()) { if (!window.G50?.st.played) G4ROOTS.add(g.scene); G4UPLOAD.add(() => onLoad && onLoad(g), g4Bytes(g.scene)); } else onLoad && onLoad(g); } catch (x) { console.error('[v42] onLoad ' + key, x); } }; if (TCAP.cap() || TCAP.capc()) TCAP.run(g, key).then(fin, fin); else fin(); }, onProgress, fail); };
     attempt();
   };
   const api = { reg, cfg,
