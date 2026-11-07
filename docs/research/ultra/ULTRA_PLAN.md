@@ -4,7 +4,7 @@
 
 There is no AAA game installed in this sandbox. This study used public developer presentations, published technical analyses and this repository's source. No commercial executable was downloaded, disassembled or captured with Ghidra/RenderDoc; no DRM bypass, proprietary code, shader or asset copying occurred. Techniques below are independently implementable ideas, not reconstructed game implementations. The older REA/Ghidra research wording in COMMA_TASKS.md does not override these limits.
 
-This commit contains research only. Phase 2 must wait for explicit approval of this plan **in the same Task**. No runtime files, dependencies, shaders, assets, service worker or deployment are changed. There are no measured GPU times or FPS results from this phase. Memory arithmetic below is allocation modelling, not observed residency; pass counts describe the proposed browser graph, not commercial games.
+This branch contains research only. The user approved the plan with binding scope amendments recorded below; that approval does **not** authorize starting implementation now. No runtime files, dependencies, shaders, assets, service worker or deployment are changed. There are no measured GPU times or FPS results from this phase. Memory arithmetic below is allocation modelling, not observed residency; pass counts describe the proposed browser graph, not commercial games.
 
 Evidence labels: [مصدر أولي/محاضرة مطور] primary/developer; [تحليل صحفي] journalistic; [استنتاج] inference/design proposal. All browser mappings, priorities and cost estimates are [استنتاج] unless explicitly identified as repository observations. Exact GI/probe, cascade, wetness or temporal details absent from the sources stay unknown in the individual studies. This does not mean those games lack the effect.
 
@@ -22,6 +22,63 @@ Read the ten studies in requested order:
 10. [Death Stranding](10-death-stranding.md)
 
 **Coverage: 10 requested games; no exclusions or replacements.** Depth varies: Ghost/Horizon/Death Stranding have direct developer material; several others have journalistic evidence and explicitly unresolved internals. Each study covers six rendering categories with cost estimates and source links. The [source register](SOURCES.md) records whether full text, partial extraction or a search excerpt was available.
+
+## Approval and phase-2 scope
+
+**Binding amendment recorded 2026-11-07 in Task `TASK/1794040848.110000`. This section overrides broader implementation suggestions elsewhere in this research document.** The user approved the plan subject to the following limits. Research estimates and deferred techniques remain for reference, not as authorization to implement them.
+
+### Approved scope, currently on hold
+
+Only ranks **1–3** may be implemented when the hold is explicitly lifted:
+
+- **Rank 1:** isolated linear HDR graph, exposure/colour management, grade and LUT.
+- **Rank 2:** sky/light/reflection agreement with bounded PMREM resolution, residency and refresh cadence. No scope expansion into a spatial probe system.
+- **Rank 3:** analytic height haze integrated with the existing atmosphere, without new volumetric/cloud work.
+
+The new preset **replaces the existing `ultra` key with one meaning**. There must be no legacy/new dual ULTRA semantics or duplicate key. Expose that same preset in the new settings UI as **`فائقة`**. Keep the exact HIGH fallback under `?ultra=0` and all legacy pixel-identity requirements.
+
+**Desktop first.** Desktop FPS and image evidence are the first performance deliverable. The Galaxy A14 ULTRA-lite profile is **deferred until real A14 measurements exist**; its earlier budgets below are research hypotheses, not a current implementation target.
+
+### Deferred ranks — no implementation or prerequisite work authorized
+
+| Rank | Status |
+|---|---|
+| 4 — terrain blending/detail normals | **Deferred** |
+| 5 — silhouette LOD/transitions | **Deferred** |
+| 6 — foliage wind/density | **Deferred** |
+| 7 — CSM/contact grounding | **Deferred** |
+| 8 — local irradiance/baked occlusion | **Deferred** |
+| 9 — AO improvements | **Deferred** |
+| 10 — new HDR bloom pyramid | **Deferred** |
+| 11 — wetness | **Deferred** |
+| 12 — clouds/shafts | **Deferred** |
+| 13 — water reflections | **Deferred** |
+| 14 — TAA | **Deferred** |
+| 15 — photo DOF | **Deferred** |
+
+Do not modify these systems or add their proposed flags/resources as phase-2 preparation. Existing effects may be preserved while integrating ranks 1–3, but their quality, algorithms and feature scope must not be upgraded under this approval.
+
+### Implementation hold and repository verification
+
+Implementation remains stopped until the five v50g4 PRs **#1–#5** have been reviewed and stabilized, and the coordinating agent sends a **later explicit release message**. Their becoming merged/closed alone is not permission to start. No implementation branch, runtime edit or implementation rebase is allowed now. This amendment changes only `ULTRA_PLAN.md` on the research branch.
+
+Fetched `origin/main` on 2026-11-07: HEAD is **`e9d41bbba849dac22b134055e502ed928d08b5a7`**, subject `docs/research: add 1-peer-matrix.csv`. **v50g3 does not appear in this fetched main snapshot:** `index.html:1221` still loads `v50g2/code/part-*.txt?v=v50g2`; the top-level tree has v50g/v50g2 and no v50g3 directory; COMMA_TASKS.md explicitly says v50g3 is not on main yet. This is a source-snapshot conclusion, not a claim about unretrieved historical commits (the clone is shallow).
+
+GitHub PR API verification on 2026-11-07 found all five **open, `merged=false`**:
+
+| PR | Work | Shared files reported in PR diff |
+|---|---|---|
+| [#1](https://github.com/mustafashqair/open-world-game/pull/1) | v50g4-2 textures | `v50g2/code/part-000.txt` |
+| [#2](https://github.com/mustafashqair/open-world-game/pull/2) | v50g4-3 residency | `v50g2/code/part-000.txt`, `part-001.txt`, `part-002.txt` |
+| [#3](https://github.com/mustafashqair/open-world-game/pull/3) | v50g4-4 pacing | `v50g2/code/part-000.txt`, `part-001.txt`, `part-002.txt` |
+| [#4](https://github.com/mustafashqair/open-world-game/pull/4) | v50g4-5 animations | `v50g2/code/part-000.txt`, `part-002.txt` |
+| [#5](https://github.com/mustafashqair/open-world-game/pull/5) | v50g4-1 shader/upload admissions | `v50g2/code/part-000.txt`, `part-001.txt`, `part-002.txt` |
+
+These shared files are untouched by this documentation amendment. Refresh main and these statuses again after release; do not assume today's snapshot remains current.
+
+### Delivery after a later explicit implementation release
+
+Create **`comma/ultra-preset`** from the then-current main after the required baseline refresh/rebase; open **one draft PR**. Deliver HIGH-versus-ULTRA screenshots in **city, market, forest and village**, desktop FPS results with hardware/method, exact pixel evidence that **`?ultra=0` equals HIGH**, and **zero changed pixels** for HIGH, MEDIUM, LOW and very-low against the pinned baseline. Tab reviews and tests before any merge. **This agent must never merge.** These are future delivery requirements; none is claimed as completed by this research update.
 
 ## Baseline audit and integration map
 
@@ -49,17 +106,17 @@ Line numbers refer to the baseline, not stable public APIs. Symbol names are the
 
 ## Non-negotiable contract
 
-- ULTRA is a new explicit visual preset above HIGH, Arabic UI `فائقة`. Resolve the existing legacy key rather than creating two ULTRA meanings. It is opt-in and never chosen by legacy auto-quality.
+- ULTRA is a new explicit visual preset above HIGH, Arabic UI `فائقة`. It replaces the existing `ultra` key with one meaning across both settings surfaces; no duplicate or parallel legacy ULTRA meaning is allowed. It is opt-in and never chosen by legacy auto-quality.
 - **HIGH, MEDIUM, LOW and very-low remain pixel-identical**, including their loading/material/render paths. Do not change their settings, shaders, exposure, time step, ordering or default assets to pay for ULTRA.
 - Parse `?ultra=0` before imports, settings expansion or material changes. It disables every new feature/allocation and, when ULTRA was requested or saved, uses the **exact baseline HIGH path** for that load without rewriting the stored preference. For any other preset it behaves exactly like that baseline preset. This fallback mapping must be documented/tested, not silently interpreted as “all expensive flags off.” Existing unrelated URL flags still apply normally.
-- Proposed subflags: `uGrade`, `uEnv`, `uFog`, `uTerrain`, `uLod`, `uWind`, `uShadow`, `uBounce`, `uAO`, `uBloom`, `uWet`, `uCloud`, `uWater`, `uTAA`, `uDOF`, each `=0` disables its ULTRA feature. Global `ultra=0` wins over all of them. Subflags cannot activate a feature outside ULTRA. No new network requests or optional shader compile on non-ULTRA loads.
+- In-scope proposed subflags are only `uGrade`, `uEnv`, `uFog`, each `=0` disables its ULTRA feature. Flags for ranks 4–15 are deferred and must not be implemented in phase 2. Global `ultra=0` wins over all of them. Subflags cannot activate a feature outside ULTRA. No new network requests or optional shader compile on non-ULTRA loads.
 - No cypress, palms or snow. Arabic-only UI and player-facing messages. No new characters, objects or placement near the palace or its garden. Material/light evaluation of existing surfaces is allowed; no new prop “demonstration” at the palace.
 - Do not redo fixed-step physics (1/60, four-step cap), very-low ratio 0.55 or its no-shadow rule. No animation replacement. No gameplay/AI changes.
 - No mutation of global ShaderChunk/prototypes for new features. Clone materials, chain existing hooks, use unique `customProgramCacheKey`, own all optional resources, and dispose on teardown. ULTRA transitions may reload the page to guarantee isolation. Test switch-away persistence and stale worker replies. Leaving ULTRA must restore exact baseline pixels, not merely similar settings.
 
-## Two target profiles and honest feasibility
+## Target profiles — desktop first; phone deferred
 
-These are proposed acceptance targets, **not measured capabilities**. ULTRA refers to a coordinated visual profile, not “all settings maxed.” A lower internal resolution can make a better composed image affordable; it cannot guarantee a phone will run it.
+Desktop is the only current phase-2 performance target. The phone profile and all its feature-selection suggestions are deferred pending real A14 measurements. These are research targets, **not measured capabilities**; rank 4–15 selections in this table remain deferred on both devices. ULTRA refers to a coordinated visual profile, not “all settings maxed.” A lower internal resolution can make a better composed image affordable; it cannot guarantee a phone will run it.
 
 | | Galaxy A14 / Mali-G57 / 4 GB target | Desktop reference target |
 |---|---|---|
@@ -92,7 +149,7 @@ For bandwidth, a full RGBA16F read+write is **at least 16P bytes/frame**: 14.06 
 
 All implementation and cost entries in this section are [استنتاج]. Order favours broad image improvement and low marginal cost; mobile/desktop choices can differ. Dependencies (especially HDR isolation) must be implemented before the dependent effects, regardless of visual rank.
 
-### 1. Coherent exposure, colour management and restrained grading
+### 1. Coherent exposure, colour management and restrained grading — APPROVED SCOPE, IMPLEMENTATION ON HOLD
 
 **Evidence:** [G1](SOURCES.md) [مصدر أولي/محاضرة مطور] custom HDR/tone mapping; [F1/M2](SOURCES.md) [تحليل صحفي] surface/light presentation. This is the cheapest broad correction, not a request to imitate a game's colour palette.
 
@@ -102,7 +159,7 @@ All implementation and cost entries in this section are [استنتاج]. Order 
 
 **Touches:** `V40.fxBuild/fxRender`, `COMP_FS`, `V41.mkFx/atmoBuild`, renderer setup; isolated material ownership. **Risk/check:** white clothing at noon/night, emissive lamps and sky; no double ACES, no double sRGB, no change to HIGH graph.
 
-### 2. Better sky/environment agreement and bounded PMREM refresh
+### 2. Better sky/environment agreement and bounded PMREM refresh — APPROVED SCOPE, IMPLEMENTATION ON HOLD
 
 **Evidence:** [G1](SOURCES.md) [مصدر أولي/محاضرة مطور] relit diffuse/specular environments; [F2](SOURCES.md) [تحليل صحفي] authored sky capture. Improve existing `envTick`, don't add an unconditional capture loop.
 
@@ -112,7 +169,7 @@ All implementation and cost entries in this section are [استنتاج]. Order 
 
 **Touches:** `V40.envTick`, `charSweep`, `CHARENV`, V41 night lighting. **Risk/check:** night metals must not reflect a daylight sky; PMREM refresh frame spikes and memory disposal.
 
-### 3. Sun-aware analytic height haze and aerial perspective
+### 3. Sun-aware analytic height haze and aerial perspective — APPROVED SCOPE, IMPLEMENTATION ON HOLD
 
 **Evidence:** [D2](SOURCES.md) [مصدر أولي/محاضرة مطور] analytic height fog plus scattering; [M1/R1](SOURCES.md) [تحليل صحفي] atmosphere survives quality reductions.
 
@@ -122,7 +179,7 @@ All implementation and cost entries in this section are [استنتاج]. Order 
 
 **Touches:** `V40.fogTick`, `V41.atmoBuild/mkFx/post`, `ENV`, `ORG`. **Risk/check:** silhouette halos, underwater/near-plane depth, dawn/sunset horizon and recenter jumps.
 
-### 4. Terrain macro variation, slope blending and distance-faded detail normals
+### 4. Terrain macro variation, slope blending and distance-faded detail normals — DEFERRED
 
 **Evidence:** [O1/W1](SOURCES.md) [تحليل صحفي] material/detail improvements; specific blend algorithm is an independent design, not an attributed proprietary technique.
 
@@ -132,7 +189,7 @@ All implementation and cost entries in this section are [استنتاج]. Order 
 
 **Touches:** `terrainMat`, `terrainLib.chunk`, `addChunk`, `TB24`, cliffs/road materials. **Risk/check:** tile/road seams, derivative discontinuities, grazing-angle shimmer; no new placement or geometry near palace.
 
-### 5. Silhouette-first LOD and short, deterministic transitions
+### 5. Silhouette-first LOD and short, deterministic transitions — DEFERRED
 
 **Evidence:** [M1/R1/F1](SOURCES.md) [تحليل صحفي] differentiated foliage/geometry distance; [G2](SOURCES.md) [مصدر أولي/محاضرة مطور] tiled culling/LOD.
 
@@ -142,7 +199,7 @@ All implementation and cost entries in this section are [استنتاج]. Order 
 
 **Touches:** `updateChunks/addChunk/killChunk`, `attachTrees/TREESET`, `TB24`, `ORG`. **Risk/check:** moving route, fade spikes, stale replies, recentering and silhouette holes; preserve deterministic placement/exclusion masks.
 
-### 6. Coherent foliage wind and limited near-field density
+### 6. Coherent foliage wind and limited near-field density — DEFERRED
 
 **Evidence:** [G2](SOURCES.md) [مصدر أولي/محاضرة مطور] common wind and grouped planting; [H3/F1](SOURCES.md) [تحليل صحفي] thin foliage aliasing.
 
@@ -152,7 +209,7 @@ All implementation and cost entries in this section are [استنتاج]. Order 
 
 **Touches:** `trees33/maple-wind.js`, `tree-wind-v2.js`, `attachTrees`, grass generation. **Risk/check:** wind/depth mismatch, bounding boxes too tight, temporal shimmer, no cypress/palms/snow or new palace/garden vegetation.
 
-### 7. Stable cascaded shadows with selective contact grounding
+### 7. Stable cascaded shadows with selective contact grounding — DEFERRED
 
 **Evidence:** [H2](SOURCES.md) [مصدر أولي/محاضرة مطور] CSM usage; [W1/R1](SOURCES.md) [تحليل صحفي] near grass grounding and far-shadow trade-offs.
 
@@ -162,7 +219,7 @@ All implementation and cost entries in this section are [استنتاج]. Order 
 
 **Touches:** `csmWant/csmSet/csmTick`, `V40C`, caster flags, render scheduling. **Risk/check:** low-angle acne/peter-panning, cascade edge jumps and moving-leaf shadow mismatch. Keep LOW/very-low shadow rules unchanged.
 
-### 8. Local irradiance and baked occlusion without real-time GI
+### 8. Local irradiance and baked occlusion without real-time GI — DEFERRED
 
 **Evidence:** [G1](SOURCES.md) [مصدر أولي/محاضرة مطور] SH relighting/interior masks; [K1/W1](SOURCES.md) [تحليل صحفي] indirect bounce/occlusion improves sheltered surfaces.
 
@@ -172,7 +229,7 @@ All implementation and cost entries in this section are [استنتاج]. Order 
 
 **Touches:** material lighting hooks, `hemi`, `scene.environment`, region/room classification, `ORG`. **Risk/check:** interior leaks and incorrect night bounce; no new placed lamps, characters or objects near palace.
 
-### 9. Depth-aware AO at reduced resolution
+### 9. Depth-aware AO at reduced resolution — DEFERRED
 
 **Evidence:** [R1/D1/W1](SOURCES.md) [تحليل صحفي] AO grounds objects; [G1](SOURCES.md) [مصدر أولي/محاضرة مطور] visibility is essential to plausible indirect illumination.
 
@@ -182,7 +239,7 @@ All implementation and cost entries in this section are [استنتاج]. Order 
 
 **Touches:** `fxBuild/fxRender`, GTAO uniforms, final composite. **Risk/check:** moving camera along thin geometry, foliage cutouts, wall/base contact versus texture AO double-counting.
 
-### 10. Small HDR bloom pyramid fused into output
+### 10. Small HDR bloom pyramid fused into output — DEFERRED
 
 **Evidence:** [H3](SOURCES.md) [مصدر أولي/محاضرة مطور] developer discussion includes bloom in temporal ordering; appearance/pipeline choice here is independent.
 
@@ -192,7 +249,7 @@ All implementation and cost entries in this section are [استنتاج]. Order 
 
 **Touches:** `X.bloom`, `fxRender`, HDR output. **Risk/check:** daylight white walls must not glow; Arabic HUD should remain outside the effect; lamps retain warm shape.
 
-### 11. Weather-driven roughness and local wetness masks
+### 11. Weather-driven roughness and local wetness masks — DEFERRED
 
 **Evidence:** [K1](SOURCES.md) [تحليل صحفي] specular/diffuse mismatch is visibly harmful. Specific wetness algorithms in the ten games remain unverified; this entire implementation is [استنتاج].
 
@@ -202,7 +259,7 @@ All implementation and cost entries in this section are [استنتاج]. Order 
 
 **Touches:** `ENV`, material clones, terrain/roads, V41 environment. **Risk/check:** no plastic-looking stone, no permanently glowing wet metal at night, smooth weather transitions.
 
-### 12. Budgeted cloud detail and optional short sun shafts
+### 12. Budgeted cloud detail and optional short sun shafts — DEFERRED
 
 **Evidence:** [H1](SOURCES.md) [مصدر أولي/محاضرة مطور] cloud environments/temporal artefacts; [R1/M1](SOURCES.md) [تحليل صحفي] reduced volumetric resolution can retain atmosphere.
 
@@ -212,7 +269,7 @@ All implementation and cost entries in this section are [استنتاج]. Order 
 
 **Touches:** `V41.cloudsMake`, `atmoBuild`, existing local weather/noise and sun CSM. **Risk/check:** horizon seams, flashing during sun motion, trail/ghosts; keep aerial perspective available if clouds are off.
 
-### 13. Selective water reflection improvement
+### 13. Selective water reflection improvement — DEFERRED
 
 **Evidence:** [D1/K1](SOURCES.md) [تحليل صحفي] SSR limitations; [W1](SOURCES.md) [تحليل صحفي] SSR as a non-RT water path. No ray-traced reflections are proposed.
 
@@ -222,7 +279,7 @@ All implementation and cost entries in this section are [استنتاج]. Order 
 
 **Touches:** `V41.waterInit/waterTick/nearWater`, `Water.js`, camera layers. **Risk/check:** shoreline/clip artefacts, stale reflection during turns, reflection/light mismatch at night.
 
-### 14. Optional robust TAA with explicit motion data — defer until core works
+### 14. Optional robust TAA with explicit motion data — defer until core works — DEFERRED
 
 **Evidence:** [H3](SOURCES.md) [مصدر أولي/محاضرة مطور] history reuse needs reliable vectors/rejection; [O1/D1](SOURCES.md) [تحليل صحفي] softness/ghosting trade-off.
 
@@ -232,7 +289,7 @@ All implementation and cost entries in this section are [استنتاج]. Order 
 
 **Touches:** camera update/render loop, material variants including skinned/wind/depth, `ORG`, fx graph. **Risk/check:** trails behind leaves/characters, shimmering disocclusion, outlines and UI. Do not ship a “TAA” label for stationary accumulation only.
 
-### 15. Cinematic DOF as a separate photo-only option
+### 15. Cinematic DOF as a separate photo-only option — DEFERRED
 
 **Evidence:** [D1](SOURCES.md) [تحليل صحفي] low internal DOF resolution flickers; [H3](SOURCES.md) [مصدر أولي/محاضرة مطور] history ordering complicates DOF.
 
@@ -244,6 +301,8 @@ All implementation and cost entries in this section are [استنتاج]. Order 
 
 ## Render graph and bounded allocation plan
 
+**Scope override:** the full graphs and allocation examples below are retained research scenarios. Phase 2 is limited to HDR/grade/LUT, bounded sky/PMREM agreement and analytic height haze. No new AO, bloom, shadows, clouds, water, TAA, DOF, terrain, vegetation or LOD work is authorized. Mobile graphs are deferred.
+
 Proposed desktop graph: scene (linear HDR + depth) -> AO/denoise in parallel conceptually but scheduled serially -> existing budgeted atmosphere/cloud output -> optional bloom chain -> optional TAA (requires explicit validated ordering/reactive masks) -> final grade/output/AA. This is a design dependency graph, **not a promise that arbitrary post effects commute**. Finalize whether TAA happens before bloom/DOF through moving-scene tests; default uses SMAA after output and no temporal feature. Renderer shadow and reflected-water scene draws are additional. Never keep both old and new post stacks rendering the same frame.
 
 Mobile starter: scene+depth -> analytic haze -> grade/output -> FXAA only if needed. No TAA, DOF or new planar capture. Prefer reusing existing compatible buffers. One HDR scene+depth (12P), one RGBA8 output (4P), plus optional E bloom buffers (~0.88 MiB at 720p) is about 14.94 MiB core at 720p before shadow/environment/material additions. Core may be an existing allocation rather than entirely incremental. A 1024 shadow is another nominal 4 MiB. Texture staging, existing world assets and atmosphere resources are **not** included and can still exceed device capacity. Reject features rather than silently relaxing the memory ceiling.
@@ -252,17 +311,19 @@ Desktop illustrative core at 1080p: scene+depth 23.73 MiB, RGBA8 output 7.91, tw
 
 Capability gates: WebGL2, `EXT_color_buffer_float` framebuffer completeness, usable depth formats and required texture filtering must be tested. Query actual formats/dimensions. If HDR target creation fails, disable optional ULTRA graph with an Arabic explanation and fall back to exact HIGH at load. Check `MAX_TEXTURE_SIZE`, sampler counts and compressed texture support before allocation. Never assume native compute shaders, indirect draws, hardware RT, DLSS, bindless textures or asynchronous compute are available in WebGL2.
 
-## Execution slices after approval
+## Execution slices — only after an explicit release of the hold
 
-1. Rebase on current main; audit Tab/v50g3 and v50g4 overlap. Record untouched preset hashes/settings and fixed deterministic screenshot routes before adding features.
-2. Build ULTRA ownership/capability/kill-switch shell and reconcile the legacy key/new settings UI; keep all feature code inert elsewhere. Prove `ultra=0` fallback and no non-ULTRA imports/allocations first.
-3. Implement the isolated HDR graph plus ranks 1–3; validate the existing atmosphere exposure compensation. Only then add material/LOD/wind work (4–6).
-4. Measure shadows/local bounce/AO (7–9), choose a device profile, then add reduced bloom/wetness (10–11). Publish side-by-side moving captures and per-feature GPU/allocation deltas.
-5. Desktop experiments 12–15 are separate opt-ins with individual evidence. TAA cannot block delivery of the stable SMAA profile. No deployment or merge is authorized by approval of research alone; follow the later implementation task's delivery instructions.
+1. **Now:** documentation amendment and read-only baseline/PR checks only. Do not create `comma/ultra-preset`, modify game files or perform an implementation rebase.
+2. **After release:** fetch then-current main, review the stabilized v50g4 changes and v50g3 baseline, refresh/rebase as required, and create `comma/ultra-preset`. Record deterministic legacy-preset screenshots before implementation.
+3. Reconcile the single `ultra` key/new Arabic UI, capability/resource ownership and early kill-switch. Implement **rank 1 only**: isolated HDR, exposure, grade and LUT; preserve the existing effects without expanding them.
+4. Implement **rank 2** bounded PMREM/sky agreement, then **rank 3** analytic height haze. Measure desktop frame times/FPS and validate colour/atmosphere integration.
+5. Deliver the one draft PR and required city/market/forest/village comparisons, exact HIGH kill-switch comparison, and zero legacy-preset pixel changes for Tab review. Do not merge. **Ranks 4–15 and ULTRA-lite stay deferred.**
 
-No executable prototype or game code is part of this branch. Future file names/modules can be chosen in implementation; the integration anchors above are actual source, not invented existing systems.
+No executable prototype or game code is part of this research branch. Approval of the document does not lift the implementation hold.
 
 ## Measurement and acceptance gates before claiming support
+
+Current delivery is desktop-only for ranks 1–3, including the four required screenshot locations and strict legacy pixel checks above. The broader checks below remain research guidance; phone testing and deferred-feature checks do not authorize work on those features.
 
 - **Real devices:** requested Galaxy A14/Mali-G57/4 GB (confirm exact hardware), desktop reference and another browser. Emulator measurements must be labelled emulator-only. Record OS/browser, viewport/drawing buffer, thermal/battery state and flags.
 - **Routes:** noon and sunset outside city, forest/grass motion, shaded village, night lamps/wet roads, distant skyline, water shoreline, plus observation of existing palace exterior without adding any content. Include fast pans, origin recenter, chunk crossing, resize, pause/resume and offline reload.
