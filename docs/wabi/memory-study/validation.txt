@@ -1,0 +1,2 @@
+PASS: existing LOD16.drop 20 cycles retains active owner; vatMat map unused; nested attachment predicate; revised drop avoids duplicate teardown for 20 cycles. Not a gameplay/GPU test.
+PASS: synthetic 4x4 RGBA8 mip accounting (84 bytes), 40-byte buffer, 32-byte depth, RT subset, deletion, absent performance.memory. Not a browser/driver test.

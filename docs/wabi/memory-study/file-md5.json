@@ -1,0 +1,34 @@
+[
+  {
+    "patch": "memlod.patch",
+    "path": "v50g3/code/part-001.txt",
+    "base_md5": "497e4de566b5e0afdef655512a5c9107",
+    "edited_md5": "0df83547b39ea81f3c1bb5263a064e4c",
+    "syntax": "PASS",
+    "diff_check": "PASS"
+  },
+  {
+    "patch": "memfrz.patch",
+    "path": "v50g3/code/part-002.txt",
+    "base_md5": "88acf35786cc04f1955e66b50fb6ebeb",
+    "edited_md5": "dcafd4716cde56a4cbef81bce590fce8",
+    "syntax": "PASS",
+    "diff_check": "PASS"
+  },
+  {
+    "patch": "memcrowd.patch",
+    "path": "v50g3/code/part-002.txt",
+    "base_md5": "88acf35786cc04f1955e66b50fb6ebeb",
+    "edited_md5": "a27237df02afb4a75ecea2190b155393",
+    "syntax": "PASS",
+    "diff_check": "PASS"
+  },
+  {
+    "patch": "memhud.patch",
+    "path": "v50g3/code/part-000.txt",
+    "base_md5": "d9ad223aeaa77b6100239abad6048778",
+    "edited_md5": "810bd1085b9bb1dc76b8343bcbe4f10c",
+    "syntax": "PASS",
+    "diff_check": "PASS"
+  }
+]
