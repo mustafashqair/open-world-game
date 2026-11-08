@@ -2981,12 +2981,12 @@ const Q6 = (() => {
     const fs = sh.fragmentShader;
     if (fs.indexOf('uQ6G') < 0) { const AN = '#include <fog_fragment>', AL = '#include <colorspace_fragment>', at = fs.indexOf(AN) >= 0 ? AN : fs.indexOf(AL) >= 0 ? AL : '';
       if (at) { sh.uniforms.uQ6G = UG; sh.uniforms.uQ6D = UD; sh.uniforms.uQ6Sz = URES; sh.fragmentShader = fs.replace(at, at + GL_G); DECL(sh, 'uniform float uQ6G; uniform float uQ6D; uniform vec2 uQ6Sz;'); st.grade++; } }
-    if (sh.fragmentShader.indexOf('uQ6R') < 0 && sh.fragmentShader.indexOf('#include <lights_fragment_end>') >= 0 && sh.fragmentShader.indexOf('vViewPosition') >= 0) {
+    if (sh.fragmentShader.indexOf('uQ6R') < 0 && sh.fragmentShader.indexOf('#include <lights_fragment_end>') >= 0 && /vViewPosition|<lights_lambert_pars_fragment>/.test(sh.fragmentShader)) {
       sh.uniforms.uQ6R = UR; sh.fragmentShader = sh.fragmentShader.replace('#include <lights_fragment_end>', '#include <lights_fragment_end>' + GL_R); DECL(sh, 'uniform float uQ6R;'); st.rim++; }
-    if (m === terrainMat && sh.fragmentShader.indexOf('uQ6T') < 0 && sh.fragmentShader.indexOf('diffuseColor.rgb *= 0.72 + 0.56*dn;') >= 0) {
+    if ((m === terrainMat || (m.userData && m.userData.lamOf === terrainMat)) && sh.fragmentShader.indexOf('uQ6T') < 0 && sh.fragmentShader.indexOf('diffuseColor.rgb *= 0.72 + 0.56*dn;') >= 0) {
       sh.uniforms.uQ6T = UT; sh.fragmentShader = sh.fragmentShader.replace('diffuseColor.rgb *= 0.72 + 0.56*dn;', 'diffuseColor.rgb *= 0.72 + 0.56*dn;' + GL_T); DECL(sh, 'uniform float uQ6T;'); st.tint++; }
   }
-  function wrap(m) { if (!ON || !m || !m.onBeforeCompile || m.onBeforeCompile.__q6) return; if (LAM.pend && LAM.pend(m)) return; const pv = m.onBeforeCompile, ck = m.customProgramCacheKey;
+  function wrap(m) { if (!ON || !LOW() || !m || !m.onBeforeCompile || m.onBeforeCompile.__q6) return; if (LAM.pend && LAM.pend(m)) return; const pv = m.onBeforeCompile, ck = m.customProgramCacheKey;
     m.onBeforeCompile = function (sh, rd) { pv.call(this, sh, rd); try { hook(m, sh); } catch (e) {} };
     m.customProgramCacheKey = ck ? function () { return ck.call(this) + '|q6'; } : function () { return 'q6|' + pv.toString(); };
     m.onBeforeCompile.__q6 = 1; m.userData.q6w = 1; m.needsUpdate = true; st.wrap++; }
