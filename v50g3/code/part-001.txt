@@ -5069,6 +5069,8 @@ function banRespawn(b) {
   b.dead = false; b.deadT = 0; b.deadA = 0; b.hp = b.maxHp; b.x = b.homeX; b.z = b.homeZ; b.fleeT = 0;
   b.piv.rotation.set(0, 0, 0); b.piv.position.set(0, 0, 0); if (b.sk) b.sk.cur = null;
 }
+/* v50g5 gc6d: مصفوفة أشجار banUpdateOne معادة الاستخدام على LOW/vlow (gatherTreeSolids تدفع إليها فقط وpushOut يقرأها فقط، ولا مرجع يبقى بعد الاستدعاء) — نفس القيم بالضبط. ?gc6d=0 أو ?v50g5=0 = v50g3 بالضبط */
+const GC6D = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](gc6d|v50g5)=0\b/.test(location.search); const BD6 = [];
 function banUpdateOne(b, dt, day) {
   const c = b.camp, dP = Math.hypot(PL.x - b.x, PL.z - b.z);
   if (b.dead) {
@@ -5102,7 +5104,7 @@ function banUpdateOne(b, dt, day) {
     const step = Math.min(dd - stopR, sp * dt), nx = b.x + dx / dd * step, nz = b.z + dz / dd * step;
     if (!banNearVillage(nx, nz, BAN.VIL_KEEP * 0.7) && LIB.height(nx, nz) > 0.5) { b.x = nx; b.z = nz; b.mv = true; }   // لا تدخل القرى
   }
-  const out = []; gatherTreeSolids(b.x, b.z, 2, out); pushOut(b, 0.45, out, 2);
+  const out = GC6D ? (BD6.length = 0, BD6) : []; gatherTreeSolids(b.x, b.z, 2, out); pushOut(b, 0.45, out, 2);
   // الوجه: نحو الهدف عند الحركة، ونحو الطريق عند الكمين
   const lx = mode === 'hide' && dd <= stopR ? c.amb[0] - b.x : tx - b.x, lz = mode === 'hide' && dd <= stopR ? c.amb[1] - b.z : tz - b.z;
   b.face = aLerp(b.face, Math.atan2(-lx, -lz), Math.min(1, dt * 6));
