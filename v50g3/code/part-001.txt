@@ -718,6 +718,36 @@ const DIRS = { '+z': [0, 1], '-z': [0, -1], '+x': [1, 0], '-x': [-1, 0] };
 const rotL = (lx, lz, yaw) => [lx * Math.cos(yaw) + lz * Math.sin(yaw), -lx * Math.sin(yaw) + lz * Math.cos(yaw)];   // دوران y كما في three.js
 // ── أشكال التصادم: دائرة [x,z,r] أو صندوق موجّه [x,z,R,hw,hd,yaw,cos,sin] (R نصف قطر الإحاطة للرفض السريع) ──
 const SDN = { x: 0, z: 0 }, HIT = { n: 0, x: 0, z: 0 }, NPC_R = 0.35, PL_R = 0.36;
+// ── gc7c = gc7a+gc7b معاً: خدشة Float64Array لناتج sdist وتجميع HIT محلياً (gc7a) + p في متغيرات محلية وكتابة واحدة بالنهاية (gc7b). ألوا/فيري-لو فقط؛ medium/high يمر من الكود الأصلي حرفياً ──
+const GC7C = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](gc7c|v50g5)=0\b/.test(location.search);
+const SDN6 = new Float64Array(2);
+function sdist6(o, x, z) {                        // gc7c: نفس حسابات sdist بالبت — العمودي الخارجي في SDN6 بدل SDN
+  const dx = x - o[0], dz = z - o[1];
+  if (o.length < 6) { const l = Math.hypot(dx, dz); if (l > 1e-6) { SDN6[0] = dx / l; SDN6[1] = dz / l; } else { SDN6[0] = 1; SDN6[1] = 0; } return l - o[2]; }
+  const c = o[6], s = o[7], lx = dx * c - dz * s, lz = dx * s + dz * c, qx = Math.abs(lx) - o[3], qz = Math.abs(lz) - o[4];
+  let nx, nz, d;
+  if (qx > 0 || qz > 0) { const ex = Math.max(qx, 0), ez = Math.max(qz, 0); d = Math.hypot(ex, ez); nx = (lx < 0 ? -ex : ex) / d; nz = (lz < 0 ? -ez : ez) / d; }   // خارج: أقرب نقطة (تشمل الزوايا)
+  else if (qx > qz) { d = qx; nx = lx < 0 ? -1 : 1; nz = 0; } else { d = qz; nx = 0; nz = lz < 0 ? -1 : 1; }                                                 // داخل: أقرب وجه
+  SDN6[0] = nx * c + nz * s; SDN6[1] = -nx * s + nz * c; return d;
+}
+function pushOut7(p, rad, list, it) {              // gc7c: نفس pushOut بالبت — كل الحالة في محليات/خدشة، وHIT وp يُكتبان مرة واحدة قبل الإرجاع
+  let px = p.x, pz = p.z, hn = 0, hx = 0, hz = 0;
+  for (let k = 0; k < (it || 3); k++) { let any = false;
+    for (let i = 0; i < list.length; i++) { const o = list[i], e = o[2] + rad; if (px - o[0] > e || o[0] - px > e || pz - o[1] > e || o[1] - pz > e) continue;
+      const d = sdist6(o, px, pz); if (d < rad) { const m = rad - d + 1e-4; px += SDN6[0] * m; pz += SDN6[1] * m; hn++; hx += SDN6[0]; hz += SDN6[1]; any = true; } }
+    if (!any) break; }
+  HIT.n = hn; HIT.x = hx; HIT.z = hz; if (hn > 0) { p.x = px; p.z = pz; }
+  return hn > 0;
+}
+function pushOut2b(p, rad, A, B, it) {             // gc7c: نفس pushOut2 بالبت
+  let px = p.x, pz = p.z, hn = 0, hx = 0, hz = 0;
+  for (let k = 0; k < (it || 3); k++) { let any = false;
+    for (let li = 0; li < 2; li++) { const list = li ? B : A; for (let i = 0; i < list.length; i++) { const o = list[i], e = o[2] + rad; if (px - o[0] > e || o[0] - px > e || pz - o[1] > e || o[1] - pz > e) continue;
+      const d = sdist6(o, px, pz); if (d < rad) { const m = rad - d + 1e-4; px += SDN6[0] * m; pz += SDN6[1] * m; hn++; hx += SDN6[0]; hz += SDN6[1]; any = true; } } }
+    if (!any) break; }
+  HIT.n = hn; HIT.x = hx; HIT.z = hz; if (hn > 0) { p.x = px; p.z = pz; }
+  return hn > 0;
+}
 const solidBox = (x, z, w, d, yaw, pad) => { const hw = w / 2 + (pad || 0), hd = d / 2 + (pad || 0); yaw = yaw || 0; return [x, z, Math.hypot(hw, hd), hw, hd, yaw, Math.cos(yaw), Math.sin(yaw)]; };
 // ── v10: البعد العمودي للأشكال الصلبة — o.top = ارتفاع السطح العلوي (إحداثيات العالم) مأخوذ من حدود النموذج الحقيقي ──
 //    شكل بلا top = جدار لا نهائي الارتفاع (نفس السلوك القديم تماماً)، فأي شكل لم نعطه ارتفاعاً لا يتغيّر شيء فيه
@@ -735,6 +765,7 @@ function sdist(o, x, z) {                         // مسافة موقّعة إ�
   SDN.x = nx * c + nz * s; SDN.z = -nx * s + nz * c; return d;
 }
 function pushOut(p, rad, list, it) {              // يدفع جسماً دائرياً (p.x,p.z) خارج كل الأشكال؛ التكرار يعالج الزوايا والتقاطعات
+  if (GC7C) return pushOut7(p, rad, list, it);   // gc7c: low/vlow → pushOut7؛ وإلا الكود الأصلي كما هو
   HIT.n = 0; HIT.x = 0; HIT.z = 0;
   for (let k = 0; k < (it || 3); k++) { let any = false;
     for (let i = 0; i < list.length; i++) { const o = list[i], e = o[2] + rad; if (p.x - o[0] > e || o[0] - p.x > e || p.z - o[1] > e || o[1] - p.z > e) continue;
@@ -743,6 +774,7 @@ function pushOut(p, rad, list, it) {              // يدفع جسماً دائ�
   return HIT.n > 0;
 }
 function pushOut2(p, rad, A, B, it) {             // v50d5: pushOut(p, rad, A.concat(B), it) بدون نسخ القائمتين
+  if (GC7C) return pushOut2b(p, rad, A, B, it);  // gc7c
   HIT.n = 0; HIT.x = 0; HIT.z = 0;
   for (let k = 0; k < (it || 3); k++) { let any = false;
     for (let li = 0; li < 2; li++) { const list = li ? B : A; for (let i = 0; i < list.length; i++) { const o = list[i], e = o[2] + rad; if (p.x - o[0] > e || o[0] - p.x > e || p.z - o[1] > e || o[1] - p.z > e) continue;
