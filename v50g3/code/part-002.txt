@@ -3642,6 +3642,57 @@ const PRF = (() => { const on = /[?&]prof=1\b/.test(location.search), now = perf
   api.begin = function () { this.cur = {}; this.mixN = this.mixT = this.skN = this.skT = this.mwT = 0; if (this.mixSeen) this.mixSeen.clear(); return now(); };
   api.end = function (tStart) { const c = this.cur, r = renderer.info.render; c.total = now() - tStart; c.mix = this.mixT; c.mixN = this.mixN; c.mixU = this.mixSeen ? this.mixSeen.size : 0; c.skel = this.skT; c.skN = this.skN; c.mw = this.mwT; c.calls = r.calls; c.tris = r.triangles; c.t = tStart; this.fr.push(c); if (this.fr.length > 4000) this.fr.shift(); };
   return api; })();
+/* ═══ v50g5 adapt5 (Qwen ADAPT + Tab fixes): دقة رسم تلقائية على «منخفض/منخفضة جدا» بس — بترفع الدقة لما الجهاز مرتاح وبترجع فوراً لما يثقل؛ ‏?adapt=0 أو ?v50g5=0 = إيقاف. تصليحات Tab: (١) القرار على وقت الشغل الفعلي بالإطار + الفاصل بين الإطارات (مش dt لحالو، لأن حد ٢٥ م.ث على «منخفضة جدا» بيخفي الراحة)؛ (٢) ما بتلمس S.pr أبداً (S بينحفظ بـ localStorage)، فالرفع ما بينحفظ للجلسة الجاية؛ (٣) إذا تغيّر الإعداد أو S.pr بترجع تبدأ من الأول ═══ */
+const ADAPT5 = (/[?&]adapt=0\b/.test(location.search) || /[?&]v50g5=0\b/.test(location.search)) ? null : (function () {
+  const VLOW_STEPS = [0.55, 0.62, 0.70], LOW_STEPS = [0.75, 0.85, 0.95];
+  const RING = 64, BIN_MAX = 250, MIN_SAMPLES = 30, EVAL_MS = 250, WARMUP_MS = 8000, MAX_MS = 250, UP_COOLDOWN_MS = 4000, GOOD_STREAK_NEEDED = 4, DOWN_FREEZE_WINDOW_MS = 30000, EMA_ALPHA = 0.125;
+  const ringI = new Uint8Array(RING), ringW = new Uint8Array(RING), histI = new Uint16Array(BIN_MAX + 1), histW = new Uint16Array(BIN_MAX + 1);
+  const dbg = window.__adapt = { pr: 0, steps: 0, frozen: false, emaMs: 0, on: false, p90i: 0, p90w: 0, ups: 0, downs: 0 };
+  let on = false, preset0 = '', base0 = -1, steps = VLOW_STEPS, stepIndex = 0, pr = 0, frozen = false;
+  let raiseIntMax = 0, raiseWorkMax = 0, downIntMin = 0;
+  let warmupMs = 0, lastStepTime = -1e9, lastDownTime = -1e9, evalAccMs = 0, goodStreak = 0, ringPos = 0, sampleCount = 0, emaMs = 0, emaInit = false;
+  function resetWindow() { ringPos = 0; sampleCount = 0; evalAccMs = 0; goodStreak = 0; histI.fill(0); histW.fill(0); }
+  function upd() { dbg.pr = pr; dbg.steps = stepIndex; dbg.frozen = frozen; dbg.emaMs = emaMs; dbg.on = on; }
+  function bin(ms) { let b = (ms + 0.5) | 0; return b < 0 ? 0 : b > BIN_MAX ? BIN_MAX : b; }
+  function addSample(iMs, wMs) {
+    const bi = bin(iMs), bw = bin(wMs);
+    if (sampleCount === RING) { const oi = ringI[ringPos], ow = ringW[ringPos]; if (histI[oi] > 0) histI[oi]--; if (histW[ow] > 0) histW[ow]--; } else sampleCount++;
+    ringI[ringPos] = bi; ringW[ringPos] = bw; histI[bi]++; histW[bw]++; ringPos = (ringPos + 1) & (RING - 1);
+  }
+  function pct(h, p) { if (!sampleCount) return 0; const need = Math.ceil(sampleCount * p); let c = 0; for (let i = 0; i <= BIN_MAX; ++i) { c += h[i]; if (c >= need) return i; } return BIN_MAX; }
+  function setScale(v) { renderer.setPixelRatio(Math.min(v, devicePixelRatio || 1)); renderer.setSize(innerWidth, innerHeight); }   /* نفس سطر part-001:4389 بس بالقيمة الجديدة، بدون كتابة S.pr */
+  function applyStep(i) { stepIndex = i; pr = steps[i]; setScale(pr); upd(); }
+  function init() {
+    preset0 = S.preset; base0 = S.pr; frozen = false; warmupMs = 0; emaInit = false; emaMs = 0; lastStepTime = -1e9; lastDownTime = -1e9; resetWindow();
+    steps = S.preset === 'vlow' ? VLOW_STEPS : LOW_STEPS;
+    on = (S.preset === 'vlow' || S.preset === 'low') && Math.abs(S.pr - steps[0]) < 1e-6;   /* إعداد مخصّص (pr مختلف) = ما منلمسو */
+    if (S.preset === 'vlow') { raiseIntMax = 27; raiseWorkMax = 15; downIntMin = 33; }   /* حد الإطار ٢٥ م.ث: رفع بس إذا الإطار ماشي عالحد والشغل ≤ ١٥ م.ث؛ نزول إذا p90 الفاصل ≥ ٣٣ (أقل من ٣٠ إطار) */
+    else { raiseIntMax = 18; raiseWorkMax = 10; downIntMin = 24; }
+    stepIndex = 0; pr = on ? steps[0] : S.pr; upd();
+  }
+  function tick(rawDt, workMs) {
+    if (S.preset !== preset0 || S.pr !== base0) { if (on && stepIndex > 0) setScale(S.pr); init(); }   /* تغيّر الإعداد من القائمة: رجوع للأصل وبداية جديدة */
+    if (!on) return;
+    const iMs = rawDt * 1000;
+    if (!(iMs > 0)) return;
+    if (iMs > MAX_MS) { resetWindow(); emaInit = false; return; }
+    if (warmupMs < WARMUP_MS) { warmupMs += iMs; return; }
+    if (!emaInit) { emaMs = workMs; emaInit = true; } else emaMs += (workMs - emaMs) * EMA_ALPHA;
+    addSample(iMs, workMs); evalAccMs += iMs;
+    if (evalAccMs < EVAL_MS) return;
+    evalAccMs = 0;
+    if (sampleCount < MIN_SAMPLES) return;
+    const now = performance.now(), p90i = pct(histI, 0.9), p90w = pct(histW, 0.9); dbg.p90i = p90i; dbg.p90w = p90w;
+    if (!frozen) {
+      if (p90i >= downIntMin && stepIndex > 0) { applyStep(stepIndex - 1); dbg.downs++; lastStepTime = now; goodStreak = 0; if (now - lastDownTime <= DOWN_FREEZE_WINDOW_MS) frozen = true; lastDownTime = now; }
+      else if (stepIndex < steps.length - 1 && now - lastStepTime >= UP_COOLDOWN_MS && p90i <= raiseIntMax && p90w <= raiseWorkMax) { if (++goodStreak >= GOOD_STREAK_NEEDED) { applyStep(stepIndex + 1); dbg.ups++; lastStepTime = now; goodStreak = 0; } }
+      else goodStreak = 0;
+    }
+    upd();
+  }
+  init();
+  return { tick, init };
+})();
 let FCAP_T = 0; const FCAP_ON = !/[?&]fcap=0\b/.test(location.search);
 function frame(rafTime) {
   requestAnimationFrame(frame);
@@ -3670,7 +3721,7 @@ function frame(rafTime) {
   if (pON) pT = PRF.lap('fauna_shops', pT);
   loadUpdate(rawDt); try { LAM.tick(rawDt); } catch (e) {}
   const tR4 = performance.now(); if (pON) pT = PRF.lap('load', pT); WARM2.pre(); if (pON) pT = PRF.lap('c_warm2', pT); CULL23.before(); if (pON) pT = PRF.lap('c_cull23', pT); G50.pre(); if (pON) pT = PRF.lap('c_g50pre', pT); MIX5.flush(); if (pON) pT = PRF.lap('precull', pT); if (window.V40 && V40.render) V40.render(dt); else renderer.render(scene, camera); if (pON) pT = PRF.lap('render', pT); G50.post(); CULL23.after(); PERF46.tick(); if (pON) { PRF.lap('post', pT); PRF.end(pT0); }
-  { const tn = performance.now(); FRAME4.lg.push(tR4 - FRAME4.t0); FRAME4.rd.push(tn - tR4); if (FRAME4.lg.length > 240) { FRAME4.lg.shift(); FRAME4.rd.shift(); } if (HUD4) HUD4.tick(rawDt); }
+  { const tn = performance.now(); FRAME4.lg.push(tR4 - FRAME4.t0); FRAME4.rd.push(tn - tR4); if (FRAME4.lg.length > 240) { FRAME4.lg.shift(); FRAME4.rd.shift(); } if (HUD4) HUD4.tick(rawDt); if (ADAPT5) ADAPT5.tick(rawDt, tn - FRAME4.t0); }
 }
 window.__dbg = { SPOT_T, losClear, guardsCrowd, SEARCH_T, MODELS, stallMesh, SHIELDS, BODYS, WEAPONS, RANGED, QUIVERS, HELMS, SETS, GEAR_SLOT, GEAR_NAME, GV, gvApply, arrowDmg, gearSanitize, gearRed, MNT, mountToggle, equipItem, openShopDlg, hurt, recalcDmg, ST, WM, openWM, closeWM, CITY, CITYV, LIB, TREE_DEFS, BANDITS, CAMPS, banHit, banRelocate, onNewDay, buildSpurRoads, banRespawn, banFindCamp, LOADX, loadTarget, inputLock, hitNPC, respawn, respawnNPC, witnessGuards, resetGuardsAfterDeath, BAG, ITEMS, INV, ST, WM, openInv, closeInv, openWM, closeWM, uiLock, useItem, renderBar, renderInv, buy, MMP, mmpBuild, mmpDraw, mmpTick, mmpZoom, TREESET, npcWalk, treeRockExcluded, treePlacements, treeCandidate, treeExcluded, treeRoadDistance, gatherTreeSolids, attachTrees, addChunk, killChunk, WORLD, CFG, renderer, scene, camera, updateChunks, recenter, sdist, pushOut, moveCollide, IN, keys, ST, HOUSE_DEFS, HCACHE, PL, CAM, VILLAGES, NPCS, WOLVES, ANIMALS, MODELS, ENV, S, LIB, chunks,
   tp(x, z) { PL.x = x; PL.z = z; PL.y = LIB.height(x, z) + 0.5; CAM.tx = x; CAM.ty = PL.y + 1.6; CAM.tz = z; } };
