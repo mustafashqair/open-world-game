@@ -2954,16 +2954,16 @@ const LAM = (() => { const tw = new Map(), st = { n: 0, skip: 0 }; let t = 0, on
         if (o3) { st.n3 = (st.n3 || 0) + 1; { const hk = m.onBeforeCompile !== dflt ? m.onBeforeCompile : null, ck = m.customProgramCacheKey, ckD = ck === THREE.Material.prototype.customProgramCacheKey, ei = m.envMapIntensity == null ? 1 : m.envMapIntensity; w.onBeforeCompile = function (sh, r) { if (hk) hk.call(this, sh, r); L3AMB.inject(sh, ei * L3AMB.k, !!m.envMap); }; w.customProgramCacheKey = function () { return (hk ? (ckD ? hk.toString() : ck.call(m)) : '') + '|lam3a'; }; if (hk) st.h3 = (st.h3 || 0) + 1; }
           if (m.envMap && !m.emissiveMap && m.envMapIntensity > 0) w.emissive.add(m.color.clone().multiplyScalar(Math.min(0.15, 0.25 * m.envMapIntensity)));   /* بدل إضاءة البيئة: ضو ثابت خفيف */
           if (m.normalMap) { w.normalMap = m.normalMap; w.normalMapType = m.normalMapType; if (m.normalScale) w.normalScale.copy(m.normalScale); }   /* hooks that read normalMap need it declared on the twin too */
-          w.userData.lam3 = 1; } } catch (e) { w = null; } }
+          w.userData.lam3 = 1; } if (window.__Q6 && __Q6.wrap) { try { __Q6.wrap(w); } catch (e) {} } } catch (e) { w = null; } }
     else st.skip++;
-    tw.set(m, w); return w; }
+    tw.set(m, w); if (window.__Q6 && __Q6.wrap && !w) { try { __Q6.wrap(m); } catch (e) {} } return w; }
   function sweep() { scene.traverse(o => { if (!o.isMesh || !o.material || o.userData.noLam) return; if (L3 && o.isSkinnedMesh) for (const mm of (Array.isArray(o.material) ? o.material : [o.material])) if (mm && mm.userData && tw.get(mm) === undefined) mm.userData.sk3 = 1;
       if (Array.isArray(o.material)) { let ch = false; const a = o.material.map(mm => { const w = twin(mm); if (w) { ch = true; return w; } return mm; }); if (ch) o.material = a; }
       else { const w = twin(o.material); if (w) o.material = w; } }); }
   function tick(dt) { if (!on || S.preset !== 'vlow' || window.__QUALITY === 'high') return; t -= dt; if (t > 0) return; t = (st.sw = (st.sw || 0) + 1) > 4 ? 10 : 2; try { sweep(); if (L3) check3(); } catch (e) { on = false; console.warn('[lam]', e); } }
   function apply(root) { if (!on || S.preset !== 'vlow' || window.__QUALITY === 'high') return; root.traverse(o => { if (!o.isMesh || !o.material || o.userData.noLam) return; if (L3 && o.isSkinnedMesh) for (const mm of (Array.isArray(o.material) ? o.material : [o.material])) if (mm && mm.userData && tw.get(mm) === undefined) mm.userData.sk3 = 1; if (Array.isArray(o.material)) { let ch = false; const a = o.material.map(mm => { const w = twin(mm); if (w) { ch = true; return w; } return mm; }); if (ch) o.material = a; } else { const w = twin(o.material); if (w) o.material = w; } }); }
   /* v50g3: إذا الشيدر المبسط ما اشتغل (خطأ ترجمة) منرجّع المادة الأصلية */
-  function check3() { if (!L3) return 0; let k = 0; scene.traverse(o => { if (!o.isMesh || !o.material) return; const fix = mm => { if (!mm || !mm.userData || !mm.userData.lam3) return mm; const p = renderer.properties.get(mm), pr = p && p.currentProgram; if (pr && pr.diagnostics && pr.diagnostics.runnable === false) { const m0 = mm.userData.lamOf; tw.set(m0, null); k++; return m0; } return mm; }; if (Array.isArray(o.material)) o.material = o.material.map(fix); else o.material = fix(o.material); }); st.bad3 = (st.bad3 || 0) + k; return k; }
+  function check3() { if (!L3) return 0; let k = 0; scene.traverse(o => { if (!o.isMesh || !o.material) return; const fix = mm => { if (!mm || !mm.userData || !mm.userData.lam3) return mm; const p = renderer.properties.get(mm), pr = p && p.currentProgram; if (pr && pr.diagnostics && pr.diagnostics.runnable === false) { const m0 = mm.userData.lamOf; tw.set(m0, null); if (window.__Q6 && __Q6.wrap) { try { __Q6.wrap(m0); } catch (e) {} } k++; return m0; } return mm; }; if (Array.isArray(o.material)) o.material = o.material.map(fix); else o.material = fix(o.material); }); st.bad3 = (st.bad3 || 0) + k; return k; }
   function pend(m) { if (!on || S.preset !== 'vlow' || window.__QUALITY === 'high' || !m) return false; if (m.type !== 'MeshStandardMaterial' && m.type !== 'MeshPhysicalMaterial') return false; return tw.get(m) !== null; }
   return { tick, st, apply, check3, L3, pend }; })();
 window.__LAM = LAM;
@@ -2986,10 +2986,10 @@ const Q6 = (() => {
     if (m === terrainMat && sh.fragmentShader.indexOf('uQ6T') < 0 && sh.fragmentShader.indexOf('diffuseColor.rgb *= 0.72 + 0.56*dn;') >= 0) {
       sh.uniforms.uQ6T = UT; sh.fragmentShader = sh.fragmentShader.replace('diffuseColor.rgb *= 0.72 + 0.56*dn;', 'diffuseColor.rgb *= 0.72 + 0.56*dn;' + GL_T); DECL(sh, 'uniform float uQ6T;'); st.tint++; }
   }
-  function wrap(m) { if (!m || !m.onBeforeCompile || m.userData.q6w) return; const pv = m.onBeforeCompile, ck = m.customProgramCacheKey;
+  function wrap(m) { if (!ON || !m || !m.onBeforeCompile || m.onBeforeCompile.__q6) return; if (LAM.pend && LAM.pend(m)) return; const pv = m.onBeforeCompile, ck = m.customProgramCacheKey;
     m.onBeforeCompile = function (sh, rd) { pv.call(this, sh, rd); try { hook(m, sh); } catch (e) {} };
     m.customProgramCacheKey = ck ? function () { return ck.call(this) + '|q6'; } : function () { return 'q6|' + pv.toString(); };
-    m.userData.q6w = 1; m.needsUpdate = true; st.wrap++; }
+    m.onBeforeCompile.__q6 = 1; m.userData.q6w = 1; m.needsUpdate = true; st.wrap++; }
   function sweep() { if (!ON) return; st.sweeps++; scene.traverse(o => { if (!o.material) return; if (Array.isArray(o.material)) { for (const mm of o.material) wrap(mm); } else wrap(o.material); }); }
   const _add = GLB_MAT.add.bind(GLB_MAT);
   GLB_MAT.add = function (m) { if (ON) { try { wrap(m); } catch (e) {} } return _add(m); };
@@ -3000,7 +3000,7 @@ const Q6 = (() => {
     if (low) { if (ON && QQ.get('q6d') !== '0' && U.uWaves.value < 2) U.uWaves.value = 2; } else U.uWaves.value = S.wq;
     UG.value = api.g; UD.value = api.d; UR.value = api.r;
     if (on) sweep(); }
-  const api = { ON, LOW, FLG, UG, UD, UR, UT, URES, st, apply, sweep };
+  const api = { ON, LOW, FLG, UG, UD, UR, UT, URES, st, wrap, apply, sweep };
   window.__Q6 = api;
   try { if (ON) { wrap(terrainMat); wrap(sky.material); wrap(water.material); sweep(); } } catch (e) {}
   apply();
