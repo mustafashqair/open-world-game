@@ -212,7 +212,7 @@ function addChunk(cx, cz, res, r, gr) {         // بناء شبكة القطع�
 }
 
 /* ═══ v24 أداء: (١) القطع البعيدة من الأرض تُدمج في شبكة واحدة (نداء رسم واحد بدل ~٤٠)، القريبة (٣×٣) تبقى كما هي؛ (٢) خريطة الظل تُحدَّث كل إطارين ═══ */
-const TB24 = { blocks: new Map(), n: 0, on: !/notb/.test(location.search), fr: 0, sh2: !/nosh2/.test(location.search) };
+const TB24 = { blocks: new Map(), n: 0, on: !/notb\b/.test(location.search), fr: 0, sh2: !/nosh2\b/.test(location.search) };
 function tb24Build(list, ax, az) {
   let nv = 0, ni = 0; for (const m of list) { nv += m.geometry.attributes.position.count; ni += m.geometry.index ? m.geometry.index.count : m.geometry.attributes.position.count; }
   const P = new Float32Array(nv * 3), N = new Float32Array(nv * 3), Cc = new Float32Array(nv * 3), I = new Uint32Array(ni); let ov = 0, oi = 0;
@@ -884,7 +884,7 @@ window.__VIL4_SH = ["w1", "w3", "w4"];
    حصى مندمج بالتراب بتوزيع طبيعي + حصى ممسوح حقيقي، بساتين خضار وسياج نبات، تنويع البيوت (حجم، دوران، لون، أغراض حولها)، ظلال تلامس.
    قوام Poly Haven (CC0). ?vil4=0 يعيد الشكل القديم. ═══ */
 const VIL4 = (() => {
-  const PH = (window.__QUALITY || 'mobile') !== 'high', OFF = /[?&]vil4=0/.test(location.search);
+  const PH = (window.__QUALITY || 'mobile') !== 'high', OFF = /[?&]vil4=0\b/.test(location.search);
   const st = { t0: performance.now(), phone: PH, off: OFF, loaded: 0, need: 5, failed: [], built: [], tris: 0, draws: 0 };
   const sfx = PH ? '-l' : '', TL = new THREE.TextureLoader();
   const aniso = () => { try { return Math.min(PH ? 4 : 8, renderer.capabilities.getMaxAnisotropy()); } catch (e) { return 4; } };
@@ -1036,7 +1036,7 @@ const VIL4 = (() => {
     LD('trees33/oak-large-mid.glb?k=oak3', sc => { sc.name = 'oak'; const g = new THREE.Group(); g.add(sc); sc.name = 'OAK'; kitOf(g); });
     LD('nature/nature-plants-lite.glb', sc => kitOf(sc, n => /^bush_(myrtle|broom)/.test(n), 'B_'));
     // v45g: بوابة v5 — نموذج واحد بإحداثياته الأصلية (X على امتداد السور، +Z نحو داخل القرية، y=0 الأرض)
-    LD('village/v4/gate-v5' + (PH && !/[?&]gatehi=1/.test(location.search) ? '-lite' : '') + '.glb', sc => { sc.updateMatrixWorld(true); const out = [], B = new THREE.Box3();
+    LD('village/v4/gate-v5' + (PH && !/[?&]gatehi=1\b/.test(location.search) ? '-lite' : '') + '.glb', sc => { sc.updateMatrixWorld(true); const out = [], B = new THREE.Box3();
       sc.traverse(o => { if (o.isMesh) { fixMat(o.material); GLB_GEO.add(o.geometry); out.push({ geo: o.geometry, mat: o.material, m: o.matrixWorld.clone() }); B.union(new THREE.Box3().setFromObject(o)); } });
       if (out.length) { out.size = B.getSize(new THREE.Vector3()); K.H_gate = out; } }); }
   const ready = () => OFF || st.loaded >= st.need || performance.now() - st.t0 > 90000;
@@ -2056,7 +2056,7 @@ const PMQ = (() => {
     const L = ST.L; ST.inside = null;
     if (L && !ST.farHidden && L.farG && L.farG.children.length) { for (const m of L.farG.children) { const p = m.geometry && m.geometry.parameters; if (p && p.width === 40 && p.height === 17) m.visible = false; } ST.farHidden = true; }
     for (const B of ST.built) {
-      const dx = PL.x - B.ox, dz = PL.z - B.oz, d = Math.hypot(dx, dz); B.int.visible = d < B.R - 15;   /* الداخل يُرسم فقط على بعد ≤45م */ { const fd = d > ((B.far24 && B.far24.visible) ? 125 : 135), fm = fd && !/nofar/.test(location.search) ? pmqFar24(B) : null; B.ext.visible = d < 1100 && !fm; if (B.far24) B.far24.visible = d < 1100 && !!fm; }
+      const dx = PL.x - B.ox, dz = PL.z - B.oz, d = Math.hypot(dx, dz); B.int.visible = d < B.R - 15;   /* الداخل يُرسم فقط على بعد ≤45م */ { const fd = d > ((B.far24 && B.far24.visible) ? 125 : 135), fm = fd && !/nofar\b/.test(location.search) ? pmqFar24(B) : null; B.ext.visible = d < 1100 && !fm; if (B.far24) B.far24.visible = d < 1100 && !!fm; }
       if (d > B.R) continue; const c = Math.cos(B.yaw), s = Math.sin(B.yaw), lx = dx * c - dz * s, lz = dx * s + dz * c;
       for (const r of B.rooms) if (lx > r.x0 - 0.3 && lx < r.x1 + 0.3 && lz > r.z0 - 0.3 && lz < r.z1 + 0.3 && PL.y < r.ceil - 1.2) { ST.inside = { B, r, lx, lz }; break; }
     }
@@ -2428,7 +2428,7 @@ const LOD16 = (() => { const E = new Map(), V3 = THREE.Vector3, fr = new THREE.F
       for (let lv = 0; lv < 3; lv++) { const im = IM[lv]; if (!im) continue; im.count = cnt[lv]; im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true; im.castShadow = (lv === 0 || hq) && !(e.model && e.model.nsm && !hq); }
       stat.hi += cnt[0]; stat.lo += cnt[1]; stat.lo2 += cnt[2]; stat.n += e.list.length; } }
   return { addInst, addMesh, finish, drop, tick, get stat() { return stat; }, E }; })();
-window.LOD16 = LOD16; window.__LOD16_ON = !/nolod/.test(location.search);
+window.LOD16 = LOD16; window.__LOD16_ON = !/nolod\b/.test(location.search);
 
 /* ═══ v16: تكثيف المدينة — صفوف بيوت متلاصقة على حلقات بأزقة ضيقة وممرات عرضية وساحات صغيرة، تدوير/مرآة/تكبير ٠٫٩–١٫١٥ وارتفاعات مختلفة،
    خزانات ماء وقباب صغيرة ومظلات على بعض الأسطح — كلها نسخ مكررة عبر LOD16، ولكل بيت مصادم. الشوارع الرئيسية والساحة والسوق والجامع وطريق القصر والدرج تبقى فارغة ═══ */
@@ -3092,7 +3092,7 @@ const DENSE16 = (() => { let ROOF = null;
             if (rnd() < 0.35) props.awn.push([x + bx * (d / 2 + 0.05), H(x, z) + 2.5, z + bz * (d / 2 + 0.05), yaw, 1]);
             break; } } } } }
     try { L.v17fronts = V17.snap(out, props, { cx, cz, OC, cell }); } catch (e) { console.warn('[v17] snap', e); }
-    const CNT = { tries }; L.cnt16 = CNT; if (/occ16/.test(location.search)) window.__OCC16 = { N, OC: Array.from(OC) };
+    const CNT = { tries }; L.cnt16 = CNT; if (/occ16\b/.test(location.search)) window.__OCC16 = { N, OC: Array.from(OC) };
     // البيوت: نسخ عبر LOD16 + مصادم بسطح (يمكن الوقوف على السطح)
     const m4 = new THREE.Matrix4(), Q = new THREE.Quaternion(), P3 = new THREE.Vector3(), S3 = new THREE.Vector3(), UP = new THREE.Vector3(0, 1, 0);
     for (const q of out) { const M = MODELS[q.k], y = H(q.x, q.z) - 0.1; m4.compose(P3.set(q.x - cx, y, q.z - cz), Q.setFromAxisAngle(UP, q.yaw), S3.set(q.s * (q.mir ? -1 : 1), q.sy, q.s));
@@ -4015,7 +4015,7 @@ const KIOSK = (() => {
       L._kiosk.push({ id, x: best.x, z: best.z, yaw }); st.placed.push({ id, ok: true, x: +best.x.toFixed(1), z: +best.z.toFixed(1), r: best.r, lat: best.lat }); }
     st.placeMs = Math.round(performance.now() - t0); console.info('[kiosk] placed', JSON.stringify(st.placed), st.placeMs + 'ms');
     if (late) try { if (window.V19 && V19.NS && V19.NS.nat && V19.NS.nat.refreshGrass) V19.NS.nat.refreshGrass(); } catch (e) {} }
-  function build(L, v) { if (!isTarget(v) || /[?&]nokiosk/.test(location.search)) return; if (st.loaded >= IDS.length) place(L, v); else wait.push(() => place(L, v, true)); }
+  function build(L, v) { if (!isTarget(v) || /[?&]nokiosk\b/.test(location.search)) return; if (st.loaded >= IDS.length) place(L, v); else wait.push(() => place(L, v, true)); }
   const api = { st, T, DEF, build, ready: () => st.loaded >= IDS.length }; window.KIOSK = api; return api;
 })();
 

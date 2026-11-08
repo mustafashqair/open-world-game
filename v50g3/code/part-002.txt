@@ -793,7 +793,7 @@ function riderPose(m, dt) {                       // v22: وضعية الفار�
     for (const r of [22, 16, 10, 6]) for (const a of [0, 0.5, -0.5, 1, -1]) { const x = PL.x + (bx * Math.cos(a) - bz * Math.sin(a)) * r, z = PL.z + (bz * Math.cos(a) + bx * Math.sin(a)) * r;
       const L = []; gatherSolids(x, z, 2, L); if (L.some(o => sdist(o, x, z) < 1.2)) continue; if (LIB.height(x, z) < -0.5) continue; if (HFX.on && HFX.blocked(x, z, PL.x, PL.z, HFX.solids(x, z, PL.x, PL.z, 1.5), 0.8)) { if (!alt) alt = [x, z]; continue; } return [x, z]; } return strict ? null : alt; }
   // ═══ v45h HORSEFIX: الحصان المُصفَّر له يلتفّ حول الإسطبل والجدران (مسار A* على شبكة ١م) بدل الاصطدام بها، والقفز خلف الكاميرا فقط لمكان يرى اللاعب — مفتاح الإيقاف ?horsefix=0
-  const HFX = { on: !/[?&]horsefix=0/.test(location.search), path: null, pi: 0, t: 0, m: null, gx: 0, gz: 0, plans: 0, fails: 0, ms: 0 };
+  const HFX = { on: !/[?&]horsefix=0\b/.test(location.search), path: null, pi: 0, t: 0, m: null, gx: 0, gz: 0, plans: 0, fails: 0, ms: 0 };
   V19.HFX = HFX;
   HFX.solids = (x0, z0, x1, z1, pad) => { const L = []; gatherSolidsNoHorse((x0 + x1) / 2, (z0 + z1) / 2, Math.max(Math.abs(x1 - x0), Math.abs(z1 - z0)) / 2 + pad, L); return L; };
   HFX.blocked = (x0, z0, x1, z1, L, r) => { const len = Math.hypot(x1 - x0, z1 - z0), k = Math.max(1, Math.ceil(len / 0.4));
@@ -4202,7 +4202,7 @@ window.V41 = (() => {
 loadTreeModels(); updateChunks(); frame();
 
 /* ═══ v42 FX42 (three.quarks): غبار تحت الأقدام والحصان، شرار ضربة السيف، دخان نار المخيمات — مطفي افتراضياً، يشتغل بـ ?fx=quarks ═══ */
-const FX42 = (() => { const on = /[?&]fx=quarks/.test(location.search) || (() => { try { return localStorage.getItem('ow_fx') === 'quarks'; } catch (e) { return false; } })();
+const FX42 = (() => { const on = new URLSearchParams(location.search).get('fx') === 'quarks' || (() => { try { return localStorage.getItem('ow_fx') === 'quarks'; } catch (e) { return false; } })();
   const ST = { on, ok: false, err: null, dust: 0, sparks: 0, smoke: 0, systems: 0 }; if (!on) { window.FX42 = { ST, tick() {}, sparks() {} }; return window.FX42; }
   let Q = null, br = null, S = {}, dustAcc = 0, px = null, pz = null; const smokes = new Map();
   const tex = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -4235,7 +4235,7 @@ const FX42 = (() => { const on = /[?&]fx=quarks/.test(location.search) || (() =>
   window.FX42 = { ST, tick, sparks }; return window.FX42; })();
 
 /* ═══ v42 PHYS42 (Rapier): صناديق وبراميل بتوقع وبتتدحرج وبتنزاح لما تمشي فيها، وزر G (أو زر «ارمِ» عالموبايل) بيرمي صندوق لقدّام — مطفي افتراضياً، يشتغل بـ ?phys=rapier ═══ */
-const PHYS42 = (() => { const on = /[?&]phys=rapier/.test(location.search) || (() => { try { return localStorage.getItem('ow_phys') === 'rapier'; } catch (e) { return false; } })();
+const PHYS42 = (() => { const on = /[?&]phys=rapier\b/.test(location.search) || (() => { try { return localStorage.getItem('ow_phys') === 'rapier'; } catch (e) { return false; } })();
   const ST = { on, ok: false, err: null, bodies: 0, thrown: 0, ground: 0, steps: 0, maxStepMs: 0 }; if (!on) { window.PHYS42 = { ST, tick() {} }; return window.PHYS42; }
   let R = null, world = null, ply = null, gnd = null, gc = null, acc = 0; const objs = [];
   const wood = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'); g.fillStyle = '#8a5a2b'; g.fillRect(0, 0, 64, 64);
@@ -4271,7 +4271,7 @@ const PHYS42 = (() => { const on = /[?&]phys=rapier/.test(location.search) || ((
   window.PHYS42 = { ST, tick, throwOne, scatter, objs: () => objs.map(o => { const p = o.b.translation(); return [+p.x.toFixed(2), +p.y.toFixed(2), +p.z.toFixed(2)]; }) }; return window.PHYS42; })();
 
 /* ═══ v42 NAV42 (recast-navigation): أهل البلد بيمشوا على navmesh حقيقي (بيلفّوا حول البيوت والأسوار) بدل شبكة A* — مطفي افتراضياً، يشتغل بـ ?nav=recast؛ لو فشل أي شي بيرجع للـ A* القديم ═══ */
-const NAV42 = (() => { const on = /[?&]nav=recast/.test(location.search) || (() => { try { return localStorage.getItem('ow_nav') === 'recast'; } catch (e) { return false; } })();
+const NAV42 = (() => { const on = /[?&]nav=recast\b/.test(location.search) || (() => { try { return localStorage.getItem('ow_nav') === 'recast'; } catch (e) { return false; } })();
   const ST = { on, ok: false, err: null, meshes: 0, polys: [], buildMs: [], paths: 0, fallbacks: 0, pending: 0 }; if (!on) { window.NAV42 = { ST, path() { return null; } }; return window.NAV42; }
   let C = null, G = null; const cache = new Map();
   Promise.all([import('@recast-navigation/core'), import('@recast-navigation/generators')]).then(async ([c, g]) => { await c.init(); C = c; G = g; ST.ok = true; console.info('[v42] NAV42 recast ready'); })
@@ -4305,7 +4305,7 @@ const NAV42 = (() => { const on = /[?&]nav=recast/.test(location.search) || (() 
   window.NAV42 = { ST, path, cache }; return window.NAV42; })();
 
 /* ═══ v42 SFX42 (Howler): صوت ضربة السيف والتلويح، خطوات (عشب/حجر)، حوافر الحصان ونخرته — مطفي افتراضياً، يشتغل بـ ?sfx=howler ═══ */
-const SFX42 = (() => { const on = /[?&]sfx=howler/.test(location.search) || (() => { try { return localStorage.getItem('ow_sfx') === 'howler'; } catch (e) { return false; } })();
+const SFX42 = (() => { const on = /[?&]sfx=howler\b/.test(location.search) || (() => { try { return localStorage.getItem('ow_sfx') === 'howler'; } catch (e) { return false; } })();
   const SS = { on, ok: false, err: null, loaded: 0, total: 0, unlocked: false, played: { hit: 0, swing: 0, grass: 0, stone: 0, hoof: 0, snort: 0 } };
   if (!on) { window.SFX42 = { ST: SS, tick() {}, hit() {}, swing() {} }; return window.SFX42; }
   const N = { hit: 3, swing: 2, grass: 4, stone: 4, hoof: 4, snort: 1 }, VOL = { hit: 0.8, swing: 0.45, grass: 0.3, stone: 0.35, hoof: 0.5, snort: 0.35 }, S = {};
@@ -4331,7 +4331,7 @@ const SFX42 = (() => { const on = /[?&]sfx=howler/.test(location.search) || (() 
   window.SFX42 = { ST: SS, tick, play, hit: (x, z) => play('hit', fall(x, z)), swing: () => play('swing', 1), selftest: () => { for (const k in N) play(k, 0.01); last = {}; return { played: Object.assign({}, SS.played), ctx: window.Howler && Howler.ctx ? Howler.ctx.state : null, loaded: SS.loaded, total: SS.total }; } }; return window.SFX42; })();
 
 /* ═══ v42 HIT42 (Rapier): ضربة السيف بصندوق إصابة حقيقي بيكنس قوس قدّام اللاعب بدل المخروط، مع قوس ضوئي للضربة وحلقة عند الإصابة — مطفي افتراضياً، يشتغل بـ ?combat=rapier ═══ */
-const HIT42 = (() => { const on = /[?&]combat=rapier/.test(location.search) || (() => { try { return localStorage.getItem('ow_combat') === 'rapier'; } catch (e) { return false; } })();
+const HIT42 = (() => { const on = /[?&]combat=rapier\b/.test(location.search) || (() => { try { return localStorage.getItem('ow_combat') === 'rapier'; } catch (e) { return false; } })();
   const HS = { on, ok: false, err: null, swings: 0, hits: 0, misses: 0, fallbackCone: 0, maxMs: 0, last: null, vfx: 0 };
   if (!on) { window.HIT42 = { ST: HS, tick() {} }; return window.HIT42; }
   let R = null, world = null, blade = null; const fxs = [];
