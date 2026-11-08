@@ -208,7 +208,7 @@ function addChunk(cx, cz, res, r, gr) {         // بناء شبكة القطع�
   if (r.rk.length) m.add(inst(ROCK, rockMat, r.rk, false, 0.65));
   scene.add(m);
   if (cur) killChunk(cur);
-  chunks.set(k, { cx, cz, res, gr, mesh: m });
+  { const __chgC = { cx, cz, res, gr, mesh: m }; chunks.set(k, __chgC); if (cx >= CHG_MIN && cx <= CHG_MAX && cz >= CHG_MIN && cz <= CHG_MAX) CHG[(cz - CHG_MIN) * CHG_W + (cx - CHG_MIN)] = __chgC; }
 }
 
 /* ═══ v24 أداء: (١) القطع البعيدة من الأرض تُدمج في شبكة واحدة (نداء رسم واحد بدل ~٤٠)، القريبة (٣×٣) تبقى كما هي؛ (٢) خريطة الظل تُحدَّث كل إطارين ═══ */
@@ -284,7 +284,7 @@ function updateChunks() {
   queue = list; for (const j of list) pending.add(j.k);
   for (const [k, c] of chunks) {                // حذف القطع البعيدة
     if (Math.abs(c.cx - PL.cx) > R + 1 || Math.abs(c.cz - PL.cz) > R + 1) {
-      killChunk(c); chunks.delete(k); }
+      const __chgI = (c.cx >= CHG_MIN && c.cx <= CHG_MAX && c.cz >= CHG_MIN && c.cz <= CHG_MAX) ? (c.cz - CHG_MIN) * CHG_W + (c.cx - CHG_MIN) : -1; killChunk(c); chunks.delete(k); if (__chgI >= 0) CHG[__chgI] = undefined; }
   }
   for (const k of [...pending]) { if (!queue.some(q => q.k === k) && !workers.some(w => w.busy)) pending.delete(k); }
 }
@@ -4392,7 +4392,7 @@ function applySettings() {
   if (S.shadow > 0) { sun.shadow.mapSize.set(S.shadow, S.shadow); sun.shadow.map?.dispose(); sun.shadow.map = null; }
   U.uWaves.value = S.wq; rainGeo.setDrawRange(0, Math.floor(RN * Math.min(1, S.fx)) * 2);
   if (applySettings.lastVeg !== undefined && applySettings.lastVeg !== S.veg) {   // تغيّر الكثافة: إعادة بناء كل القطع
-    for (const c of chunks.values()) killChunk(c); chunks.clear(); pending.clear(); queue = []; }
+    for (const c of chunks.values()) killChunk(c); chunks.clear(); CHG.fill(undefined); pending.clear(); queue = []; }
   applySettings.lastVeg = S.veg;
   terrainMat.needsUpdate = true; updateChunks(); saveSettings();
 }
