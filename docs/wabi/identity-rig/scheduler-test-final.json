@@ -1,0 +1,33 @@
+{
+  "status": "pass",
+  "orderedAsyncCommit": {
+    "out": [
+      "first",
+      "second"
+    ],
+    "pending": 0,
+    "frame": 3
+  },
+  "checks": [
+    "two identical seeded clock runs",
+    "timer then RAF ordering",
+    "30 fixed ticks",
+    "ordered asynchronous commit without blocking ticks",
+    "medium guard",
+    "master switch",
+    "det=0 switch"
+  ],
+  "sample": {
+    "randoms": [
+      0.2577907438389957,
+      0.9707721115555614
+    ],
+    "out": [
+      "t10",
+      "raf"
+    ],
+    "now": 1000.0000000000005,
+    "date": 1700000001000,
+    "frames": 30
+  }
+}

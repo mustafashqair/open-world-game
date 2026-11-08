@@ -1,0 +1,14 @@
+{
+  "result": {
+    "name": "base-vlow-village-1",
+    "status": "incomplete",
+    "errors": [],
+    "requests": [],
+    "consoleErrors": [],
+    "frames": 90,
+    "every": 30,
+    "scope": "fixed-step test-mode sampled state; not production/visual identity",
+    "reason": "Error: page evaluation exceeded 15 s; no identity verdict"
+  },
+  "rows": []
+}

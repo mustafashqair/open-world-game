@@ -1,0 +1,2445 @@
+[
+  {
+    "file": "index.html",
+    "line": 554,
+    "classes": [
+      "timers"
+    ],
+    "source": "<link rel=\"manifest\" href=\"manifest.webmanifest\"><link rel=\"apple-touch-icon\" href=\"icon-192.png\"><meta name=\"apple-mobile-web-app-capable\" content=\"yes\"><meta name=\"mobile-web-app-capable\" content=\"yes\"><meta name=\"theme-color\" content=\"#12203a\"><script>/* v50g-label: شارة الإصدار */(function(){var V='v50g3',n=0;function s(){try{document.title=document.title.replace(/\\s*v4\\d-test$/,'').replace(/\\s*v50[a-z]\\d?$/,'')+' '+V;var b=document.getElementById('v40badge');if(b)b.textContent=V+(/\\(off\\)/.test(b.textContent)?' (off)':'');}catch(e){}if(++n<30)setTimeout(s,1000);}setTimeout(s,500);})();</script>"
+  },
+  {
+    "file": "index.html",
+    "line": 980,
+    "classes": [
+      "timers"
+    ],
+    "source": "var later = function (fn, ms) { if (VTon) vtq.push([vnow + ms, fn]); else setTimeout(fn, ms); };"
+  },
+  {
+    "file": "index.html",
+    "line": 997,
+    "classes": [
+      "timers"
+    ],
+    "source": "setInterval(function () { applyAudio(false); }, 700);"
+  },
+  {
+    "file": "index.html",
+    "line": 1005,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "var noise = function (dur, f, q, g0, dl) { var n = Math.floor(ac.sampleRate * dur), b = ac.createBuffer(1, n, ac.sampleRate), d = b.getChannelData(0); for (var i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2); var s = ac.createBufferSource(), bp = ac.createBiquadFilter(), g = ac.createGain(); s.buffer = b; bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = q; g.gain.value = g0; s.connect(bp); bp.connect(g); g.connect(out); s.start(t + (dl || 0)); };"
+  },
+  {
+    "file": "index.html",
+    "line": 1020,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "var P = (function () { var cv = $('sgP'), cx = cv.getContext('2d'), W = 0, H = 0, dpr = Math.min(1.5, devicePixelRatio || 1), parts = [], birds = [], run = true, vt = null, last = performance.now(), T = 0;"
+  },
+  {
+    "file": "index.html",
+    "line": 1036,
+    "classes": [
+      "timers"
+    ],
+    "source": "function loop(n) { if (!run) return; requestAnimationFrame(loop); if (vt !== null || document.hidden) return; T += Math.min(0.1, (n - last) / 1000); last = n; draw(T); }"
+  },
+  {
+    "file": "index.html",
+    "line": 1037,
+    "classes": [
+      "timers"
+    ],
+    "source": "requestAnimationFrame(function (n) { last = n; loop(n); });"
+  },
+  {
+    "file": "index.html",
+    "line": 1046,
+    "classes": [
+      "timers"
+    ],
+    "source": "var tipT = setInterval(function () { if (demo === null && !ready) showTip(tipI + 1); }, 5200);"
+  },
+  {
+    "file": "index.html",
+    "line": 1050,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "var t0 = performance.now();"
+  },
+  {
+    "file": "index.html",
+    "line": 1061,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "var m = mb(), sec = (performance.now() - t0) / 1000;"
+  },
+  {
+    "file": "index.html",
+    "line": 1064,
+    "classes": [
+      "timers"
+    ],
+    "source": "setTimeout(tick, 250);"
+  },
+  {
+    "file": "index.html",
+    "line": 1070,
+    "classes": [
+      "timers"
+    ],
+    "source": "setTimeout(tick, 60);"
+  },
+  {
+    "file": "index.html",
+    "line": 1071,
+    "classes": [
+      "timers"
+    ],
+    "source": "setTimeout(function () { if (!ready) setB.classList.add('in'); }, 1100);"
+  },
+  {
+    "file": "index.html",
+    "line": 1108,
+    "classes": [
+      "timers"
+    ],
+    "source": "$('sgQWt').textContent = 'جاري إعادة التحميل…'; setTimeout(function () { location.reload(); }, 150); };"
+  },
+  {
+    "file": "index.html",
+    "line": 1141,
+    "classes": [
+      "timers"
+    ],
+    "source": "setTimeout(function(){if(!window.__ow)owMsg('لم يبدأ سكربت اللعبة: غالباً تعذّر تحميل Three.js من الشبكة أو حُجب بالأمان.');},8000);"
+  },
+  {
+    "file": "index.html",
+    "line": 1184,
+    "classes": [
+      "async"
+    ],
+    "source": "if (u === p) return loader.load(p, ok(p), onProgress, onError);"
+  },
+  {
+    "file": "index.html",
+    "line": 1185,
+    "classes": [
+      "async"
+    ],
+    "source": "return loader.load(u, ok(u), onProgress, function () {"
+  },
+  {
+    "file": "index.html",
+    "line": 1187,
+    "classes": [
+      "async"
+    ],
+    "source": "loader.load(p, ok(p), onProgress, onError);"
+  },
+  {
+    "file": "index.html",
+    "line": 1204,
+    "classes": [
+      "async"
+    ],
+    "source": "return of0(input, init).then(function (r) { if (!r.ok && n > 0 && (r.status >= 500 || r.status === 429 || r.status === 408)) throw new Error('HTTP ' + r.status); return r; })"
+  },
+  {
+    "file": "index.html",
+    "line": 1206,
+    "classes": [
+      "timers",
+      "async"
+    ],
+    "source": "return new Promise(function (res) { setTimeout(res, (4 - n) * 700); }).then(function () { return of(input, init, n - 1); }); } throw e; }); };"
+  },
+  {
+    "file": "index.html",
+    "line": 1210,
+    "classes": [
+      "async"
+    ],
+    "source": "if (s) return Promise.all(Array.from({ length: s[0] }, function (_, i) { return of(u.pathname + '.' + i + u.search, init).then(function (r) { if (!r.ok) throw new Error(k + '.' + i + ' HTTP ' + r.status); return r.arrayBuffer(); }); }))"
+  },
+  {
+    "file": "index.html",
+    "line": 1211,
+    "classes": [
+      "async"
+    ],
+    "source": ".then(function (a) { var b = new Blob(a, { type: 'model/gltf-binary' }); if (b.size !== s[1]) throw new Error(k + ': size ' + b.size + ' != ' + s[1]); return new Response(b, { status: 200, headers: { 'Content-Type': 'model/gltf-binary', 'Content-Length': String(b.size) } }); }); } } catch (e) {}"
+  },
+  {
+    "file": "index.html",
+    "line": 1221,
+    "classes": [
+      "timers",
+      "async"
+    ],
+    "source": "Promise.all(Array.from({length: 3}, (_, i) => (function f(n) { return fetch('v50g3/code/part-' + String(i).padStart(3, '0') + '.txt?v=v50g3').then(r => { if (!r.ok && n > 0) throw new Error('HTTP ' + r.status); return r; }).catch(e => { if (n > 0) return new Promise(z => setTimeout(z, 800)).then(() => f(n - 1)); throw e; }); })(3).then(r => { if (!r.ok) throw new Error('part ' + i + ' HTTP ' + r.status); return r.text(); })))"
+  },
+  {
+    "file": "index.html",
+    "line": 1222,
+    "classes": [
+      "async"
+    ],
+    "source": ".then(a => { const s = document.createElement('script'); s.type = 'module'; s.textContent = a.join(''); document.body.appendChild(s); })"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 26,
+    "classes": [
+      "wall-clock"
+    ],
+    "source": "const now = () => (performance.timeOrigin ? Date.now() - performance.timeOrigin : Date.now());"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 40,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "async function run(g, key) { const t0 = performance.now(), byImg = new Map(); const C = cap(), CC = capc();"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 46,
+    "classes": [
+      "async"
+    ],
+    "source": "jobs.push(createImageBitmap(im, { resizeWidth: nw, resizeHeight: nh, resizeQuality: 'high' }).then(b => { for (const t of e.tex) { t.image = b; t.needsUpdate = true; } try { if (im.close) im.close(); } catch (x) {} st.n++; st.px0 += w * h; st.px1 += nw * nh; }).catch(() => { st.err++; })); }"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 47,
+    "classes": [
+      "perf-clock",
+      "async"
+    ],
+    "source": "await Promise.all(jobs); st.files++; st.ms += performance.now() - t0; }"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 55,
+    "classes": [
+      "timers"
+    ],
+    "source": "if (e.tries < 4 && +st !== 404 && +st !== 403) { const wait = [800, 2500, 6000][e.tries - 1] || 6000; console.warn('[v42] retry ' + key + ' #' + e.tries + ' (' + (err && err.message || err) + ')'); setTimeout(attempt, wait); return; }"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 58,
+    "classes": [
+      "async"
+    ],
+    "source": "const fin = () => { try { onLoad && onLoad(g); } catch (x) { console.error('[v42] onLoad ' + key, x); } }; if (TCAP.cap() || TCAP.capc()) TCAP.run(g, key).then(fin, fin); else fin(); }, onProgress, fail); };"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 804,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "api.repick = (n, pick) => { for (let k = 0; k < 5; k++) { st.repick++; const p = pick(n); n.poi = p; n.tx = p.x + (Math.random() - 0.5) * 2.4; n.tz = p.z + (Math.random() - 0.5) * 2.4; if (!api.badGoal(n.tx, n.tz)) return; }"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 900,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const ROADTEX = (() => { const t0 = performance.now(), mk = (c, srgb) => { const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4; if (srgb) t.colorSpace = THREE.SRGBColorSpace; return t; };"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 902,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "console.info('[الطرق] قوام إجرائي: ' + (performance.now() - t0).toFixed(0) + ' م.ث'); return T; } catch (e) { console.warn('[الطرق] تعذّر رسم القوام', e); return null; } })();"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 929,
+    "classes": [
+      "async"
+    ],
+    "source": "for (const n of ['wallstone', 'roof', 'door', 'cobble', 'flag', 'road', 'banner']) for (const sfx of (n === 'banner' ? [''] : ['', '_n'])) { const t = TL.load('city/' + n + sfx + '.webp', undefined, undefined, () => console.warn('[v15] لم يُحمَّل القوام ' + n + sfx));"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 977,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const CITY_GLB_T0 = performance.now(); function cityReady() { return [...Object.keys(NPC_GLB), ...Object.keys(HOUSE_GLB), ...Object.keys(SHOP_GLB)].every(k => k in MODELS) && (!window.__shop20 || window.__shop20.ready()) || performance.now() - CITY_GLB_T0 > 120000; }   // v15: المدينة تنتظر نماذجها الجديدة (لا رجوع للشكل القديم على الموبايل البطيء)"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 1042,
+    "classes": [
+      "timers",
+      "async"
+    ],
+    "source": "const one = (i, n) => fetch('./v42/emb/e-' + String(i).padStart(3, '0') + '.txt?v=74016c9b').then(r => { if (!r.ok) throw new Error('emb ' + i + ' HTTP ' + r.status); return r.arrayBuffer(); }).catch(e => { if (n > 0) return new Promise(z => setTimeout(z, 800 * (4 - n))).then(() => one(i, n - 1)); throw e; });"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 1043,
+    "classes": [
+      "async"
+    ],
+    "source": "const ready = Promise.all(Array.from({ length: N }, (_, i) => one(i, 3))).then(bs => { const u = new Uint8Array(L); let o = 0; for (const b of bs) { u.set(new Uint8Array(b), o); o += b.byteLength; } if (o !== L) throw new Error('emb size ' + o + ' != ' + L); AB = u.buffer; return AB; });"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 1088,
+    "classes": [
+      "async"
+    ],
+    "source": "EMB42.ready.then(() => { for (const k of Object.keys(MDEF)) { const d = MDEF[k];"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 1098,
+    "classes": [
+      "wall-clock"
+    ],
+    "source": "{ const CRIT = ['plSw', 'npcM', 'npcF', 'grdSw', 'grdSp'], T0 = Date.now(); window.__crit42 = { CRIT, t: null };   // v42: «جاهز» بس لما يوصلوا اللاعب وأهل القرى والحرس (أو يفشلوا نهائياً بعد إعادة المحاولة)، وحد أقصى ١٥٠ ث"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 1099,
+    "classes": [
+      "wall-clock",
+      "timers"
+    ],
+    "source": "const iv = setInterval(() => { const el = Date.now() - T0, crit = CRIT.every(k => k in MODELS); if (crit && window.__crit42.t == null) window.__crit42.t = el;"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 1128,
+    "classes": [
+      "async"
+    ],
+    "source": "if (nurl && !m.normalMap) new THREE.TextureLoader().load(nurl, t => { t.flipY = false; t.colorSpace = THREE.NoColorSpace; t.anisotropy = AN; m.normalMap = t; m.normalScale.set(1.2, 1.2); m.needsUpdate = true; }, undefined, () => console.warn('[v13] normal map missing: ' + nurl));"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 1572,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "try { const t0 = performance.now(), S22 = PA.make(g.scene), NC = Object.assign({}, P22.buildIdle(S22, g.scene, clips), P22.buildIdleBow(S22, g.scene, clips), P22.buildPunch(S22, g.scene, clips), P22.buildBow(S22, g.scene, clips));   // v22: مقاطع حقيقية جديدة (وقفة، لكمات، قوس)"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 1574,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "P22.makeLeftFist(g.scene); g.scene.userData.p22S = S22; console.info('[v22] مقاطع اللاعب: ' + Object.keys(NC).join(', ') + ' (' + Math.round(performance.now() - t0) + 'ms)');"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 1666,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const fx = bo.userData.fx; if (draw && fx && fx.arPos) { P22.lastArrow = { p: fx.arPos.clone(), d: fx.arDir.clone(), at: performance.now() }; }"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 1703,
+    "classes": [
+      "async"
+    ],
+    "source": "ld.load('npcs/npc-' + kind + '-far.glb', g => { try { let far = null; g.scene.traverse(o => { if (o.isSkinnedMesh) far = o; }); if (!far || far.skeleton.bones.length !== near.skeleton.bones.length) return;"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 1902,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "for (let i = 0; i < 1800; i++) { const u = Math.random() * 2 - 1, a = Math.random() * 6.283, s = Math.sqrt(1 - u * u);"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 1926,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "for (let i = 0; i < RN; i++) { const x = Math.random() * 30, y = Math.random() * 20, z = Math.random() * 30;"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 1938,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (ENV.auto) { ENV.wTimer -= dt; if (ENV.wTimer < 0) { ENV.wTimer = 90 + Math.random() * 120; const q = Math.random();"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 1953,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "ENV.flash = Math.max(0, ENV.flash - dt * 3); if (ENV.storm > 0.5 && Math.random() < dt * 0.15) ENV.flash = 1; U.uFlash.value = ENV.flash;"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 54,
+    "classes": [
+      "async"
+    ],
+    "source": "const WMP = Promise.all([import('./trees33/maple-wind.js?v=36'), import('./trees33/tree-wind-v2.js?v=36')]).then(([m, t]) => { WMOD = { maple: m.applyMapleWind, tree: t.applyTreeWind }; }).catch(e => { WMOD = {}; console.warn('[v36] wind ' + (e && e.message || e)); });"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 59,
+    "classes": [
+      "async"
+    ],
+    "source": "loader.load(url, g => WMP.then(() => { T.loading--; try {"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 247,
+    "classes": [
+      "timers"
+    ],
+    "source": "(function tb24Loop() { requestAnimationFrame(tb24Loop); try { tb24Tick(); } catch (e) { if (!TB24.err) { TB24.err = 1; console.warn('[v24] tb', e); } } })();"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 251,
+    "classes": [
+      "async"
+    ],
+    "source": "const src = `const L=(${terrainLib})();onmessage=e=>{const d=e.data;if(d.world){L.setWorld(d.world);return;}L.init(d.seed);const r=L.chunk(d.cx,d.cz,d.res,d.ch,d.veg,d.gr);` +"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 256,
+    "classes": [
+      "async"
+    ],
+    "source": "const w = new Worker(url); w.busy = false; w.postMessage({ world: WORLD });     // حقول العالم تُمرَّر مرة واحدة"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 257,
+    "classes": [
+      "perf-clock",
+      "async"
+    ],
+    "source": "w.onmessage = e => { w.busy = false; CT.n++; CT.ms += performance.now() - w.t0; if (CT.n === 80) console.info('[أداء] متوسط زمن توليد القطعة (Worker): ' + (CT.ms / CT.n).toFixed(1) + ' م.ث'); addChunk(e.data.cx, e.data.cz, e.data.res, e.data.r, e.data.gr); };"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 267,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const j = queue.shift(); w.busy = true; w.t0 = performance.now();"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 434,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (w.hp <= 0) { w.dead = true; w.deadT = 0; if (byP) { const g = 8 + ((Math.random() * 8) | 0); ST.gold += g; toast('أسقطتَ ذئباً (+' + g + ' ذهب)'); } else toast('سقط ذئب'); }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 457,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "if (a.delay > 0) { a.delay -= dt; if (a.delay > 0) { a.m.visible = false; continue; } a.m.visible = true; const L = P22.lastArrow; if (L && performance.now() - L.at < 500) { a.x = L.p.x + ORG.x; a.y = L.p.y; a.z = L.p.z + ORG.z; } }   // v22"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 474,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "while (tries++ < 80) { const a = Math.random() * 6.283, r = 120 + Math.random() * 520, x = SPAWN.x + Math.cos(a) * r, z = SPAWN.z + Math.sin(a) * r, h = LIB.height(x, z);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 475,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (h < 4 || h > 60) continue; const n2 = 2 + ((Math.random() * 3) | 0);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 476,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "for (let k = 0; k < n2; k++) makeAnimal(Math.random() < 0.3 ? 'horseW' : 'horse', x + Math.cos(k * 2.1) * 5, z + Math.sin(k * 2.1) * 5, null, false);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 483,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "WOLVES.push({ g: inst, mixer, acts, mats, cur: null, x, z, y: LIB.height(x, z), face: Math.random() * 6.28, hp: 60, cd: 0, flash: 0, dead: false, deadT: 0, seed,"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 484,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "home: [x, z], state: 'wander', tgt: null, eatT: 0, howlCd: 15 + Math.random() * 30, atkT: 0, atkDid: true, wa: Math.random() * 6.28 });"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 526,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (!w.tgt || w.tgt.o && w.tgt.o.dead || Math.random() < dt * 0.5) { const p = wolfPrey(w); w.tgt = p; if (p) w.state = p.d2 > 14 || night ? 'stalk' : 'chase'; }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 554,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "skPlay(w, Math.random() < 0.005 ? 'Idle' : 'Walk', 0.35);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 565,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "const a = { kind, g: inst, mixer, acts, mats, cur: null, x, z, y: LIB.height(x, z), face: Math.random() * 6.28, hp: kind === 'donkey' ? 55 : 80,"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 566,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "dead: false, deadT: 0, flash: 0, state: 'graze', t: 1 + Math.random() * 4, idleV: 'Idle', home: [x, z], rad: pen ? 4.2 : 42, L: L || null, fleeT: 0, thX: 0, thZ: 0, wx: x, wz: z };"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 572,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (byP) { const g = 5 + ((Math.random() * 9) | 0); ST.gold += g; toast('اصطدتَ ' + ANN[a.kind] + ' (+' + g + ' ذهب)');"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 598,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (a.t <= 0) { const q = Math.random();"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 599,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (q < 0.45) { a.state = 'graze'; a.t = 4 + Math.random() * 5; }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 600,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "else if (q < 0.72) { a.state = 'idle'; a.t = 3 + Math.random() * 3.5; a.idleV = Math.random() < 0.35 ? 'Idle_2' : 'Idle'; }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 601,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "else { a.state = 'walk'; a.t = 4 + Math.random() * 4; const ang = Math.random() * 6.283, rr = 2 + Math.random() * a.rad;"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 607,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "else { a.state = 'graze'; a.t = 3 + Math.random() * 3; } }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 620,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "const E = id => document.getElementById(id), pickA = a => a[(Math.random() * a.length) | 0], aLerp = (a, b, t) => a + Math.atan2(sn(b - a), cs(b - a)) * t;"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 668,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const t0 = performance.now(), HW = CFG.HW, HH = CFG.HH, CELL = 20, n = Math.round(2 * HW / CELL), N = n * n, X = i => -HW + (i + 0.5) * CELL, Z = j => -HH + (j + 0.5) * CELL;"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 705,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "console.info('[الجبال] سلاسل: ' + spines.length + ' | أعلى غلاف: ' + mx.toFixed(0) + ' م | مساحة المرتفعات: ' + (cells * CELL * CELL / 1e6).toFixed(1) + ' كم² | ' + (performance.now() - t0).toFixed(0) + ' م.ث');"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 771,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const T = {}, st = { t0: performance.now(), loaded: 0, failed: [], need: need.length, phone: PH };"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 782,
+    "classes": [
+      "async"
+    ],
+    "source": "try { (window.__qLoad || ((l, u, a, p, b) => l.load(u, a, p, b)))(ld, F[k], ok, undefined, bad); } catch (e) { bad(); } }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 783,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const ready = () => st.loaded >= st.need || performance.now() - st.t0 > 60000;"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 856,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const st = { t0: performance.now(), phone: PH, off: OFF, loaded: 0, need: 5, failed: [], built: [], tris: 0, draws: 0 };"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 859,
+    "classes": [
+      "async"
+    ],
+    "source": "const tex = (n, srgb) => { const t = TL.load('village/v4/' + n + '.webp', undefined, undefined, () => { st.failed.push(n); console.warn('[vil4] قوام ' + n); });"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 999,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const done = () => { st.loaded++; if (st.loaded >= st.need) { st.ms = Math.round(performance.now() - st.t0); for (const f of waitQ.splice(0)) try { f(); } catch (e) { console.warn('[vil4] late', e); } } };"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1001,
+    "classes": [
+      "async"
+    ],
+    "source": "try { (window.__qLoad || ((l, u, a, p, b) => l.load(u, a, p, b)))(ld, url, g => { try { ok(g.scene); } catch (e) { st.failed.push(url); console.warn('[vil4]', e); } done(); }, undefined, bad); } catch (e) { bad(); } };"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1010,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const ready = () => OFF || st.loaded >= st.need || performance.now() - st.t0 > 90000;"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1182,
+    "classes": [
+      "async"
+    ],
+    "source": "try { (window.__qLoad || ((l, u, a, p, b) => l.load(u, a, p, b)))(ld, url, ok, undefined, bad); } catch (e) { bad(); } }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1192,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "function finish(L, v) { if (OFF || !L.v4) return; const t0 = performance.now();"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1199,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "makeInst(L); st.built.push({ v: v.name, draws: L.v4.draws, tris: L.v4.tris, ms: Math.round(performance.now() - t0) });"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1463,
+    "classes": [
+      "async"
+    ],
+    "source": "const load = (u, fb) => TLD.load(u, x => done(x.image), undefined, () => { if (fb) load(fb, null); });"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2001,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "if (B.far24) return B.far24; if (B.f24x) return null; const now = performance.now(); if (B.f24t && now - B.f24t < 1500) return null; B.f24t = now;"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2038,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "function palace(L, ctx) { ST.L = L; try { const t0 = performance.now(), B = buildPalace(L, ctx); console.info('[PMQ] palace', Math.round(B.tris), 'tris', Math.round(performance.now() - t0), 'ms', HQ ? 'high' : 'mobile'); }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2041,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "try { const t0 = performance.now(), B = buildMosque(L, ctx, x, z, yaw); console.info('[PMQ] mosque', Math.round(B.tris), 'tris', Math.round(performance.now() - t0), 'ms'); }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2121,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const api = { mats: M, get geo() { if (!G) { const t0 = performance.now(); G = { wlS: wall(), wlQ: towerQ(), wlR: towerR(), wlG: gate(false), wlC: gate(true) }; console.info('[v15] السور الجديد: ' + (performance.now() - t0).toFixed(0) + ' م.ث'); } return G; } };"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2127,
+    "classes": [
+      "async"
+    ],
+    "source": "const tx = (p, srgb) => { const t = TL.load(p); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4; if (srgb) t.colorSpace = THREE.SRGBColorSpace; return t; };"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2252,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "Object.defineProperty(C15, 'geo', { configurable: true, get() { if (!G) { const t0 = performance.now(); G = { wlS: wall(), wlQ: towerQ(true), wlR: towerR(), wlG: gate(false), wlC: gate(true) }; console.info('[v16] السور الجديد (طراز القدس/دمشق): ' + (performance.now() - t0).toFixed(0) + ' م.ث', JSON.stringify(Object.fromEntries(Object.entries(G).map(([k, g]) => [k, (g.index ? g.index.count : g.attributes.position.count) / 3])))); } return G; } });"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2262,
+    "classes": [
+      "async"
+    ],
+    "source": "const tex = (p, srgb) => { const t = TL.load(p, undefined, undefined, () => console.warn('[v16] لم يُحمَّل ' + p)); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4; if (srgb) t.colorSpace = THREE.SRGBColorSpace; return t; };"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2312,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "function build(L, ctx) { const { cx, cz, H, add, lamps, D2R } = ctx, q = WORLD.hill, T = q.t; if (!T) return; const t0 = performance.now();"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2366,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "L.hill16 = { tris: geo.index ? geo.index.count / 3 : geo.attributes.position.count / 3, bal: balPos.length, ms: Math.round(performance.now() - t0) }; console.info('[v16] تل القصر', JSON.stringify(L.hill16)); }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2404,
+    "classes": [
+      "async"
+    ],
+    "source": "for (const lv of [1, 2]) loader.load(base.replace('.glb', lv === 1 ? '-lod.glb' : '-lod2.glb'), g => { try { g.scene.updateMatrixWorld(true); let mesh = null; g.scene.traverse(o => { if (o.isMesh && !mesh) mesh = o; }); if (!mesh) return;"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2525,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "function snap(out, props, ctx) { const t0 = performance.now(), { cx, cz, OC, cell } = ctx, S = streets(CITY_R), SB = 0.9, ID = new Int32Array(OC.length), st = { rot: 0, mv: 0, face: 0, side: 0, n: out.length };"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2543,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "st.ms = Math.round(performance.now() - t0); ST.snap = st; return fronts; }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2545,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "function build(L, rm, ctx) { const t0 = performance.now(), { cx, cz, H, onHill, gates } = ctx, CR = CITY_R, roads = L.roads || [], stat = {};"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2585,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "stat.kerbs = kn; stat.arches = arches.length; stat.tris = all.attributes.position.count / 3; L.v17arches = arches; ST.build = stat; stat.ms = Math.round(performance.now() - t0); return stat; }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2626,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "function atlas() { if (ATL) return ATL; const t0 = performance.now(), A = HQ() ? 2048 : 1024, k = A / 2048;"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2722,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "ATL = { A, tc, tn, mat, canvas: c, ms: Math.round(performance.now() - t0) }; ST.atlas = ATL.ms; return ATL; }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2768,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "function build(L, ctx) { const t0 = performance.now(), { cx, cz, H, pcx, pcz, HR, HL, RES } = ctx, gates = (L.gates || []).map(q => (CITY2 && q.a !== 90) ? [cx + CITY_WALL_R * Math.cos(q.a * D2R), cz - CITY_WALL_R * Math.sin(q.a * D2R)] : [q.x, q.z]), P = (r, a) => [cx + r * Math.cos(a * D2R), cz - r * Math.sin(a * D2R)];"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2953,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "ST.build = { units: live.length, dropped: units.length - live.length, alleys: nAl, strips: strips.length, sides: nSide, arches: arches.length, meshes: nm, tris: Math.round(tris), homes: L.houses.filter(h => h.key === 'v18').length, drop: DR, ms: Math.round(performance.now() - t0) };"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2957,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "function dress(L, ctx) { const t0 = performance.now(), V = L.v18; if (!V || !window.V17 || !V17.geos) return null; const { cx, cz, H } = ctx, rnd = rs(5151), G = V17.geos(), SC = 1.25;"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2969,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "ST.dress = { clA: cl[0].length, clB: cl[1].length, stalls: stalls.length, lanterns: lan.length, ms: Math.round(performance.now() - t0) }; return ST.dress; }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2971,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "function nav(L) { const t0 = performance.now(), V = L.v18; if (!V) return; const n = Math.ceil(2 * (ANX50.on ? 257 : CITY_R) + 24), x0 = V.cx - n / 2, z0 = V.cz - n / 2, a = new Uint8Array(n * n), clr = 0.46;"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2974,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "L.nav18 = { n, x0, z0, a }; ST.nav = Math.round(performance.now() - t0); }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3004,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "function farMove(n, L, gx, gz, s) { let left = s; n.fs = n.fs || (Math.random() < 0.5 ? 1 : -1);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3020,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "function build(L, ctx) { const t0 = performance.now(), { cx, cz, H, blockedAt, lamps, D2R, pcx, pcz } = ctx, PI = Math.PI;"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3080,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "L.dense16 = { cnt: CNT, n: out.length, props: Object.fromEntries(Object.entries(props).map(([k, v]) => [k, v.length])), ms: Math.round(performance.now() - t0) }; console.info('[v16] تكثيف المدينة', JSON.stringify(L.dense16)); }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3100,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "v.live = L; g.add(det, farG); scene.add(g); const tb = performance.now(), cnt = {}, groups = {}, SEC = 8, circ = [], GA = [0, 90, 180, 270];"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3303,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "L.stat = { houses: L.houses.length, residential: hs.length, pop: tot, npcs: roles, counts: cnt, visibleTrisEst: tris, drawCallsEst: det.children.length, buildMs: +(performance.now() - tb).toFixed(1) };"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3307,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const night = ENV.T >= 22 || ENV.T < 6, now = performance.now() / 1000, d = Math.hypot(PL.x - v.x, PL.z - v.z);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3338,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "a.time = opt.t0 !== undefined ? opt.t0 : (o ? 0 : Math.random() * a.getClip().duration);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3344,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "let nm = pool[(Math.random() * pool.length) | 0]; if (pool.length > 1 && nm === G.lastAtk) nm = pool[(pool.indexOf(nm) + 1) % pool.length]; G.lastAtk = nm;"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3366,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (hitNew) { const blk = n.blkT > 0, par = blk && A.Parry && Math.random() < 0.6, nm = par ? 'Parry' : blk && A.BlockHit ? 'BlockHit' : A.Hit ? 'Hit' : null;   // v16: Parry"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3441,
+    "classes": [
+      "timers"
+    ],
+    "source": "el.textContent = txt; el.style.opacity = 1; clearTimeout(palNotice.t); palNotice.t = setTimeout(() => { el.style.opacity = 0; }, 3200);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3580,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (n.farmer && T >= 7 && T < 17 && P.field.length) return P.field[(Math.random() * P.field.length) | 0];     // ويخرجون صباحاً إلى الحقول"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3581,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (n.homeWork && T >= 7 && T < 17) return { x: n.home.door[0] + (Math.random() - 0.5) * 8, z: n.home.door[1] + (Math.random() - 0.5) * 8, type: 'wood' }; }   // أهل الحلقة ب يعملون عند بيوتهم"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3589,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "for (let t = 0; t < 6; t++) { let q = Math.random() * tot, c = W[0] && W[0][1]; for (const w of W) { q -= w[0]; if (q <= 0) { c = w[1]; break; } }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3591,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "return best || { x: (L.big ? n.x : n.v.x) + (Math.random() - 0.5) * 12, z: (L.big ? n.z : n.v.z) + (Math.random() - 0.5) * 12, type: 'plaza' };"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3597,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (n.castleG) { if (n.stT <= 0) { n.sd = -n.sd; n.stT = 4 + Math.random() * 3; } return [n.post[0] + n.sd * 1.6, n.post[1], 'post', n.gface]; }   // حرس القصر: مواقع ثابتة"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3599,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (n.stT <= 0) { n.sd = -n.sd; n.stT = 3.5 + Math.random() * 2; }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3611,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (n.shop) { if (T >= 7 && T < 19) { if (n.stT <= 0) { n.sd = -n.sd; n.stT = 3.5 + Math.random() * 2; }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3614,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (!n.poi) { n.poi = pickPOI(n); n.tx = n.poi.x + (Math.random() - 0.5) * 2.4; n.tz = n.poi.z + (Math.random() - 0.5) * 2.4; n.atP = false; } if (NPCK.on && NPCK.badGoal(n.tx, n.tz)) NPCK.repick(n, pickPOI);   // npck v2: ولا وجهة على طريق القصر"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3627,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (o) a.crossFadeFrom(o, fade, false); else a.time = Math.random() * a.getClip().duration;   // طور عشوائي حتى لا يمشي الجميع بنفس الخطوة"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3665,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (Math.random() < 0.35 && n.hitT <= 0 && n.atkT <= 0) { npcSay(n, 'shield'); n.blkT = 0.7; toast('صدّ الحارس ضربتك بدرعه'); dmg *= 0.15; kx *= 0.1; kz *= 0.1; }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3737,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "else if (n.cool <= 0) { n.cool = 0.9 + Math.random() * 0.4; grdStrike(n, n.castleG || n.royal16 ? 21 : 14); } }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3747,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "n.strafe -= dt; if (n.strafe <= 0) { n.strafe = 1.1 + Math.random() * 1.7; n.strafeD = Math.random() < 0.5 ? 1 : -1; }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3751,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "else if (n.cool <= 0) { n.cool = 0.8 + Math.random() * 0.4; grdStrike(n, n.castleG || n.royal16 ? 21 : 14); } } }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3766,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (Math.random() < dt * 0.45) n.lastSeen = [n.lastSeen[0] + (Math.random() - 0.5) * 16, n.lastSeen[1] + (Math.random() - 0.5) * 16]; }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3787,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (Math.hypot(m.x - n.x, m.z - n.z) < 5 && Math.random() < dt * 0.5) { const t = 3 + Math.random() * 2.5; n.chat = { w: m, t }; m.chat = { w: n, t }; break; } }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3790,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (gl[2] === 'poi') { if (arrived) { if (!n.atP) { n.atP = true; n.dwell = 2 + Math.random() * 3.5; } n.dwell -= dt; if (n.dwell <= 0) { n.poi = null; n.atP = false; } } else n.atP = false; }   // توقف قصير ثم وجهة جديدة"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3797,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (moved < 0.02) { n.stuckT += dt; if (n.stuckT > 1.1) { n.stuckT = 0; n.path = null; n.poi = null; n.atP = false; n.stT = 0; n.x += (Math.random() - 0.5) * 1.8; n.z += (Math.random() - 0.5) * 1.8; } }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3805,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (!n.sleeping && !n.talking && Math.hypot(n.x - n.chkX, n.z - n.chkZ) < 1) { n.poi = null; n.path = null; n.atP = false; n.stT = 0; n.chat = null; n.x += (Math.random() - 0.5) * 2; n.z += (Math.random() - 0.5) * 2; }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3945,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const IDS = [1, 2, 3, 4], T = {}, wait = [], st = { t0: performance.now(), loaded: 0, failed: [], placed: [], phone: PH };"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3954,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const done = () => { st.loaded++; if (st.loaded >= IDS.length) { st.ms = Math.round(performance.now() - st.t0); for (const f of wait.splice(0)) try { f(); } catch (e) { console.warn('[kiosk] late', e); } } };"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3958,
+    "classes": [
+      "async"
+    ],
+    "source": "try { (window.__qLoad || ((l, u, a, p, b) => l.load(u, a, p, b)))(ld, url, ok, undefined, bad); } catch (e) { bad(); } }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3963,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "if (v.live !== L || L._kiosk) return; const t0 = performance.now(); L._kiosk = []; const H = LIB.height, ga = L.ga, ux = Math.cos(ga), uz = Math.sin(ga), nx = -uz, nz = ux;"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3984,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "st.placeMs = Math.round(performance.now() - t0); console.info('[kiosk] placed', JSON.stringify(st.placed), st.placeMs + 'ms');"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4006,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "if (st.loading) return; st.loading = true; hq = HQ(); const t0 = performance.now();"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4010,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const fin = () => { st.loaded++; if (st.loaded >= st.need) { st.ms = Math.round(performance.now() - t0); for (const f of wait.splice(0)) try { f(); } catch (e) { console.warn('[vwork] late', e); } } };"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4019,
+    "classes": [
+      "async"
+    ],
+    "source": "try { (window.__qLoad || ((l, u, a, p, b) => l.load(u, a, p, b)))(ld, url, ok, undefined, bad); } catch (e) { bad(); } }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4160,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "if (v.live !== L || L._vwork) return; L._vwork = []; mats(); const t0 = performance.now(), H = LIB.height;"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4191,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "st.built++; st.placeMs = Math.round(performance.now() - t0); console.info('[vwork] ' + L._vwork.length + ' شغّيلة بقرية تل الأمل ' + st.placeMs + 'ms', JSON.stringify(st.skipped));"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4206,
+    "classes": [
+      "perf-clock",
+      "async"
+    ],
+    "source": "function precompile(dt) { if (pcDone) return; pcT += dt; if (pcT < 2) return; pcT = 0; if (!started() || window.__QUALITY === 'high') return; pcDone = true; try { const t0 = performance.now(); (renderer.compileAsync ? renderer.compileAsync(scene, camera) : Promise.resolve(renderer.compile(scene, camera))).then(() => { st.precompileMs = Math.round(performance.now() - t0); }).catch(() => {}); } catch (e) {} }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4225,
+    "classes": [
+      "timers"
+    ],
+    "source": "function start(L, v) { load(); const go = () => { if (v.live !== L) return; if (L._kiosk || !window.KIOSK || KIOSK.ready() || st.kw > 40) place(L, v); else { st.kw = (st.kw || 0) + 1; setTimeout(go, 500); } };"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4243,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const t0 = performance.now(), ld = new GLTFLoader(); ld.setMeshoptDecoder(MeshoptDecoder);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4245,
+    "classes": [
+      "async"
+    ],
+    "source": "const nearLoad = () => { if (st.near4) return; st.near4 = 1; for (const f of files) ld.load(f, gl => { const r = gl.scene; r.updateMatrixWorld(true); NR4.push(r);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4251,
+    "classes": [
+      "timers",
+      "async"
+    ],
+    "source": "const as4 = (palA() || (S.preset === 'medium' && V4ON('med5'))) && renderer.compileAsync; if (as4) { try { window.__LAM && __LAM.apply && __LAM.apply(r); } catch (e) {} g.add(r); r.visible = false; r.userData.c4 = 1; const add = () => { if (!r.userData.c4) return; r.userData.c4 = 0; r.visible = !GF4 || !!st.nearOn4 || !palA(); st.shown4 = (st.shown4 || 0) + 1; }; try { renderer.compileAsync(r, camera, scene).then(add, add); } catch (e) { add(); } setTimeout(add, 20000); } else g.add(r);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4252,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "st.loaded++; st.ms = Math.round(performance.now() - t0); console.info('[est50] loaded', f, st.ms + 'ms');"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4271,
+    "classes": [
+      "async"
+    ],
+    "source": "st.farTris = I.length / 3; GF4 = gf; st.far4 = 'ok'; const add = () => { g.add(gf); st.far4 = 'shown'; }; try { renderer.compileAsync ? renderer.compileAsync(gf, camera, scene).then(add, add) : add(); } catch (e) { add(); } };"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4272,
+    "classes": [
+      "async"
+    ],
+    "source": "for (const f of FILES) ld.load(f, gl => { try { eat(gl.scene); okN++; } catch (e) { console.warn('[est50] far', e); } fin(); }, undefined, e => { console.warn('[est50] far fail', f, e && e.message); fin(); }); }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4295,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "function updateVillages(dt) { const wP = window.PRF, qO = !!(wP && wP.on); let qT = qO ? performance.now() : 0; try { EST50.tick(); if (CITY2) CITY2X.tick(); } catch (e) { if (!window.__e50) { window.__e50 = 1; console.warn('[est50] tick', e); } } if (qO) qT = wP.lap('v_est50_city2x', qT); if (window.SFX42) window.SFX42.tick(dt); if (window.HIT42) window.HIT42.tick(dt); if (window.FX42) window.FX42.tick(dt); if (window.PHYS42) window.PHYS42.tick(dt); if (qO) qT = wP.lap('v_fx42_phys42', qT); if (LANT15) LANT15.tick(); if (qO) qT = wP.lap('v_lant15', qT); LOD16.tick(); if (qO) qT = wP.lap('v_lod16', qT); try { V3B.tick(dt); } catch (e) {} if (qO) qT = wP.lap('v_v3b', qT);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4354,
+    "classes": [
+      "timers"
+    ],
+    "source": "function toast(t) { const el = $('toast'); el.textContent = t; el.style.opacity = 1; clearTimeout(toast.t); toast.t = setTimeout(() => el.style.opacity = 0, 2500); }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4531,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const now = performance.now(), dt = DOLL.last ? Math.min(0.05, (now - DOLL.last) / 1000) : 0; DOLL.last = now;"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4537,
+    "classes": [
+      "timers"
+    ],
+    "source": "DOLL.raf = requestAnimationFrame(dollFrame);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4544,
+    "classes": [
+      "timers"
+    ],
+    "source": "DOLL.last = 0; if (!DOLL.raf) DOLL.raf = requestAnimationFrame(dollFrame);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4898,
+    "classes": [
+      "timers"
+    ],
+    "source": "const ld = $('load'); if (ld) { ld.style.opacity = 0; setTimeout(() => ld.remove(), 900); }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4919,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "return c.length ? c[(Math.random() * c.length) | 0] : null;"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4924,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "const x = (Math.random() * 2 - 1) * (CFG.HW - 500), z = (Math.random() * 2 - 1) * (CFG.HH - 500);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4992,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "else if (b.atkT > 0) { if (!/^Attack/.test(S.cur || '')) banPlay36(b, ['Attack1', 'Attack2', 'Attack3'][(Math.random() * 3) | 0], true, 0.08); }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4998,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "const kind = Math.random() < 0.5 ? 'viking' : 'berserk';"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 5013,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "const n = BAN.MIN + ((Math.random() * (BAN.MAX - BAN.MIN + 1)) | 0);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 5033,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (have.length) { const id = have[(Math.random() * have.length) | 0]; BAG[id]--; got.push(ITEMS[id].name); renderBar(); }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 5317,
+    "classes": [
+      "async"
+    ],
+    "source": "GV.ld.load(url, g => { g.scene.traverse(o => { if (o.isMesh) { o.castShadow = true; o.frustumCulled = false; const ms = Array.isArray(o.material) ? o.material : [o.material];"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 258,
+    "classes": [
+      "async"
+    ],
+    "source": "ld.load('./horse.glb', g => { try { SOLH.M = solhTemplate(g); } catch (e) { SOLH.failed = true; console.warn('[خيول الجنود] ' + (e && e.message || e) + ' — بلا خيول'); } },"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 276,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "const a = acts.Idle; a.play(); a.time = Math.random() * M.clips.Idle.duration; h.cur = 'Idle';"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 394,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const NS = { nat: null, failed: false, starting: false, t0: performance.now(), court: [], tmp: [], err: null };"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 439,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "console.log('[v19] الطبيعة جاهزة: ' + NS.court.length + ' فناء، ' + ((performance.now() - NS.t0) / 1000).toFixed(1) + 'ث');"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 447,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "if (!NS.nat) { if (!NS.starting && !NS.failed && (CITYV.live || performance.now() - NS.t0 > 15000)) startNature(); return; }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 463,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const H = { tpl: {}, list: [], loading: false, ready: false, failed: null, L: null, rail: null, gallopBtn: false, camD0: null, ui: null, hintT: 0, saveT: 0, bones: null, thumbs: false, t0: performance.now() };"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 482,
+    "classes": [
+      "async"
+    ],
+    "source": "jobs.push(ld.loadAsync('./horses/fauna-horse-' + coat + (lite ? '-lite' : '') + '.glb').then(g => { let ok = false; try { ok = mergeTack(g, coat); } catch (e) { console.warn('[v19] دمج السرج', e); } try { gallop28(g); } catch (e) { console.warn('[v28] gallop', e); } if (!window.__g29) { window.__g29 = 1; console.info('[v29] gallop table', Object.keys(G28_TAB).length); } H.merged = (H.merged || 0) + (ok ? 1 : 0); (H.tpl[coat] = H.tpl[coat] || {})[lite ? 'lite' : 'hi'] = g; }));"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 483,
+    "classes": [
+      "perf-clock",
+      "async"
+    ],
+    "source": "Promise.all(jobs).then(() => { H.ready = true; console.log('[v19] الخيول جاهزة ' + ((performance.now() - H.t0) / 1000).toFixed(1) + 'ث'); try { makeThumbs(); } catch (e) { console.warn('[v19] صور الخيول', e); } })"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 605,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "speed: 0, real: 0, mounted: false, called: false, idleT: 2 + Math.random() * 6, st: opts.bare ? 'Eat' : 'Idle', vis: false, px: opts.x, pz: opts.z, stuckT: 0, pitch: 0, sol: [[0, 0, 0.5], [0, 0, 0.5]] };"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 612,
+    "classes": [
+      "async"
+    ],
+    "source": "ld.loadAsync('./horses/fauna-horse-' + coat + '.glb').then(g => { try { mergeTack(g, coat); } catch (e) { console.warn('[v19] دمج السرج', e); } try { gallop28(g); } catch (e) {} T.hi = g; }).catch(e => { T.hiL = 0; console.warn('[v42] horse hi', e && e.message || e); }); }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 646,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "makeHorse(kind, { x: cx + ox, z: cz + oz, h: Math.PI / 2 + (Math.random() - 0.5) * 0.12, sale: !bare, bare, lite: !HQ }); });"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 802,
+    "classes": [
+      "wall-clock"
+    ],
+    "source": "HFX.plan = (m) => { const t0 = Date.now(), CS = 1.0, R = 0.85, MAXN = 96;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 821,
+    "classes": [
+      "wall-clock"
+    ],
+    "source": "HFX.ms = Date.now() - t0; HFX.msMax = Math.max(HFX.msMax || 0, HFX.ms); if (!done[gk]) { HFX.fails++; return null; }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 877,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "if (!H.loading && (performance.now() - H.t0 > 6000 || H.saved.owned.length)) loadTpl();"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 898,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "else { m.idleT -= dt; if (m.idleT <= 0) { m.st = m.bare || Math.random() < 0.45 ? (m.st === 'Eat' && !m.bare ? 'Idle' : 'Eat') : 'Idle'; m.idleT = 5 + Math.random() * 8; } clip = m.st; }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1109,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "const R = (a, b) => a + Math.random() * (b - a);"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1170,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "R(0.016, 0.034) * (0.85 + 0.3 * Math.min(1.6, k)), R(0.7, 1.25), [0x4a0404, 0x620707, 0x7a0a0a, 0x560505][(Math.random() * 4) | 0]); }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1209,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const HB = { disp: ST.hp, tr: ST.hp, last: ST.hp, hold: 0, t: performance.now(), vig: 0, heal: 0, low: null, dead: null };"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1211,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const now = performance.now(), dt = Math.min(0.1, (now - HB.t) / 1000); HB.t = now; const hp = Math.max(0, Math.min(100, ST.hp));"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1303,
+    "classes": [
+      "async"
+    ],
+    "source": "(f36 && window.__qLoad ? (a, b, c, d) => window.__qLoad(loader, a, b, c, d) : (a, b, c, d) => loader.load(a, b, c, d))(url, g => { active--; try { TPL[k] = mkTpl(k, g); } catch (e) { BAD[k] = 1; console.info('[الحيوانات] ' + k + ': تعذّر التجهيز'); } fire(k); pump2(); },"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1333,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "const a = { k, g, mesh, mixer, acts, cur: null, x, z, y: H(x, z), face: hash(x * 10, z * 10, 7) * 6.283, grp, state: 'idle', t: 0.5 + Math.random() * 3, tx: x, tz: z, spd: 0, fleeT: 0, acc: 0,"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1337,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "n.reset(); n.setLoop(THREE.LoopRepeat, Infinity); n.timeScale = 1; if (!a.cur) n.time = Math.random() * n.getClip().duration; n.play();"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1457,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (a.hop > 0) { a.hop -= dt; a.hy = Math.sin(Math.PI * Math.min(1, 1 - a.hop / 2.4)) * 1.5; a.face += dt * 1.4; if (a.hop <= 0) { a.hop = 0; a.hy = 0; a.state = 'idle'; a.t = 3 + Math.random() * 3; } play(a, a.acts.Fly ? 'Fly' : 'Flap', 0.15); return; }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1459,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (a.t <= 0 || (dp < 5 && Math.random() < dt * 2)) { const q = Math.random(); if ((q < 0.16 || dp < 5) && (a.acts.Fly || a.acts.Flap)) { a.hop = 2.4; return; }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1460,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "a.state = q < 0.55 ? 'graze' : 'idle'; a.t = 2 + Math.random() * 4; if (Math.random() < 0.35) a.face += (Math.random() - 0.5) * 2.2; }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1463,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "else { if (Math.random() < dt * 0.06 && a.acts.Flap) { a.extra = 'Flap'; a.extraT = a.acts.Flap.getClip().duration; } play(a, 'Idle', 0.3); } }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1470,
+    "classes": [
+      "async"
+    ],
+    "source": "if (!hReq) { hReq = true; import('./animals36/hunt.js?v=36').then(m => { HMOD = m; }).catch(e => console.warn('[v36] hunt.js ' + (e && e.message || e))); }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1492,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (th) for (const m of g.mem) { m.fleeT = 4 + Math.random(); m.thx = th[0]; m.thz = th[1]; } }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1494,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (a.fleeT > 0) { a.fleeT -= dt; if (a.fleeT <= 0) { a.state = 'idle'; a.t = 2 + Math.random() * 2; g.x += (a.x - g.x) * 0.5; g.z += (a.z - g.z) * 0.5; }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1499,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (l < 0.5 || a.t < -14) { a.state = 'idle'; a.t = 1 + Math.random() * 3; } else return step(a, dt, Math.atan2(dx, dz), a.state === 'shy' ? a.ref * 2.4 : a.spd, 'Walk', a.cref || a.ref, false); }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1500,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (a.t <= 0) { const q = Math.random();"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1501,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (q < 0.5) { a.state = 'graze'; a.t = 5 + Math.random() * 7; }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1502,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "else if (q < 0.72) { a.state = 'idle'; a.t = 3 + Math.random() * 4; }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1503,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "else { for (let k = 0; k < 5; k++) { const ang = Math.random() * TAU, rr = Math.sqrt(Math.random()) * g.rad, x = g.x + Math.cos(ang) * rr, z = g.z + Math.sin(ang) * rr;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1504,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (Math.hypot(x - a.x, z - a.z) > 1.5 && g.ok(x, z)) { a.state = 'walk'; a.tx = x; a.tz = z; a.t = 0; a.spd = a.ref * (1.05 + Math.random() * 0.3); break; } }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1508,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "else { if (a.state === 'idle' && !a.extra && Math.random() < dt * 0.04) { const ex = a.kb === 'peacock' ? 'Display' : /^(goose|chicken|raven|crow)$/.test(a.kb) ? 'Flap' : /^(sheep|ram|woolsheep)$/.test(a.kb) ? 'Bleat' : null;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1514,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (v > 0.01) { if (a.grp.ok(nx, nz) || (run && dry(nx, nz) && cityD(nx, nz) > CITY_WR + 20 && vilD(nx, nz) > 75)) { a.x = nx; a.z = nz; } else if (!run) { a.state = 'idle'; a.t = 1 + Math.random() * 2; } else a.fleeT = Math.min(a.fleeT, 0.3); }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1521,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "if (!started) { if (!LOADX.done || !MODELS.ready) return; started = performance.now(); F.started = true; return; }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1522,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "if (performance.now() - started < 1500) return;          // تحميل كسول بعد بدء اللعب بقليل"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1568,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const R = HQ() ? 62 : 40; if (!force && Math.hypot(PL.x - NB.px, PL.z - NB.pz) < 4.5) return; const t0 = performance.now(); NB.px = PL.x; NB.pz = PL.z;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1578,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "NB.g.setDrawRange(0, k); NB.mesh.visible = k > 0; U.uP.value.set(PL.x, PL.z); U.uR.value = R; NB.n = list.length; NB.tris = k / 3; NB.ms = Math.round(performance.now() - t0); }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1652,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "function crowdSetup(L) { const t0 = performance.now(), V = L.v18, cx = V.cx, cz = V.cz, r = rs20(4242), H = (x, z) => LIB.height(x, z), blk = (x, z) => V18.blk(L, x, z), hq = HQ();"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1692,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "CW.stat = { stalls: ns, benches: benches.length, statics: CW.S.length, walkers: CW.W.filter(w => w.kind === 'w').length, wander: CW.W.filter(w => w.kind === 'p').length, ms: Math.round(performance.now() - t0) };"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1701,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (d < 0.4) { w.wait = 2 + Math.random() * 6; const L = CW.L, V = L.v18; for (let t = 0; t < 8; t++) { const a = Math.random() * 6.283, rr = 14 + Math.random() * 46, X = V.cx + Math.cos(a) * rr, Z = V.cz - Math.sin(a) * rr; if (!V18.blk(L, X, Z) && Math.hypot(X - w.x, Z - w.z) < 30) { w.tx = X; w.tz = Z; break; } } return false; }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1705,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (cn.length && (Math.random() < 0.4 || B === 0 || B === s.pts.length - 1)) { const [sj, vj] = cn[(Math.random() * cn.length) | 0], s2 = S[sj], ok = []; if (vj + 1 < s2.pts.length) ok.push(1); if (vj - 1 >= 0) ok.push(-1); if (ok.length) { const d2 = ok[(Math.random() * ok.length) | 0]; w.si = sj; w.a = vj; w.b = vj + d2; w.u = 0; w.o = Math.min(w.o, s2.om); if (depth < 3) return stepW(w, Math.min(1, mv / Math.max(0.05, w.spd * w.slow)), S, depth + 1); break; } }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1714,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "for (const w of CW.W) { const d2 = (w.x - px) ** 2 + (w.z - pz) ** 2; if (d2 > ACT && w.x) { if (Math.random() < dt * 0.5) stepW(w, 0.8, CW.SG); continue; } w.mv = stepW(w, dt, CW.SG); const k = gk(w.x, w.z); let a = grid.get(k); if (!a) grid.set(k, a = []); a.push(w); }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1736,
+    "classes": [
+      "async"
+    ],
+    "source": "async function crowdLoad() { if (CW.loading) return; CW.loading = true; try { const tl = new THREE.TextureLoader(), tex = u => new Promise((ok, no) => tl.load(u, t => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 2; ok(t); }, undefined, no));"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1737,
+    "classes": [
+      "async"
+    ],
+    "source": "const [m0, m1, f0, f1, tm, tf] = await Promise.all([vatLoad('crowd/male-0.bin'), vatLoad('crowd/male-1.bin'), vatLoad('crowd/female-0.bin'), vatLoad('crowd/female-1.bin'), tex('crowd/crowd-m.webp'), tex('crowd/crowd-f.webp')]);"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1756,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const TAU = Math.PI * 2, D2R = Math.PI / 180, now = () => performance.now();"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1773,
+    "classes": [
+      "async"
+    ],
+    "source": "try { if (document.fonts && document.fonts.load) document.fonts.load('700 16px \"Noto Naskh Arabic\"').then(bump).catch(() => {}); } catch (e) {}"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2435,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "let hint32 = -1e9; doAttack = function () { if (mode() === 'fist' && !MNT.on && !ST.dead && !Object.keys(WEAPONS).some(k => ST.owned[k]) && performance.now() - hint32 > 20000) { hint32 = performance.now(); toast('ليس معك سيف — تقاتل بقبضتك. اشترِ سيفاً من الحدّاد في سوق المدينة (٢٠ ذهب)'); }   /* v32: تلميح الشراء */"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2521,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "let tPrev = performance.now();"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2522,
+    "classes": [
+      "perf-clock",
+      "timers"
+    ],
+    "source": "(function loop() { requestAnimationFrame(loop); const t = performance.now(); B.dt = Math.min(0.05, (t - tPrev) / 1000); tPrev = t; try { sync(); } catch (e) { if (!B.err) { B.err = 1; console.warn('[v20] btn20', e); } } })();"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2547,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const M = {}, ST = { loaded: 0, failed: [], placed: [], ms: 0 }; let left = Object.keys(URL).length, t0 = performance.now();"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2651,
+    "classes": [
+      "async"
+    ],
+    "source": "const aLoader = () => AL37 || (AL37 = Promise.all([import('three/addons/loaders/GLTFLoader.js'), import('three/addons/libs/meshopt_decoder.module.js'), import('three/addons/utils/SkeletonUtils.js')]).then(([a, b, c]) => { const l = new a.GLTFLoader(); l.setMeshoptDecoder(b.MeshoptDecoder); return { l, SU: c }; }));"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2653,
+    "classes": [
+      "async"
+    ],
+    "source": "(horseMod || (horseMod = import('./shops/stable-v6-horses.js'))).then(m => m.addStableHorses(root, { base: 'horses37/', clips: 'shops/stable-v6-horse-clips.glb', lite: !high(), updateDistance: 45 })).then(h => {"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2657,
+    "classes": [
+      "async"
+    ],
+    "source": "aLoader().then(({ l, SU }) => { const cache = {}; const get = f => cache[f] || (cache[f] = l.loadAsync('animals36/' + f + '-lite.glb'));"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2658,
+    "classes": [
+      "async"
+    ],
+    "source": "return Promise.all(PLAN.map(async ([f, spot], i) => { const mk = root.getObjectByName(spot); if (!mk) return null; const gl = await get(f), o = SU.clone(gl.scene); o.position.copy(mk.position); o.quaternion.copy(mk.quaternion); root.add(o);"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2661,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (!A.length) return { mx, o }; let a = mx.clipAction(A[(i % 2) % A.length]); a.play(); a.time = Math.random() * a.getClip().duration; mx.timeScale = 0.9 + Math.random() * 0.2; cur = (i % 2) % A.length;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2662,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "let t = 6 + Math.random() * 8; const step = dt => { t -= dt; if (t <= 0 && A.length > 1) { t = 7 + Math.random() * 9; cur = 1 - cur; const b = mx.clipAction(A[cur]); b.reset(); b.play(); a.crossFadeTo(b, 0.7, false); a = b; } };"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2663,
+    "classes": [
+      "async"
+    ],
+    "source": "return { mx, o, step }; })); }).then(list => { const L = list.filter(Boolean), P = new THREE.Vector3();"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2694,
+    "classes": [
+      "async"
+    ],
+    "source": "(bsMod || (bsMod = import('./shops/blacksmith-v7-fire-g38.js'))).then(m => { try {"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2707,
+    "classes": [
+      "async"
+    ],
+    "source": "(fireMod || (fireMod = import('./shops/food-v5-fire.js'))).then(m => { try { const f = m.addOvenFire(root, {}); FIRE36.push({ f, grp }); ST.fire36 = FIRE36.length;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2708,
+    "classes": [
+      "perf-clock",
+      "timers"
+    ],
+    "source": "if (!fireLoop) { fireLoop = true; const P = new THREE.Vector3(); const tick = () => { const t = performance.now() / 1000; for (const F of FIRE36) { const cam = typeof camera !== 'undefined' ? camera : null; if (cam) { F.grp.getWorldPosition(P); F.f.group.visible = P.distanceToSquared(cam.position) < 90 * 90; } F.f.update(t); } requestAnimationFrame(tick); }; requestAnimationFrame(tick); } }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2718,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const done = () => { if (--left === 0) { ST.ms = Math.round(performance.now() - t0); console.info('[v20] SHOP20 ready ' + JSON.stringify({ loaded: ST.loaded, failed: ST.failed, ms: ST.ms, calls: Object.fromEntries(Object.entries(M).filter(e => e[1] && e[1].shop).map(([k, v]) => [k, v.calls])) })); } };"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2722,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const ready = () => left <= 0 || performance.now() - t0 > 120000;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2878,
+    "classes": [
+      "async"
+    ],
+    "source": "add(grp) { this.grps.push(grp); if (!this.req) { this.req = 1; import('./shops/supply-daylight.js?v=36').then(m => { this.mod = m; }).catch(e => console.warn('[v36] daylight ' + (e && e.message || e))); } },"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2922,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "const G = { inst, mat, mixer, acts, cur: null, acc: 0, seller: shop.type, gT: 3 + Math.random() * 5, gNm: null, gLeft: 0, tI: 0, tLeft: 0 };"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2925,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "if (G.gNm) { G.gLeft -= dt; if (G.gLeft > 0) return G.gNm; G.gNm = null; G.gT = 6 + Math.random() * 7; return 'Idle'; }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2926,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "G.gT -= dt; if (G.gT <= 0 && gest.length) { G.gNm = gest[(Math.random() * gest.length) | 0]; G.gLeft = dur(G.gNm) * (G.gNm === 'Grind' ? 2 : 1); return G.gNm; } return 'Idle'; };"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2936,
+    "classes": [
+      "timers"
+    ],
+    "source": "setInterval(() => { if (left <= 0 && (M.supSel || M.potSel || M.smSel || M.fdSel || M.stSel)) reskin(); }, 4000);"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3025,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const g2q = G2V('cull'), wP4 = window.PRF, pq = !!(wP4 && wP4.on); let tq = pq ? performance.now() : 0;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3094,
+    "classes": [
+      "async"
+    ],
+    "source": "const p = parser.getDependency('bufferView', sd.bufferView).then(bv => { ST.imgs++;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3098,
+    "classes": [
+      "async"
+    ],
+    "source": "return hit.then(t0 => { const t = t0.clone(); t.userData = Object.assign({}, sd.extras || {}, { mimeType: sd.mimeType }); return t; }); }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3100,
+    "classes": [
+      "async"
+    ],
+    "source": "const pristine = q.then(t => t.clone());   // لقطة قبل ما أي حدا يعدّل عليها (flipY، الفلاتر، colorSpace…)"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3375,
+    "classes": [
+      "async"
+    ],
+    "source": "return Promise.all(pending); };"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3421,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const on = window.__G50ON === true, RN = () => performance.now();"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3429,
+    "classes": [
+      "timers"
+    ],
+    "source": "if (e) { PC.delete(k); if (e.st === 'ok') { setTimeout(() => { try { onLoad && onLoad(e.g); } catch (x) { console.error('[v50g] onLoad ' + k, x); } }, 0); return; } if (e.st === 'loading') { e.cbs.push([onLoad, onProgress, onError, this, url]); return; } }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3487,
+    "classes": [
+      "async"
+    ],
+    "source": "try { const p1 = renderer.compileAsync ? renderer.compileAsync(scene, camera) : Promise.resolve(renderer.compile(scene, camera));"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3488,
+    "classes": [
+      "async"
+    ],
+    "source": "const p2 = tpl.length ? (renderer.compileAsync ? renderer.compileAsync(grp, camera, scene) : Promise.resolve(renderer.compile(grp, camera, scene))) : Promise.resolve();"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3489,
+    "classes": [
+      "async"
+    ],
+    "source": "Promise.all([p1, p2]).then(done, e => { st.err = 'compile ' + (e && e.message); done(); }); } catch (e) { st.err = 'compile ' + (e && e.message); done(); }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3525,
+    "classes": [
+      "async"
+    ],
+    "source": "const compile = root => renderer.compileAsync ? renderer.compileAsync(root, camera, scene) : Promise.resolve(renderer.compile(root, camera, scene));"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3526,
+    "classes": [
+      "async"
+    ],
+    "source": "const variants = () => Promise.all([compile(scene), compile(grp)]);"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3527,
+    "classes": [
+      "async"
+    ],
+    "source": "Promise.resolve().then(() => WARM2.compileVariants ? WARM2.compileVariants(variants) : variants())"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3528,
+    "classes": [
+      "async"
+    ],
+    "source": ".then(() => compile(scene))"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3613,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "let k = FRAME4.vl ? (d < 14 ? 1 : d < 30 ? 2 : 4) : FRAME4.lw ? (d < 20 ? 1 : d < 40 ? 2 : 4) : 1; if (FRAME4.lw && window.__G50ON === true && G50.a6) k = G50.a6(this, d, k); if (!this.__h4) this.__h4 = 1 + ((Math.random() * 7) | 0);"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3647,
+    "classes": [
+      "timers"
+    ],
+    "source": "requestAnimationFrame(frame);"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3648,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "{ const fc5 = window.__G50ON === true ? (window.__G50FC | 0) : 0, cap5 = fc5 ? (fc5 < 50 ? 25 : 12) : (S.preset === 'vlow' ? 25 : 0); if (FCAP_ON && cap5) { const tn = performance.now(); if (tn - FCAP_T < cap5) return; FCAP_T = tn; } }   // v50d3 + v50g: حد الإطارات من الإعدادات (تلقائي = منخفضة جدا ٣٠ متل قبل)   // v50d3: «منخفضة جدا» = ٣٠ إطار ثابتة (أنعم من ٣٥–٥٠ متقلّبة وأبرد عالجهاز)"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3650,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "let frameMs = rawDt * 1000; if (PP1FPS) { const stamp = Number.isFinite(rafTime) ? rafTime : performance.now(); frameMs = perfStamp === null ? 0 : stamp - perfStamp; perfStamp = stamp;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3654,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "{ const tn = performance.now(); if (FRAME4.t0) FRAME4.ft.push(tn - FRAME4.t0); FRAME4.t0 = tn; FRAME4.n++; FRAME4.vl = VL4(); FRAME4.lw = FRAME4.vl || (S.preset === 'low' && V4ON('low5')); FRAME4.md = S.preset === 'medium' && V4ON('med5'); FRAME4.hid = (FRAME4.lw || FRAME4.md) && FRAME4.hidOn; FRAME4.mc = ((FRAME4.lw && !FRAME4.vl) || FRAME4.md) && MC5ON; FRAME4.cc5 = ((FRAME4.lw && !FRAME4.vl) || FRAME4.md) && CC5ON; if (FRAME4.ft.length > 240) FRAME4.ft.shift(); }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3672,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const tR4 = performance.now(); if (pON) pT = PRF.lap('load', pT); WARM2.pre(); if (pON) pT = PRF.lap('c_warm2', pT); CULL23.before(); if (pON) pT = PRF.lap('c_cull23', pT); G50.pre(); if (pON) pT = PRF.lap('c_g50pre', pT); MIX5.flush(); if (pON) pT = PRF.lap('precull', pT); if (window.V40 && V40.render) V40.render(dt); else renderer.render(scene, camera); if (pON) pT = PRF.lap('render', pT); G50.post(); CULL23.after(); PERF46.tick(); if (pON) { PRF.lap('post', pT); PRF.end(pT0); }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3673,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "{ const tn = performance.now(); FRAME4.lg.push(tR4 - FRAME4.t0); FRAME4.rd.push(tn - tR4); if (FRAME4.lg.length > 240) { FRAME4.lg.shift(); FRAME4.rd.shift(); } if (HUD4) HUD4.tick(rawDt); }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3750,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "put(V.x + 8, V.z + 8); let t0 = performance.now(); for (let i = 0; i < 600; i++) step(1 / 60); const tS = (performance.now() - t0) / 600;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3751,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "t0 = performance.now(); for (let i = 0; i < 600; i++) updateCamera(1 / 60); const tC = (performance.now() - t0) / 600;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3788,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const now = performance.now(); if (!force && now - E.t < 1500) return;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3793,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const t0 = performance.now(); const rt = E.pm.fromScene(E.sc, 0, 0.1, 100);"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3794,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "scene.environment = rt.texture; if (E.rt) E.rt.dispose(); E.rt = rt; E.sig = sig; E.t = now; E.lastH = ENV.T; st.envN++; st.envMs = +(performance.now() - t0).toFixed(2);"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3846,
+    "classes": [
+      "async"
+    ],
+    "source": "const [pass, gt, bl, sm, sp, fx] = await Promise.all([import(B + 'postprocessing/Pass.js'), import(B + 'postprocessing/GTAOPass.js'), import(B + 'postprocessing/UnrealBloomPass.js'), import(B + 'postprocessing/SMAAPass.js'), import(B + 'postprocessing/ShaderPass.js'), import(B + 'shaders/FXAAShader.js')]);"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3932,
+    "classes": [
+      "timers"
+    ],
+    "source": "setTimeout(sndLoad, 4000);                                 // تحميل متأخر بعد بدء اللعبة (لا يؤخر الفتح)"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3948,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "const id = A.howl.play(surf + ((Math.random() * 4) | 0)); A.howl.volume(vol, id); A.howl.rate(0.92 + Math.random() * 0.16 + (run ? 0.04 : 0), id);"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3954,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const now = performance.now() / 1000, sp = PL.speed;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3989,
+    "classes": [
+      "timers"
+    ],
+    "source": "try { if (F.env) setTimeout(charSweep, 1500); } catch (e) {}"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3994,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "try { if (F.env) { envUpdate(false); { const nw = performance.now(); if (nw - sweepT > 2000) { sweepT = nw; charSweep(); } } } } catch (e) { warn('env', e); }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4019,
+    "classes": [
+      "timers"
+    ],
+    "source": "try { document.title = document.title.replace(/\\s*v40-test$/, '') + ' v41-test'; setTimeout(() => { for (const el of document.querySelectorAll('div')) if (el.childElementCount === 0 && el.textContent === 'v40-test') el.textContent = 'v41-test'; }, 3000); } catch (e) {}"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4025,
+    "classes": [
+      "async"
+    ],
+    "source": "WS.tex = new T.TextureLoader().load('v41/waternormals.jpg', t => { t.wrapS = t.wrapT = T.RepeatWrapping; });"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4036,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const t0 = performance.now(), hid = reflHide();"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4038,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "st.refl++; st.ms.refl = performance.now() - t0;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4043,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const now = performance.now();"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4089,
+    "classes": [
+      "async"
+    ],
+    "source": "import('./v41/env-libs.js').then(L => { A.L = L;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4091,
+    "classes": [
+      "async"
+    ],
+    "source": "ld.load('v41/atmo/', tex => { A.tex = tex; st.atmoReady = true; }, undefined, e => { warn('atmo textures', e); F.atmo = false; });"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4132,
+    "classes": [
+      "async"
+    ],
+    "source": "CT.lw = new T.TextureLoader().load('v41/clouds/local_weather.png', t => { t.minFilter = T.LinearMipMapLinearFilter; t.magFilter = T.LinearFilter; t.wrapS = t.wrapT = T.RepeatWrapping; t.colorSpace = T.NoColorSpace; t.needsUpdate = true; });"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4133,
+    "classes": [
+      "async"
+    ],
+    "source": "CT.tu = new T.TextureLoader().load('v41/clouds/turbulence.png', t => { t.minFilter = T.LinearMipMapLinearFilter; t.magFilter = T.LinearFilter; t.wrapS = t.wrapT = T.RepeatWrapping; t.colorSpace = T.NoColorSpace; t.needsUpdate = true; });"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4135,
+    "classes": [
+      "async"
+    ],
+    "source": "wrapS: T.RepeatWrapping, wrapT: T.RepeatWrapping, wrapR: T.RepeatWrapping, colorSpace: T.NoColorSpace }).load(url);"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4137,
+    "classes": [
+      "async"
+    ],
+    "source": "CT.stbn = new L.STBNLoader().load('v41/clouds/stbn.bin');"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4171,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const t0 = performance.now();"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4181,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "st.ms.atmo = performance.now() - t0;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4197,
+    "classes": [
+      "timers"
+    ],
+    "source": "if (F.atmo && !(VLSAVED4 && V4ON('atmo4'))) setTimeout(atmoLoad, 50);"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4215,
+    "classes": [
+      "async"
+    ],
+    "source": "import('quarks.core').then(() => import('./vendor/quarks/three.quarks.esm.js')).then(M => { Q = M; br = new Q.BatchedRenderer(); br.name = 'FX42'; scene.add(br);"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4255,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "spawn(Math.random() < 0.5 ? 'box' : 'barrel', PL.x + fx * 1.2, y, PL.z + fz * 1.2, fx * 9, 3.5, fz * 9); ST.thrown++; }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4257,
+    "classes": [
+      "async"
+    ],
+    "source": "(window.__RAP42 || (window.__RAP42 = import('./vendor/rapier/rapier.es.js').then(async M => { await (M.init || M.default.init)(); return M; }))).then(async M => { R = M; world = new R.World({ x: 0, y: -9.81, z: 0 });"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4263,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "function tick(dt) { if (!ST.ok || !(dt > 0)) return; try { const t0 = performance.now();"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4270,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "ST.bodies = objs.length; ST.maxStepMs = Math.max(ST.maxStepMs, performance.now() - t0); } catch (e) { if (!ST.err) { ST.err = String(e && e.stack || e).slice(0, 300); console.warn('[v42] PHYS42 tick', e); } } }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4277,
+    "classes": [
+      "async"
+    ],
+    "source": "Promise.all([import('@recast-navigation/core'), import('@recast-navigation/generators')]).then(async ([c, g]) => { await c.init(); C = c; G = g; ST.ok = true; console.info('[v42] NAV42 recast ready'); })"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4279,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "function build(L) { const t0 = performance.now(); let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9; const ob = L.obst || [];"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4293,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const ms = Math.round(performance.now() - t0); ST.buildMs.push(ms);"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4298,
+    "classes": [
+      "timers"
+    ],
+    "source": "if (e === undefined) { cache.set(L, null); ST.pending++; setTimeout(() => { try { cache.set(L, build(L)); } catch (er) { ST.err = String(er && er.message || er).slice(0, 200); cache.set(L, false); } ST.pending--; }, 0); return null; }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4317,
+    "classes": [
+      "timers"
+    ],
+    "source": "const un = () => { SS.unlocked = !!(window.Howler && Howler.ctx && Howler.ctx.state === 'running'); }; setInterval(un, 2000); } catch (e) { SS.err = String(e).slice(0, 200); } };"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4319,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "function play(k, vol, rate) { const a = S[k]; if (!a || !a.length) return; const now = performance.now(); if (last[k] && now - last[k] < 35) return; last[k] = now;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4320,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "try { const h = a[(Math.random() * a.length) | 0]; const id = h.play(); h.volume(Math.max(0, Math.min(1, (vol == null ? 1 : vol) * VOL[k])), id); h.rate(rate || (0.92 + Math.random() * 0.16), id); SS.played[k]++; } catch (e) { SS.err = String(e).slice(0, 200); } }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4327,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "snortT -= dt; if (snortT <= 0) { snortT = 10 + Math.random() * 14; play('snort', 0.9); } return; }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4338,
+    "classes": [
+      "async"
+    ],
+    "source": "(window.__RAP42 || (window.__RAP42 = import('./vendor/rapier/rapier.es.js').then(async M => { await (M.init || M.default.init)(); return M; }))).then(async M => { R = M; world = new R.World({ x: 0, y: 0, z: 0 }); blade = new R.Cuboid(0.55, 0.55, 0.95); HS.ok = true; }).catch(e => { HS.err = String(e).slice(0, 200); });"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4347,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "function query(face, ox, oz) { const t0 = performance.now(); const x0 = ox == null ? PL.x : ox, z0 = oz == null ? PL.z : oz, h0 = LIB.height(x0, z0);"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4355,
+    "classes": [
+      "perf-clock"
+    ],
+    "source": "const ms = performance.now() - t0; HS.maxMs = Math.max(HS.maxMs, +ms.toFixed(2)); return [...hit].map(k => cand[k]); }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4365,
+    "classes": [
+      "Math.random"
+    ],
+    "source": "const ang = Math.random() * Math.PI * 2, ox = n.x + Math.sin(ang) * dist, oz = n.z + Math.cos(ang) * dist;   // stand at ox,oz; face toward n (forward = -sin,-cos)"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4382,
+    "classes": [
+      "timers"
+    ],
+    "source": "setInterval(tick, 1500); window.__late42 = { ST, tick }; return { ST, tick }; })();"
+  }
+]
