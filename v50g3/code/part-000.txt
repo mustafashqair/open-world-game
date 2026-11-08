@@ -1988,6 +1988,17 @@ function indexFor(res) {
   return indexCache[res] = new THREE.BufferAttribute(idx, 1);
 }
 function mergeGeo(parts) {                      // دمج أجزاء بألوان رؤوس في هندسة واحدة
+  if ((S.preset === 'low' || S.preset === 'vlow') && Q4.get('load2') !== '0' && Q4.get('v50g5') !== '0' && parts.every(([g, col]) => col.length === 3)) {
+    // Same per-attribute reads and Float32 rounding; avoid three growable boxed-number arrays.
+    let count = 0; for (const [g] of parts) count += g.attributes.position.count;
+    const P = new THREE.Float32BufferAttribute(count * 3, 3), N = new THREE.Float32BufferAttribute(count * 3, 3), C = new THREE.Float32BufferAttribute(count * 3, 3), I = [];
+    let off = 0, j = 0;
+    for (const [g, col] of parts) { const p = g.attributes.position, n = g.attributes.normal, ix = g.index;
+      for (let i = 0; i < p.count; i++) { P.array[j] = p.getX(i); N.array[j] = n.getX(i); C.array[j++] = col[0]; P.array[j] = p.getY(i); N.array[j] = n.getY(i); C.array[j++] = col[1]; P.array[j] = p.getZ(i); N.array[j] = n.getZ(i); C.array[j++] = col[2]; }
+      if (ix) for (let i = 0; i < ix.count; i++) I.push(ix.getX(i) + off); else for (let i = 0; i < p.count; i++) I.push(i + off);
+      off += p.count; }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', P); g.setAttribute('normal', N); g.setAttribute('color', C); g.setIndex(I); return g;
+  }
   const P = [], N = [], C = [], I = []; let off = 0;
   for (const [g, col] of parts) { const p = g.attributes.position, n = g.attributes.normal, ix = g.index;
     for (let i = 0; i < p.count; i++) { P.push(p.getX(i), p.getY(i), p.getZ(i)); N.push(n.getX(i), n.getY(i), n.getZ(i)); C.push(...col); }
