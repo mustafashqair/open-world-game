@@ -3623,8 +3623,25 @@ function pickPOI(n) {                             // نقطة اهتمام جد�
   return best || { x: (L.big ? n.x : n.v.x) + (Math.random() - 0.5) * 12, z: (L.big ? n.z : n.v.z) + (Math.random() - 0.5) * 12, type: 'plaza' };
 }
 const FK37 = { R: 1.6, V: 1.2, W: 1.2 };   // v38 W: سرعة مشيه لبيته (م/ث) — مشية هادئة والخطوة متزامنة مع الأرض   // v37: نصف قطر الالتقاط عند الوصول للكاونتر
+function npcFixHomeDoorReachable(n) {                 // v50npcfix: لا نخفي صاحب المتجر إلا إذا أمكنه الوصول لباب بيته
+  const hd = n.home && n.home.door, L = n.L, t = n.__npcfixHomeCheckT || 0;
+  if (!hd || !Number.isFinite(hd[0]) || !Number.isFinite(hd[1])) return false;
+  if (t > 0 && n.__npcfixHomeDoorX === hd[0] && n.__npcfixHomeDoorZ === hd[1]) return n.__npcfixHomeReachable !== false;
+  n.__npcfixHomeDoorX = hd[0]; n.__npcfixHomeDoorZ = hd[1]; n.__npcfixHomeCheckT = 900; // نتيجة ثابتة خلال وردية الليل لتجنب تذبذب المسار
+  navGoal(n, hd[0], hd[1]); let tx = n.gx, tz = n.gz; const nkI = NPCK.must(n) ? NPCK.exitGoal(n) : null; if (nkI) { tx = nkI[0]; tz = nkI[1]; }
+  if (Math.hypot(tx - hd[0], tz - hd[1]) > 1.25) return n.__npcfixHomeReachable = false;
+  const dd = Math.hypot(tx - n.x, tz - n.z); if (dd < 1.3 || (dd <= 6 && !lineBlocked(L, n.x, n.z, tx, tz))) return n.__npcfixHomeReachable = true;
+  const treeOb = []; gatherTreeSolids(n.x, n.z, 50, treeOb);
+  const ob = L.big ? L.obst.filter(o => Math.abs(o[0] - n.x) < o[2] + 50 && Math.abs(o[1] - n.z) < o[2] + 50) : L.obst;
+  const path = (window.NAV42 && window.NAV42.ST.ok ? window.NAV42.path(L, n.x, n.z, tx, tz) : null) || (L.nav18 ? V18.astar : astar)(n.x, n.z, tx, tz, ob.concat(treeOb), { ng: !n.guard && L.castle ? [L.castle.x, L.castle.z, L.castle.R + 1] : null, nk: !nkI && NPCK.must(n), road: L.roadF, L });
+  return n.__npcfixHomeReachable = !!path;
+}
+function npcFixHideAtHomeDoor(n, atPost = false) {     // v50npcfix: الوصول للباب أو البقاء خارج تحديثات الحشد والتصادم
+  const hd = atPost && n.shop ? n.shop.keeper : n.home.door; n.x = n.lx = n.chkX = hd[0]; n.z = n.lz = n.chkZ = hd[1]; n.y = LIB.height(n.x, n.z); n.g.position.set(n.x - n.v.x, n.y, n.z - n.v.z);
+  n.path = null; n.pg = null; n.pi = 0; n.tx = n.x; n.tz = n.z; n.mv = false; n.spd = 0; n.chat = null; n.talking = false; n.sleeping = true; n.__npcfixHomeHidden = atPost ? 'post' : true; n.__npcfixHomeReturning = false; n.g.visible = false;
+}
 function npcGoal(n) {                             // الروتين اليومي: لا توقف طويل؛ تنقّل بين نقاط الاهتمام بـA*
-  const T = ENV.T, v = n.v, L = n.L, hd = n.home.door;
+  const T = ENV.T, v = n.v, L = n.L, hd = n.home.door, NPCFIX = Q4.get('npcfix') !== '0' && Q4.get('v50g5') !== '0';
   if (n.guard) {
     if (n.castleG) { if (n.stT <= 0) { n.sd = -n.sd; n.stT = 4 + Math.random() * 3; } return [n.post[0] + n.sd * 1.6, n.post[1], 'post', n.gface]; }   // حرس القصر: مواقع ثابتة
     if (n.gate && (n.shift === 0 ? (T >= 6 && T < 18) : (T < 6 || T >= 18))) {      // حارس البوابة: يتحرك على جانبي البوابة كل ٣-٦ ثوانٍ
@@ -3634,10 +3651,11 @@ function npcGoal(n) {                             // الروتين اليومي
     if (n.stT <= 0) { const rr = (L.patrol || [36, 18.5])[n.slot % 2]; n.pa += Math.min(0.5, 40 / rr); n.pt = [v.x + Math.cos(n.pa) * rr, v.z + Math.sin(n.pa) * rr]; for (let k = 0; k < 12 && PAL3D && v.city && (ANX50.inEst(n.pt[0], n.pt[1], 5) || (NPCK.on && NPCK.sd(n.pt[0], n.pt[1]) < 3)); k++) { n.pa += 0.2; n.pt = [v.x + Math.cos(n.pa) * rr, v.z + Math.sin(n.pa) * rr]; } n.stT = 5; }
     return [n.pt[0], n.pt[1], 'wander'];
   }
-  if (n.shop && n.shop.type === 'fruit' && !window.__fk37off) { const k = n.shop.keeper, op = T >= 5 && T < 19; n.fk37 = op ? 1 : 2;   // v37: صاحب محل الطعام واقف عند الكاونتر طول الدوام؛ لا يتحرك إلا ليروح على بيته وقت السكرة (١٩:٠٠) ويطلع من بيته الصبح (٥:٠٠) راجع عالكاونتر
+  if (n.shop && n.shop.type === 'fruit' && !window.__fk37off) { const k = n.shop.keeper, op = NPCFIX ? (T >= 5.5 && T < 21) : (T >= 5 && T < 19); n.fk37 = op ? 1 : 2;   // v37/v50npcfix: البائع يعود للبيت بعد الدوام ويخرج صباحاً
     if (Math.hypot(PL.x - n.x, PL.z - n.z) > 150) { n.lock37 = false; n.rt37 = null; }   // بعيد عن اللاعب: حركة مبسّطة مباشرة
     else if (op && n.shop.r37 && !n.lock37 && !n.rt37 && Math.hypot(k[0] - n.x, k[1] - n.z) > 0.6) { const e = n.shop.r37[0]; return [e[0], e[1], 'post', n.shop.nf ?? n.shop.face]; }   // يدخل المحل من فتحة الكاونتر ثم ينزلق لنقطته
     return op ? [k[0], k[1], 'post', n.shop.nf ?? n.shop.face] : [hd[0], hd[1], 'sleep']; }
+  if (n.shop && n.shop.s20 && NPCFIX) { const k = n.shop.keeper; if (T >= 5.5 && T < 21) { n.__npcfixHomeCheckT = 0; return [k[0], k[1], 'post', n.shop.nf ?? n.shop.face]; } if (Math.hypot(hd[0] - k[0], hd[1] - k[1]) > 40) return [k[0], k[1], 's20fade', n.shop.nf ?? n.shop.face]; // أبعد من مدى A* المحلي: يبقى عند المحل حتى يخرج اللاعب عن الرؤية return npcFixHomeDoorReachable(n) ? [hd[0], hd[1], 's20home'] : [k[0], k[1], 'post', n.shop.nf ?? n.shop.face]; }
   if (T >= 22.5 || T < 5.5) return [hd[0], hd[1], 'sleep'];
   if (ENV.rain > 0.4 && !n.shop) return [hd[0], hd[1], 'shelter'];
   if (n.shop) { if (T >= 7 && T < 19) { if (n.stT <= 0) { n.sd = -n.sd; n.stT = 3.5 + Math.random() * 2; }
@@ -3727,16 +3745,17 @@ function npcAnim(n, dt, d) {                     // أنيميشن إجرائي 
   P.rotation.x += (rx - P.rotation.x) * e; P.rotation.z += (rz - P.rotation.z) * e; P.position.y += (y - P.position.y) * e;
   n.flash = Math.max(0, n.flash - dt * 4); n.mat.emissive.setRGB(n.flash * 0.8, n.flash * 0.06, n.flash * 0.03);
 }
-function updateNPC(n, dt) {
+function updateNPCBase(n, dt) {
   const v = n.v, L = n.L, dx = PL.x - n.x, dz = PL.z - n.z, d = Math.hypot(dx, dz);
   n.y = LIB.height(n.x, n.z); n.g.position.set(n.x - v.x, n.y, n.z - v.z); n.g.rotation.y = n.face;
   if (n.dead) { n.deadT += dt; n.mv = false; npcSay(n, null); n.g.visible = d < 70 && n.deadT <= NPC_CORPSE_T; if (n.deadT > NPC_RESPAWN_T) respawnNPC(n); animNPC(n, dt, d); return; }
-  n.cool = Math.max(0, n.cool - dt); n.alertT = Math.max(0, n.alertT - dt); n.atkT = Math.max(0, n.atkT - dt); n.hitT = Math.max(0, n.hitT - dt);
+  n.cool = Math.max(0, n.cool - dt); n.alertT = Math.max(0, n.alertT - dt); n.atkT = Math.max(0, n.atkT - dt); n.hitT = Math.max(0, n.hitT - dt); if (n.__npcfixHomeCheckT > 0) n.__npcfixHomeCheckT = Math.max(0, n.__npcfixHomeCheckT - dt);
   n.stT -= dt; n.helpT -= dt; n.greetT -= dt; n.chatCd -= dt; n.shoutT -= dt; n.warnT -= dt; if (n.inv) { n.inv[2] -= dt; if (n.inv[2] <= 0) n.inv = null; }
   n.stillT = n.mv ? 0 : (n.stillT || 0) + dt; n.mv = false; n.spd = 0;
   if (n.stillT > 6.5 && !n.sleeping && !n.talking && !n.dead && n.alertT <= 0 && n.st !== 'fight') { n.stillT = 0; n.chat = null; n.atP = false; n.poi = null; n.stT = 0; n.sd = -n.sd; n.path = null; }   // حد صارم: لا وقوف أكثر من ~٧ ثوانٍ
   const gl = npcGoal(n), rest = gl[2] === 'sleep' || gl[2] === 'shelter';
-  if (d > 150) {                                  // تحديث مبسّط للبعيدين: حركة مباشرة بلا أنيميشن
+  if (gl[2] === 's20fade') { if (d > 70) { npcFixHideAtHomeDoor(n, true); return; } gl[2] = 'post'; }
+  if (d > 150 && gl[2] !== 's20home' && !n.__npcfixHomeReturning) { // تحديث مبسّط للبعيدين: حركة مباشرة بلا أنيميشن
     n.g.visible = false; const gd = Math.hypot(gl[0] - n.x, gl[1] - n.z);
     if (gd > 1.3) { const s = Math.min(gd, 10 * dt); if (L.nav18) V18.farMove(n, L, gl[0], gl[1], s); else { n.x += (gl[0] - n.x) / gd * s; n.z += (gl[1] - n.z) / gd * s; } n.sleeping = false; } else n.sleeping = rest;
     pushOut(n, NPC_R, L.solid, 2); if (!n.guard && L.castle) keepOutZone(n, L.castle, 0.5); if (L.nav18) V18.unstick(n, L); if (NPCK.must(n)) NPCK.final(n, dt, true);   // لا اختراق حتى للبعيدين
@@ -3818,6 +3837,8 @@ function updateNPC(n, dt) {
         for (const m of L.npcs) { if (m === n || m.dead || m.sleeping || m.chat || m.chatCd > 0 || m.talking || m.fk37 === 1) continue;
           if (Math.hypot(m.x - n.x, m.z - n.z) < 5 && Math.random() < dt * 0.5) { const t = 3 + Math.random() * 2.5; n.chat = { w: m, t }; m.chat = { w: n, t }; break; } }
       const arrived = npcWalk(n, gl[0], gl[1], n.fk37 ? FK37.W : (n.guard ? (n.gm && n.gm.grd ? 1.8 : 2.8) : 2.2) * (ENV.rain > 0.2 ? 1.35 : 1) * (U.uNight.value > 0.5 ? 0.92 : 1), dt);
+      if (gl[2] === 's20home' && arrived) { npcFixHideAtHomeDoor(n); return; }
+      if (n.__npcfixHomeReturning && gl[2] === 'post' && arrived) n.__npcfixHomeReturning = false;
       if (rest && arrived) n.sleeping = true;
       if (gl[2] === 'poi') { if (arrived) { if (!n.atP) { n.atP = true; n.dwell = 2 + Math.random() * 3.5; } n.dwell -= dt; if (n.dwell <= 0) { n.poi = null; n.atP = false; } } else n.atP = false; }   // توقف قصير ثم وجهة جديدة
       if (arrived && gl[3] !== undefined) n.face = aLerp(n.face, gl[3], Math.min(1, dt * 5));
@@ -3854,9 +3875,16 @@ function updateNPC(n, dt) {
     else if (n.lock37) { n.x = k[0]; n.z = k[1]; n.lx = n.chkX = n.x; n.lz = n.chkZ = n.z; n.mv = false; n.spd = 0; n.path = null; n.sleeping = false; n.stuckT = 0; n.chat = null; n.poi = null;
       if (n.st === 'wander' || n.st === 'flee') n.st = 'idle'; if (!n.talking && !(n.greet > 0)) n.face = aLerp(n.face, n.shop.nf ?? n.shop.face, Math.min(1, dt * 5)); } }
   else { n.lock37 = false; n.rt37 = null; }
-  if (n.shop && n.shop.bs38 && !n.dead) { n.x = n.shop.keeper[0]; n.z = n.shop.keeper[1]; n.lx = n.chkX = n.x; n.lz = n.chkZ = n.z; n.path = null; n.mv = false; n.spd = 0; n.stuckT = 0; n.chat = null; }   // v38: البائع المنطقي للحداد ثابت عند السندان (الحداد اللي بنشوفه هو اللي بيشتغل بالمحل)
+  if (n.shop && n.shop.bs38 && !n.dead && (Q4.get('npcfix') === '0' || Q4.get('v50g5') === '0' || (ENV.T >= 5.5 && ENV.T < 21 && Math.hypot(n.x - n.shop.keeper[0], n.z - n.shop.keeper[1]) < 1.3))) { n.x = n.shop.keeper[0]; n.z = n.shop.keeper[1]; n.lx = n.chkX = n.x; n.lz = n.chkZ = n.z; n.path = null; n.mv = false; n.spd = 0; n.stuckT = 0; n.chat = null; }   // v50npcfix: hidden trader pins only at the counter during hours; visible smith works inside
   if (NPCK.must(n)) NPCK.final(n, dt);   // npck: آخر الإطار — دايماً برّا حرم القصر والحديقة (إلا الحرس بمواقعهم)
   n.g.visible = !n.sleeping && d < 70 && !(n.shop && n.shop.bs38); if (!n.sleeping) animNPC(n, dt, d);
+}
+function updateNPC(n, dt) { // v50npcfix: step-height exception only for this blacksmith's keeper across its own path/collision checks
+  if (n.__npcfixHomeHidden) return;
+  const ignored = n.shop && n.shop.bs38 && n.shop.npcfixIgnore;
+  if (!ignored || !ignored.length || Q4.get('npcfix') === '0' || Q4.get('v50g5') === '0') return updateNPCBase(n, dt);
+  const L = n.L, solid = L.solid, obst = L.obst, skip = new Set(ignored); L.solid = solid.filter(o => !skip.has(o)); L.obst = obst.filter(o => !skip.has(o));
+  try { return updateNPCBase(n, dt); } finally { L.solid = solid; L.obst = obst; }
 }
 // ── الحوار والسمعة والتجارة ──
 function lineFor(n) {
@@ -4332,9 +4360,13 @@ function updateVillages(dt) { const wP = window.PRF, qO = !!(wP && wP.on); let q
   if (qO) qT = wP.lap('v_nearscan', qT); near.sort((a, b) => a[0] - b[0]); const MAXA = (FRAME4.vl && V4ON('npc4')) ? 5 : S.pop < 0.6 ? 8 : 14; for (let i = 0; i < near.length && i < MAXA; i++) near[i][1].skel = true; const g2n = G2V('npc'); if (g2n) for (let i = 0; i < near.length && i < 6; i++) near[i][1].__g2f = NPCF;   // أنيميشن هيكلي للأقرب فقط (<٤٠م) وبحد أقصى
   for (const v of VILLAGES) { const L = v.live; if (!L) continue; if (L.__g50hid) continue;   // v50g: المدينة البعيدة المخفية: منطقها واقف (محمّلة، مش مرسومة)
     L.alarm = Math.max(0, L.alarm - dt); if (L.sus) L.sus[2] -= dt; L.g.position.set(v.x - ORG.x, 0, v.z - ORG.z); if (v.city) { const dc = Math.hypot(v.x - PL.x, v.z - PL.z); const dcE = PAL3D ? Math.min(dc, Math.hypot(v.x - PL.x, v.z - 150 - PL.z)) : dc; L.det.visible = dcE < 280 + CITY_DR; L.farG.visible = dcE > 230 + CITY_DR; if (qO) qT = wP.lap('v_npcs', qT); cityTick(v, L, dt); if (qO) qT = wP.lap('v_cityTick', qT); } for (let i = 0; i < L.npcs.length; i++) { const n = L.npcs[i];
-      if (g2n && !n.angry && !n.talking && n.__g2f !== NPCF) { const dd = Math.hypot(n.x - PL.x, n.z - PL.z), k = dd < 30 ? 2 : dd < 80 ? 6 : 0; if (!k) { if (n.g.visible) n.g.visible = false; continue; } if ((NPCF + i) % k) continue; updateNPC(n, dt * k); if (dd > 50 && n.g.visible) n.g.visible = false; continue; }   // v50g2: أقرب ٦ كل إطار، الباقي أقل، أبعد من ٨٠م واقفين ومخفيين، والمرسوم لحد ٥٠م
-      if (FRAME4.lw && V4ON('npc4')) { const dd = Math.hypot(n.x - PL.x, n.z - PL.z); if (dd > 35 && !n.angry && !n.talking) { const k = dd > 90 ? 5 : 3; if ((NPCF + i) % k) continue; updateNPC(n, dt * k); continue; } }   // v50d4
-      if (v.city) { const dd = Math.hypot(n.x - PL.x, n.z - PL.z); if (dd > 70) { if ((NPCF + i) % 3) continue; updateNPC(n, dt * 3); continue; } }   // المدينة: من يبعد >70م يُحدَّث كل ٣ إطارات
+      const npcFixOn = Q4.get('npcfix') !== '0' && Q4.get('v50g5') !== '0', s20keeper = npcFixOn && n.shop && n.shop.s20;
+      if (n.__npcfixHomeHidden) { if (!npcFixOn) { n.__npcfixHomeHidden = false; n.sleeping = false; n.g.visible = true; } else if (ENV.T >= 5.5 && ENV.T < 21) { const atPost = n.__npcfixHomeHidden === 'post', hd = atPost ? n.shop.keeper : n.home.door; n.x = n.lx = n.chkX = hd[0]; n.z = n.lz = n.chkZ = hd[1]; n.y = LIB.height(n.x, n.z); n.g.position.set(n.x - n.v.x, n.y, n.z - n.v.z); n.__npcfixHomeHidden = false; n.__npcfixHomeReturning = !atPost; n.sleeping = false; n.path = null; n.pg = null; n.poi = null; n.chat = null; n.g.visible = true; } else continue; }
+      const farHome = !!(s20keeper && Math.hypot(n.home.door[0] - n.shop.keeper[0], n.home.door[1] - n.shop.keeper[1]) > 40);
+      const npcFixTravel = !!(s20keeper && ((ENV.T < 5.5 || ENV.T >= 21) ? (farHome || npcFixHomeDoorReachable(n)) : n.__npcfixHomeReturning));
+      if (g2n && !npcFixTravel && !n.angry && !n.talking && n.__g2f !== NPCF) { const dd = Math.hypot(n.x - PL.x, n.z - PL.z), k = dd < 30 ? 2 : dd < 80 ? 6 : 0; if (!k) { if (n.g.visible) n.g.visible = false; continue; } if ((NPCF + i) % k) continue; updateNPC(n, dt * k); if (dd > 50 && n.g.visible) n.g.visible = false; continue; }   // v50g2: أقرب ٦ كل إطار، الباقي أقل، أبعد من ٨٠م واقفين ومخفيين، والمرسوم لحد ٥٠م
+      if (!npcFixTravel && FRAME4.lw && V4ON('npc4')) { const dd = Math.hypot(n.x - PL.x, n.z - PL.z); if (dd > 35 && !n.angry && !n.talking) { const k = dd > 90 ? 5 : 3; if ((NPCF + i) % k) continue; updateNPC(n, dt * k); continue; } }   // v50d4
+      if (!npcFixTravel && v.city) { const dd = Math.hypot(n.x - PL.x, n.z - PL.z); if (dd > 70) { if ((NPCF + i) % 3) continue; updateNPC(n, dt * 3); continue; } }   // المدينة: من يبعد >70م يُحدَّث كل ٣ إطارات
       updateNPC(n, dt); if (qO) wP.cur.npcN = (wP.cur.npcN || 0) + 1; } }
   if (qO) qT = wP.lap('v_npcs', qT);
   if (DLG.n && (Math.hypot(DLG.n.x - PL.x, DLG.n.z - PL.z) > 6 || DLG.n.dead)) closeDlg();

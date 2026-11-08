@@ -2897,10 +2897,12 @@ const SHOP20 = (() => {
     if (anchor) anchor.onBeforeRender = (r, s, cam) => { grp.getWorldPosition(_p); detG.visible = _p.distanceToSquared(cam.position) < R2; };
     det.add(grp); if (S0.type === 'general') { try { DAY36.add(grp); WAG36.put(L, det, b, W, yaw, H, cx, cz); } catch (e) { console.warn('[v36] place ' + (e && e.message || e)); } } /* v31: shops back to their v20 look (no v22 upper storey, no v24 plaster recolour, no v24/v25 joining house wall) */
     // التصادم: جدار خلفي + جداران جانبيان + الكاونتر (بفتحة جانبية يمرّ منها البائع)
-    const top = gy + b.max.y, COL = T0.COL || Mt.COL || autoCol(Mt, T0);
-    for (const [x0, x1, z0, z1, h] of COL) { const c = W((x0 + x1) / 2, (z0 + z1) / 2), sb = topOf(solidBox(c[0], c[1], x1 - x0, z1 - z0, yaw, 0.02), h ? gy + h : top); L.obst.push(sb); L.solid.push(sb); }
-    const sp38 = Mt.bs38 && Mt.mk.npc_spot ? Mt.mk.npc_spot.p : null, kp = sp38 ? W(sp38[0], sp38[2]) : W(T0.selX || 0, T0.selZ), fr = W(0, b.max.z + 0.9); if (Mt.food36) { try { fire36(grp, Mt); } catch (e) { console.warn('[v36] fire36 ' + e); } } if (Mt.a37 === 'stShop') { try { horses37(grp, Mt); } catch (e) { console.warn('[v37] horses37 ' + e); } }
-    L.stalls.push({ type: S0.type, deg: S0.deg, x: sx, z: sz, face: yaw, keeper: kp, front: fr, lat: [lx, lz], s20: true, sway: Mt.bs38 ? 0 : 0.3, bs38: !!Mt.bs38, nf: yaw + (T0.nf || 0), r37: Mt.food36 ? [W(0, 4.2), W(0, 2.9), W(0, 0.8), W(T0.selX || 0, 0.8)] : null });   /* v37: مسار دخول/خروج صاحب محل الطعام عبر فتحة الكاونتر */
+    const top = gy + b.max.y, COL = T0.COL || Mt.COL || autoCol(Mt, T0), npcfixIgnore = [];
+    for (const [x0, x1, z0, z1, h] of COL) { const c = W((x0 + x1) / 2, (z0 + z1) / 2), sb = topOf(solidBox(c[0], c[1], x1 - x0, z1 - z0, yaw, 0.02), h ? gy + h : top); L.obst.push(sb); L.solid.push(sb); if (Mt.bs38 && h && gy + h < gy + 0.35) npcfixIgnore.push(sb); }
+    const sp38 = Mt.bs38 && Mt.mk.npc_spot ? Mt.mk.npc_spot.p : null, fr = W(0, b.max.z + 0.9); let kp = sp38 ? W(sp38[0], sp38[2]) : W(T0.selX || 0, T0.selZ);
+    if (Mt.bs38 && Q4.get('npcfix') !== '0' && Q4.get('v50g5') !== '0') { const solid = L.solid.filter(o => !npcfixIgnore.includes(o)), p = { x: fr[0], z: fr[1] }; pushOut(p, NPC_R + 0.25, solid, 3); if (solid.every(o => sdist(o, p.x, p.z) >= NPC_R)) kp = [p.x, p.z]; }
+    if (Mt.food36) { try { fire36(grp, Mt); } catch (e) { console.warn('[v36] fire36 ' + e); } } if (Mt.a37 === 'stShop') { try { horses37(grp, Mt); } catch (e) { console.warn('[v37] horses37 ' + e); } }
+    L.stalls.push({ type: S0.type, deg: S0.deg, x: sx, z: sz, face: yaw, keeper: kp, front: fr, lat: [lx, lz], s20: true, sway: Mt.bs38 ? 0 : 0.3, bs38: !!Mt.bs38, npcfixIgnore: Mt.bs38 ? npcfixIgnore : null, nf: yaw + (T0.nf || 0), r37: Mt.food36 ? [W(0, 4.2), W(0, 2.9), W(0, 0.8), W(T0.selX || 0, 0.8)] : null });   /* v37/v50npcfix: keeper route ignores only this forge's sub-step floor */
     L.poi.stall.push({ x: fr[0] + dx * 0.6, z: fr[1] + dz * 0.6, type: 'stall' });
     ST.placed.push({ type: S0.type, x: +ox.toFixed(2), z: +oz.toFixed(2), yaw: +yaw.toFixed(3), keeper: kp.map(v => +v.toFixed(2)), calls: Mt.calls, tris: Mt.tris });
     return true;
