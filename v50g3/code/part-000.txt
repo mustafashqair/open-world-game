@@ -1979,6 +1979,10 @@ const ORG = { x: 0, z: 0 };
 
 /* ═══════════ ٥. بث القطع (Chunk Streaming) ═══════════ */
 const chunks = new Map(), pending = new Set(); let queue = [], workers = [], useWorker = true;
+const TGS = !/[?&]tgs=0\b/.test(location.search) && !/[?&]v50g5=0\b/.test(location.search), TGSCHECK = /[?&]tgscheck=1\b/.test(location.search);   // tgs (Qwen): فهرس رقمي CHG لنفس قطع chunks، بحث بلا نصوص بـ gatherTreeSolids؛ ?tgs=0 أو ?v50g5=0 = القديم
+const CHG_MIN = -39, CHG_MAX = 39, CHG_W = CHG_MAX - CHG_MIN + 1, CHG = new Array(CHG_W * CHG_W).fill(undefined); let tgsFrame = 0, tgsMismatches = 0;
+function tgsCheck() { if (!TGSCHECK) return; if ((++tgsFrame % 60) !== 0) return; let mismatch = 0, n = 0; for (let i = 0; i < CHG.length; ++i) if (CHG[i] !== undefined) ++n; if (n !== chunks.size) ++mismatch; for (const c of chunks.values()) if (c.cx < CHG_MIN || c.cx > CHG_MAX || c.cz < CHG_MIN || c.cz > CHG_MAX || CHG[(c.cz - CHG_MIN) * CHG_W + (c.cx - CHG_MIN)] !== c) ++mismatch; tgsMismatches = mismatch; window.__tgsMismatches = mismatch; if (mismatch) console.warn('CHG sync mismatch', mismatch); }
+if (TGSCHECK && typeof requestAnimationFrame === 'function') requestAnimationFrame(function tgsTick() { tgsCheck(); requestAnimationFrame(tgsTick); });
 const indexCache = {};
 function indexFor(res) {
   if (indexCache[res]) return indexCache[res];
@@ -2136,7 +2140,7 @@ function attachCliffs(mesh,cl,res,cx,cz) {mesh.userData.rockSolids=[];          
 }
 function gatherTreeSolids(x,z,ext,out){
   for(let cx=Math.floor((x-ext-3)/CFG.CH);cx<=Math.floor((x+ext+3)/CFG.CH);cx++)for(let cz=Math.floor((z-ext-3)/CFG.CH);cz<=Math.floor((z+ext+3)/CFG.CH);cz++){
-    const c=chunks.get(cx+','+cz);if(!c)continue;
+    const c=TGS?(cx<CHG_MIN||cx>CHG_MAX||cz<CHG_MIN||cz>CHG_MAX?undefined:CHG[(cz-CHG_MIN)*CHG_W+(cx-CHG_MIN)]):chunks.get(cx+','+cz);if(!c)continue;
     for(const t of c.mesh.userData.trees||[]){const r=t.model.trunk*t.scale;if(Math.abs(x-t.x)<ext+r&&Math.abs(z-t.z)<ext+r)out.push(t.sol||(t.sol=[t.x,t.z,r],t.sol.tree=1,t.sol));}   // v10: مصفوفة مخزّنة لكل شجرة (بلا تخصيص بكل خطوة) + وسم tree
     for(const q of c.mesh.userData.rockSolids||[]){if(Math.abs(x-q[0])<ext+q[2]&&Math.abs(z-q[1])<ext+q[2])out.push(q);}
   }
