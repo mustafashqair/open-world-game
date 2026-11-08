@@ -1,0 +1,146 @@
+diff --git a/index.html b/index.html
+index f576f72..c59ac27 100644
+--- a/index.html
++++ b/index.html
+@@ -1,6 +1,27 @@
+ <!DOCTYPE html>
+ <html lang="ar" dir="rtl">
+ <head>
++<script>
++(function(){
++  const q=new URLSearchParams(location.search); let preset='';
++  try { preset=JSON.parse(localStorage.getItem('ow_settings2')||'{}').preset; }catch(e){}
++  if(q.get('ttpprof')!=='1'||q.get('v50g5')==='0'||!['low','vlow'].includes(preset))return;
++  const d=window.__TTP={version:1,preset,marks:[],tasks:[],resources:[],frames:[],samples:[],errors:[],emb:new Set(),embDone:new Set()};
++  const seen=new Set();d.mark=(name,detail)=>{if(seen.has(name))return;seen.add(name);const time=performance.now();d.marks.push({name,time,detail});performance.mark('ttp:'+name,{detail});};
++  d.mark('navigation-start',{timeOrigin:performance.timeOrigin});d.marks[0].time=0;
++  performance.setResourceTimingBufferSize(20000);
++  try{new PerformanceObserver(l=>{for(const x of l.getEntries())d.tasks.push({start:x.startTime,duration:x.duration,attribution:x.attribution?.map(a=>({name:a.name,type:a.entryType,containerType:a.containerType,containerSrc:a.containerSrc,containerId:a.containerId,containerName:a.containerName}))});}).observe({type:'longtask',buffered:true});}catch(e){d.errors.push('longtask: '+e);}
++  try{new PerformanceObserver(l=>{for(const x of l.getEntries())d.resources.push(x.toJSON());}).observe({type:'resource',buffered:true});}catch(e){d.errors.push('resource: '+e);}
++  addEventListener('error',e=>d.errors.push(e.message));addEventListener('unhandledrejection',e=>d.errors.push(String(e.reason)));
++  addEventListener('g50ready',()=>d.mark('g50ready'));addEventListener('g50play',()=>d.mark('play-click'));
++  d.embStart=k=>{d.emb.add(k);d.mark('EMB42-decode-start');};
++  d.embEnd=k=>{d.embDone.add(k);if(d.embDone.size===d.emb.size)d.mark('EMB42-decode-end');};
++  let last=0;function frame(t){if(seen.has('play-click'))d.frames.push({time:t,dt:last?t-last:0});last=t;requestAnimationFrame(frame);}requestAnimationFrame(frame);
++  d.export=()=>JSON.stringify({...d,emb:[...d.emb],embDone:[...d.embDone],navigation:performance.getEntriesByType('navigation').map(x=>x.toJSON())},null,2);
++  new MutationObserver(()=>{const b=document.getElementById('sgPlay');if(b&&!b.disabled)d.mark('play-enabled');}).observe(document.documentElement,{attributes:true,subtree:true,attributeFilter:['disabled']});
++})();
++</script>
++
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+ <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><circle cx=%2212%22 cy=%2212%22 r=%2210%22 fill=%22none%22 stroke=%22%23e0a84a%22 stroke-width=%222%22/><polygon points=%2216.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88%22 fill=%22%23e0a84a%22/></svg>">
+@@ -1218,7 +1239,7 @@ setTimeout(function(){if(!window.__ow)owMsg('لم يبدأ سكربت اللعب
+ <script>
+ /* نسخة الاستضافة فقط: كود اللعبة نفسه بلا تغيير، مقسوم على 3 ملفاً لأن خادم النشر يرفع الملفات الكبيرة على أجزاء؛ نجمعها وننفّذها كسكربت module داخلي (نفس الـ importmap) */
+ window.__ow = true;
+-Promise.all(Array.from({length: 3}, (_, i) => (function f(n) { return fetch('v50g3/code/part-' + String(i).padStart(3, '0') + '.txt?v=v50g3').then(r => { if (!r.ok && n > 0) throw new Error('HTTP ' + r.status); return r; }).catch(e => { if (n > 0) return new Promise(z => setTimeout(z, 800)).then(() => f(n - 1)); throw e; }); })(3).then(r => { if (!r.ok) throw new Error('part ' + i + ' HTTP ' + r.status); return r.text(); })))
++Promise.all(Array.from({length: 3}, (_, i) => (function f(n) { return fetch('v50g3/code/part-' + String(i).padStart(3, '0') + '.txt?v=v50g3').then(r => { if (!r.ok && n > 0) throw new Error('HTTP ' + r.status); return r; }).catch(e => { if (n > 0) return new Promise(z => setTimeout(z, 800)).then(() => f(n - 1)); throw e; }); })(3).then(r => { if (!r.ok) throw new Error('part ' + i + ' HTTP ' + r.status); return r.text().then(t=>{ window.__TTP?.mark('code-part-'+i+'-fetched'); return t; }); })))
+   .then(a => { const s = document.createElement('script'); s.type = 'module'; s.textContent = a.join(''); document.body.appendChild(s); })
+   .catch(e => owMsg('خطأ بتحميل اللعبة: ' + e.message));
+ </script>
+diff --git a/v50g3/code/part-000.txt b/v50g3/code/part-000.txt
+index f86d678..0c8dd77 100644
+--- a/v50g3/code/part-000.txt
++++ b/v50g3/code/part-000.txt
+@@ -11,6 +11,7 @@ import { CSMShader } from 'three/addons/csm/CSMShader.js';
+ import { Water } from 'three/addons/objects/Water.js';
+ 
+ /* ═══ v42 GLB42: محمّل واحد لكل ملفات GLB — نفس المفكّكات (Meshopt/DRACO/KTX2) لكل اللوادر، إعادة محاولة للملف كله مع مهلة متزايدة، فحص بعد التحميل، وسجل لكل ملف ═══ */
++window.__TTP?.mark('module-body-start');
+ const Q4 = new URLSearchParams(location.search), V4ON = k => Q4.get(k) !== '0', VL4 = () => S.preset === 'vlow';   // v50d4
+ const G2ON = !/[?&]v50g2=0\b/.test(location.search), G2V = k => G2ON && S.preset === 'vlow' && Q4.get('g2' + k) !== '0';   /* v50g2 G2V: تحسينات المدينة على «منخفضة جدا» بس؛ ?v50g2=0 = v50g بالضبط، ?g2city=0 ?g2pal=0 ?g2npc=0 ?g2mm=0 ?g2cull=0 ?g2pre=0 كل وحدة لحالها */
+ const G3ON = G2ON && !/[?&]v50g3=0\b/.test(location.search), G3V = k => G3ON && S.preset === 'vlow' && Q4.get(k + '3') !== '0';   const L3AMB = { env: { value: null }, k: +(Q4.get('l3amb') || 1), n: 0, miss: 0, inject(sh, ei, hasOwnEnv) { const a = '#include <lights_fragment_end>', E0 = scene.environment, H = E0 && E0.image && E0.image.height; if (hasOwnEnv || !H || sh.fragmentShader.indexOf(a) < 0 || sh.fragmentShader.indexOf('void main()') < 0) { this.miss++; return; } this.n++; const mm = Math.log2(H) - 2, tw = 1 / (3 * Math.max(Math.pow(2, mm), 7 * 16)), th = 1 / H; sh.uniforms.uL3Env = this.env; sh.uniforms.uL3E = { value: ei * 0.95 }; const lib = '#define CUBEUV_TEXEL_WIDTH ' + tw.toFixed(9) + '\n#define CUBEUV_TEXEL_HEIGHT ' + th.toFixed(9) + '\n#define CUBEUV_MAX_MIP ' + mm.toFixed(1) + '\n#ifndef ENVMAP_TYPE_CUBE_UV\n#define ENVMAP_TYPE_CUBE_UV\n#define L3_UNDEF_CUV\n#endif\n' + THREE.ShaderChunk.cube_uv_reflection_fragment + '\n#ifdef L3_UNDEF_CUV\n#undef ENVMAP_TYPE_CUBE_UV\n#endif\nuniform sampler2D uL3Env; uniform float uL3E;\n'; sh.fragmentShader = sh.fragmentShader.replace('void main()', lib + 'void main()').replace(a, a + '\n  reflectedLight.indirectDiffuse += diffuseColor.rgb * uL3E * textureCubeUV(uL3Env, inverseTransformDirection(normal, viewMatrix), 1.0).rgb;'); } };   /* v50g3 lights3: the Lambert twins still read the same sky light (the same sky map, diffuse part only) the original materials had */ window.__L3AMB = L3AMB;   /* v50g3 G3V: «منخفضة جدا» بس؛ ?v50g3=0 = v50g2 بالضبط، ?merge3=0 ?lights3=0 كل وحدة لحالها */
+@@ -1040,7 +1041,8 @@ function normModel(tpl, d) {                     // توحيد المقياس: 
+ const EMBED = {};   // v42: النماذج المضمّنة صارت ملف ثنائي منفصل (v42/emb) بدل نص base64 جوّا الكود
+ const EMB42 = (() => { const P46E = !/[?&]perf=0/.test(location.search); const I = {"guard":[0,566740],"male":[566740,508736],"female":[1075476,563496],"wolf":[1638972,588552],"donkey":[2227524,643520],"houseA":[2871044,57308],"houseB":[2928352,107508],"houseC":[3035860,151996],"houseD":[3187856,591168],"wall":[3779024,18272],"cCastle":[3797296,476612],"cGate":[4273908,146812],"cBarracks":[4420720,582340],"cTemple":[5003060,291532],"cFort":[5294592,42220],"cInn":[5336812,467464],"cSaw":[5804276,307992],"cStall":[6112268,63164],"cMill":[6175432,124976],"houseE":[6300408,94904],"houseF":[6395312,357640],"vMill":[6752952,135996],"viking":[6888948,289972],"berserk":[7178920,313492],"tent":[7492412,16264],"campfire":[7508676,48572],"fire":[7557248,18560],"forge":[7575808,1723720],"foodApple":[9299528,35740],"foodBread":[9335268,29316],"foodSteak":[9364584,25312],"foodBottle":[9389896,15376],"foodPot":[9405272,15016],"nhA":[9420288,174912],"nhB":[9595200,92248],"nhC":[9687448,56892],"nhD":[9744340,105568],"nhE":[9849908,73888],"nhF":[9923796,53368],"wlS":[9977164,15948],"wlG":[9993112,46836],"wlQ":[10039948,42016],"wlC":[10081964,118016],"wlR":[10199980,53020],"pSt0":[10253000,10760],"pSt1":[10263760,10760],"pSt2":[10274520,10760],"pCt0":[10285280,57636],"pCt1":[10342916,57636],"pCt2":[10400552,57636],"pWell":[10458188,16632],"pBench":[10474820,4324],"pLamp":[10479144,6584],"pT1":[10485728,7100],"pT2":[10492828,6376],"pT3":[10499204,4052],"pT4":[10503256,4784]}, N = 13, L = 10508040; let AB = null;
+   const one = (i, n) => fetch('./v42/emb/e-' + String(i).padStart(3, '0') + '.txt?v=74016c9b').then(r => { if (!r.ok) throw new Error('emb ' + i + ' HTTP ' + r.status); return r.arrayBuffer(); }).catch(e => { if (n > 0) return new Promise(z => setTimeout(z, 800 * (4 - n))).then(() => one(i, n - 1)); throw e; });
+-  const ready = Promise.all(Array.from({ length: N }, (_, i) => one(i, 3))).then(bs => { const u = new Uint8Array(L); let o = 0; for (const b of bs) { u.set(new Uint8Array(b), o); o += b.byteLength; } if (o !== L) throw new Error('emb size ' + o + ' != ' + L); AB = u.buffer; return AB; });
++  window.__TTP?.mark('EMB42-start');
++  const ready = Promise.all(Array.from({ length: N }, (_, i) => one(i, 3))).then(bs => { window.__TTP?.mark('EMB42-network-end'); const u = new Uint8Array(L); let o = 0; for (const b of bs) { u.set(new Uint8Array(b), o); o += b.byteLength; } if (o !== L) throw new Error('emb size ' + o + ' != ' + L); AB = u.buffer; window.__TTP?.mark('EMB42-join-end'); return AB; });
+   return { I, ready, has: k => !!I[k], get: k => { const e = I[k]; return e && AB ? AB.slice(e[0], e[0] + e[1]) : null; }, size: k => I[k] ? I[k][1] : 0, free: () => { if (P46E) AB = null; } }; })();
+    // نماذج الشخصيات مضمّنة بصيغة base64 (بلا حاجة لمجلد assets)
+ const b64buf = t => { const bin = atob(t), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u.buffer; };
+@@ -1052,7 +1054,7 @@ const b64buf = t => { const bin = atob(t), u = new Uint8Array(bin.length); for (
+   const loader = new GLTFLoader(), failed = [];
+   MODELS.total += Object.keys(NPC_GLB).length + Object.keys(HOUSE_GLB).length + Object.keys(SHOP_GLB).length;                               // v13: شخصيتا أهل البلد الجديدتان (ذكر/أنثى) + المبارز (اللاعب) تُحمَّل من مجلد npcs/
+   const finish = () => {                         // تنتهي شاشة التحميل دائماً، نجح كل شيء أم فشل بعضه
+-    if (MODELS.ready) return; MODELS.ready = true;
++    if (MODELS.ready) return; MODELS.ready = true; window.__TTP?.mark('MODELS-ready');
+     const miss = Object.keys(MDEF).filter(k => !MODELS[k]);
+     if (miss.length) { console.warn('نماذج غير محمّلة:', miss.join(', ')); try { toast('نماذج غير متوفرة (تعمل اللعبة بدونها): ' + miss.join('، ')); } catch (e) {} }
+     spawnFauna(); spawnBandits(); };
+@@ -1085,8 +1087,8 @@ const b64buf = t => { const bin = atob(t), u = new Uint8Array(bin.length); for (
+     } catch (err) { return onFail(k, err); }
+     MODELS[k] = res; done(); };
+   const onFail = (k, err) => { console.error('GLB FAIL', k, err && err.message || err); failed.push(k); MODELS[k] = null; done(); };
+-  EMB42.ready.then(() => { for (const k of Object.keys(MDEF)) { const d = MDEF[k];
+-    try { if (EMB42.has(k)) loader.parse(EMB42.get(k), '', g => onLoad(k, d, g), err => onFail(k, err)); else onFail(k, new Error('النموذج غير مضمّن')); } catch (err) { onFail(k, err); } } EMB42.free(); },
++  EMB42.ready.then(() => { for(const k of Object.keys(MDEF)) window.__TTP?.embStart(k); for (const k of Object.keys(MDEF)) { const d = MDEF[k];
++    try { if (EMB42.has(k)) loader.parse(EMB42.get(k), '', g => { window.__TTP?.embEnd(k); onLoad(k, d, g); }, err => { window.__TTP?.embEnd(k); onFail(k, err); }); else onFail(k, new Error('النموذج غير مضمّن')); } catch (err) { onFail(k, err); } } EMB42.free(); },
+     err => { console.error('[v42] emb pack', err); for (const k of Object.keys(MDEF)) onFail(k, err); });
+   // v13: نماذج أهل البلد الجديدة (هيكل عظمي + مقاطع Idle/Walk/Walk2/Talk/Run). إن فشل التحميل يبقى الشكل القديم
+   const nl = new GLTFLoader(); nl.setMeshoptDecoder(MeshoptDecoder);
+@@ -2131,7 +2133,7 @@ function gatherTreeSolids(x,z,ext,out){
+   if(window.V19){V19.natSolids(x,z,ext,out);if(V19.horseSolids)V19.horseSolids(x,z,ext,out);}
+ }
+ async function loadTreeModels(){        // النماذج مفكوكة مسبقاً (buildNature)؛ هنا نفهرس الطرق ثم نفعّل التوزيع
+-  if(!TREESET.models.length)TREESET.models.push(...T33.DESC);treeRoadIndex();TREESET.ready=true;for(const c of chunks.values())attachTrees(c.mesh,c.cx,c.cz,c.res,c.gr);
++  if(!TREESET.models.length)TREESET.models.push(...T33.DESC);treeRoadIndex();TREESET.ready=true;window.__TTP?.mark('TREESET-ready');for(const c of chunks.values())attachTrees(c.mesh,c.cx,c.cz,c.res,c.gr);
+   try{T33.start();}catch(e){console.warn('[v33] trees',e);}   // v33
+   console.info('[الأشجار] نماذج الحزمة:',TREESET.models.length,'| صخور وجروف:',TREESET.rocks.length,'| غير محمّلة:',TREESET.failed);
+ }
+diff --git a/v50g3/code/part-001.txt b/v50g3/code/part-001.txt
+index ca9d3e1..fc8c801 100644
+--- a/v50g3/code/part-001.txt
++++ b/v50g3/code/part-001.txt
+@@ -4893,6 +4893,7 @@ function loadUpdate(dt) {
+   const pct = Math.floor(LOADX.p * 100);
+   if (pct !== LOADX.shown) { LOADX.shown = pct; $('lBar').style.width = pct + '%'; $('lPct').textContent = pct + '%'; }
+   const ready = chunks.size >= 12 && MODELS.ready && TREESET.ready && cityReady();
++  if(window.__TTP){if(chunks.size>=12)window.__TTP.mark('chunk-12-first-observed');if(cityReady())window.__TTP.mark('cityReady-first-observed');if(LOADX.p>=0.999)window.__TTP.mark('LOADX-0.999');}
+   if (ready && LOADX.p >= 0.999 && WARM2.ok() && G50.gate()) {   // v50g: بعد الشاشة القديمة: تحميل المدينة كاملة + زر «لعب»
+     LOADX.done = true; LOADX.p = 1; $('lBar').style.width = '100%'; $('lPct').textContent = '100%';
+     const ld = $('load'); if (ld) { ld.style.opacity = 0; setTimeout(() => ld.remove(), 900); }
+diff --git a/v50g3/code/part-002.txt b/v50g3/code/part-002.txt
+index b8edf56..d6f2c31 100644
+--- a/v50g3/code/part-002.txt
++++ b/v50g3/code/part-002.txt
+@@ -3390,8 +3390,8 @@ const WARM2 = (() => {
+     try {
+       if (st.phase === 'done' || st.phase === 'off') return true;
+       if (Q.get('warm2_visit') === '0') { st.phase = 'done'; return true; }
+-      if (!plan && !fxReady()) { if (!tFx) tFx = RN(); if (RN() - tFx < 20000) return false; }   // استنّى المؤثرات (fx) تجهز، وإلا الشيدرات بتنبني بنسخة غلط
+-      if (!plan) { plan = makePlan(); st.pts = plan.map(p => p.n); home = { x: PL.x, y: PL.y, z: PL.z, face: PL.face, yaw: CAM.yaw, pitch: CAM.pitch, tx: CAM.tx, ty: CAM.ty, tz: CAM.tz }; t0 = RN(); st.progs0 = nProg(); k = -1; fr = 0; st.phase = 'run'; }
++      if (!plan && !fxReady()) { window.__TTP?.mark('WARM2-FX-wait-start'); if (!tFx) tFx = RN(); if (RN() - tFx < 20000) return false; }   // استنّى المؤثرات (fx) تجهز، وإلا الشيدرات بتنبني بنسخة غلط
++      if (!plan) { window.__TTP?.mark('WARM2-FX-wait-end'); window.__TTP?.mark('WARM2-start'); plan = makePlan(); st.pts = plan.map(p => p.n); home = { x: PL.x, y: PL.y, z: PL.z, face: PL.face, yaw: CAM.yaw, pitch: CAM.pitch, tx: CAM.tx, ty: CAM.ty, tz: CAM.tz }; t0 = RN(); st.progs0 = nProg(); k = -1; fr = 0; st.phase = 'run'; }
+       if (st.phase === 'run') {
+         if (k < 0 || ++fr > 999) { k++; fr = 0; tPt = RN(); if (k >= plan.length) { st.phase = 'home'; tp(home.x, home.z); PL.face = home.face; CAM.yaw = home.yaw; CAM.pitch = home.pitch; fr = 0; return false; } tp(plan[k].x, plan[k].z); CAM.pitch = 0.2; return false; }
+         const p = plan[k], built = !!p.v.live, D = p.dual && LS ? 2 : 1;
+@@ -3403,7 +3403,7 @@ const WARM2 = (() => {
+       }
+       if (st.phase === 'home') {
+         fr++; CAM.yaw = home.yaw; CAM.pitch = home.pitch; PL.face = home.face; if (LS) LS.force = fr % 2 ? 'lo' : 'hi';
+-        if ((chunks.size >= 12 && fr >= 16) || fr > 600) { if (LS) LS.force = null; st.phase = 'done'; st.ms = Math.round(RN() - t0); st.progs = nProg() - st.progs0; return true; }
++        if ((chunks.size >= 12 && fr >= 16) || fr > 600) { if (LS) LS.force = null; st.phase = 'done'; window.__TTP?.mark('WARM2-end'); st.ms = Math.round(RN() - t0); st.progs = nProg() - st.progs0; return true; }
+         return false;
+       }
+     } catch (e) { if (LS) LS.force = null; st.err = String(e && e.message || e).slice(0, 200); st.phase = 'done'; try { if (home) { tp(home.x, home.z); CAM.yaw = home.yaw; CAM.pitch = home.pitch; } } catch (e2) {} return true; }
+@@ -3421,7 +3421,7 @@ const G50 = (() => {
+   const on = window.__G50ON === true, RN = () => performance.now();
+   const st = { on, phase: on ? 'base' : 'off', p: 0, step: '', ready: false, played: false, idle: false, forcePal: false, forceVW: false, t0: RN(), tBase: 0, tReady: 0, waits: {}, timeouts: [], compileMs: 0, warm: { n: 0, tot: 0, frames: 0, ms: 0, verts: 0 }, tex: { n: 0, tot: 0 }, pre: { n: 0, ok: 0, fail: 0 }, err: '' };
+   const api = { st, gate: () => true, pre() {}, post() {}, play() {}, keep() {}, gpuEst: () => null };
+-  window.G50 = api; if (!on) return api;
++  window.__TTP?.mark('G50-created'); window.G50 = api; if (!on) return api;
+   /* (١) ذاكرة تحميل لمرة وحدة: ملف بينحمّل هون تحت الشاشة، وأول مرة اللعبة بتطلبه بتاخده جاهز (بلا تفكيك وقت اللعب)؛ بعدها متل قبل */
+   const PC = new Map(), L0 = GLTFLoader.prototype.load, kOf = (ld, u) => (ld.path || '') + String(u).replace(/^\.\//, '').split('?')[0];
+   GLTFLoader.prototype.load = function (url, onLoad, onProgress, onError) {
+@@ -3440,7 +3440,7 @@ const G50 = (() => {
+   const faOk = () => { try { return !FAUNA.pending || FAUNA.pending() === 0; } catch (e) { return true; } };
+   const hi = () => window.__QUALITY === 'high';
+   let ph = 'base', tPh = 0, items = null, ki = 0, saved = [], forced = null, lights = null, compDone = false, texList = null, ti = 0, tpl = null;
+-  const phase = (n, s) => { ph = st.phase = n; st.step = s; tPh = RN(); };
++  const phase = (n, s) => { ph = st.phase = n; window.__TTP?.mark('G50-'+n); st.step = s; tPh = RN(); };
+   const isDraw = o => o.isMesh || o.isPoints || o.isLine || o.isSprite;
+   const skip = o => /_collider$|^col_/i.test(o.name || '') || (o.userData && (o.userData.collider || o.userData.noWarm)) || (o.isInstancedMesh && o.count === 0) || !o.material || (o.material.visible === false && !Array.isArray(o.material));
+   const vcount = o => { const p = o.geometry && o.geometry.attributes && o.geometry.attributes.position; return (p ? p.count : 0) * (o.isInstancedMesh ? Math.max(1, o.count) : 1); };
