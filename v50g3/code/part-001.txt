@@ -3727,6 +3727,9 @@ function npcAnim(n, dt, d) {                     // أنيميشن إجرائي 
   P.rotation.x += (rx - P.rotation.x) * e; P.rotation.z += (rz - P.rotation.z) * e; P.position.y += (y - P.position.y) * e;
   n.flash = Math.max(0, n.flash - dt * 4); n.mat.emissive.setRGB(n.flash * 0.8, n.flash * 0.06, n.flash * 0.03);
 }
+// ── gc9: آخر مصفوفتي أشجار تُخصَّصان بكل خطوة — خدشة وحدة لكل موقع (updateNPC والقطّاع banUpdateOne) تُصفَّيران وتُملآن كل نداء (length=0 ثم push). ألوا/فيري-لو فقط؛ medium/high و?gc9=0 و?v50g5=0 يمرّون من الكود الأصلي حرفياً ──
+const GC9 = !/[?&]gc9=0\b/.test(location.search) && !/[?&]v50g5=0\b/.test(location.search) && (S.preset === 'low' || S.preset === 'vlow');
+const _TOB9N = [], _TOB9B = [];
 function updateNPC(n, dt) {
   const v = n.v, L = n.L, dx = PL.x - n.x, dz = PL.z - n.z, d = Math.hypot(dx, dz);
   n.y = LIB.height(n.x, n.z); n.g.position.set(n.x - v.x, n.y, n.z - v.z); n.g.rotation.y = n.face;
@@ -3838,7 +3841,8 @@ function updateNPC(n, dt) {
     n.chkX = n.x; n.chkZ = n.z; }
   { const wx = n.x - v.x, wz = n.z - v.z, wr = Math.hypot(wx, wz);       // القرويون داخل السور (نصف القطر ٥٨م)
     const WR = (v.R || 62) - 4.5; if (wr > WR && !(n.farmer && ENV.T >= 6.5 && ENV.T < 19.5)) { n.x = v.x + wx / wr * (WR - 0.5); n.z = v.z + wz / wr * (WR - 0.5); n.path = null; if (!n.guard) { n.poi = null; n.atP = false; } } }
-  const treeOb = []; gatherTreeSolids(n.x, n.z, 2, treeOb); pushOut(n, NPC_R, treeOb, 2);
+  if (GC9) { _TOB9N.length = 0; gatherTreeSolids(n.x, n.z, 2, _TOB9N); pushOut(n, NPC_R, _TOB9N, 2); }   // gc9: خدشة معادة الاستعمال بلا تخصيص
+  else { const treeOb = []; gatherTreeSolids(n.x, n.z, 2, treeOb); pushOut(n, NPC_R, treeOb, 2); }
   pushOut(n, NPC_R, L.solid, 3); if (!n.guard && L.castle) keepOutZone(n, L.castle, 0.5);   // لا اختراق للمباني والأسوار، والمدنيون خارج القصر
   if (n.fk37 && !n.dead) { const k = n.shop.keeper, R = n.shop.r37, q = Math.hypot(k[0] - n.x, k[1] - n.z);   // v37: صاحب محل الطعام مقفول على نقطة الكاونتر (بلا مشي/تمايل/دفع/محادثات)؛ يدخل ويطلع بمسار ثابت عبر فتحة الكاونتر
     if (n.fk37 === 1) { if (!n.lock37 && !n.rt37) { if (q < 0.6) n.lock37 = true; else if (R && Math.hypot(R[0][0] - n.x, R[0][1] - n.z) < FK37.R) { const P = R.concat([k]); let bi = 0, bd = 1e9; for (let j = 0; j < P.length - 1; j++) { const ax = P[j][0], az = P[j][1], sx = P[j + 1][0] - ax, sz = P[j + 1][1] - az, ll = sx * sx + sz * sz || 1, u = Math.max(0, Math.min(1, ((n.x - ax) * sx + (n.z - az) * sz) / ll)), dd = Math.hypot(ax + sx * u - n.x, az + sz * u - n.z); if (dd < bd - 1e-3) { bd = dd; bi = j; } } n.rt37 = { pts: P.slice(bi + 1), i: 0, p: [n.x, n.z], end: 1 }; } else if (!R && q < FK37.R) n.rt37 = { pts: [k], i: 0, p: [n.x, n.z], end: 1 }; } }
@@ -5134,7 +5138,8 @@ function banUpdateOne(b, dt, day) {
     const step = Math.min(dd - stopR, sp * dt), nx = b.x + dx / dd * step, nz = b.z + dz / dd * step;
     if (!banNearVillage(nx, nz, BAN.VIL_KEEP * 0.7) && LIB.height(nx, nz) > 0.5) { b.x = nx; b.z = nz; b.mv = true; }   // لا تدخل القرى
   }
-  const out = []; gatherTreeSolids(b.x, b.z, 2, out); pushOut(b, 0.45, out, 2);
+  if (GC9) { _TOB9B.length = 0; gatherTreeSolids(b.x, b.z, 2, _TOB9B); pushOut(b, 0.45, _TOB9B, 2); }   // gc9: خدشة معادة الاستعمال بلا تخصيص
+  else { const out = []; gatherTreeSolids(b.x, b.z, 2, out); pushOut(b, 0.45, out, 2); }
   // الوجه: نحو الهدف عند الحركة، ونحو الطريق عند الكمين
   const lx = mode === 'hide' && dd <= stopR ? c.amb[0] - b.x : tx - b.x, lz = mode === 'hide' && dd <= stopR ? c.amb[1] - b.z : tz - b.z;
   b.face = aLerp(b.face, Math.atan2(-lx, -lz), Math.min(1, dt * 6));
