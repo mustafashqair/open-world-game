@@ -3433,6 +3433,9 @@ const G50 = (() => {
     L0.call(ld, url, g => { e.st = 'ok'; e.g = g; st.pre.ok++; if (e.cbs.length) { PC.delete(k); const [ok] = e.cbs.shift(); try { ok && ok(g); } catch (x) {} for (const c of e.cbs) L0.call(c[3], c[4], c[0], c[1], c[2]); } },
       undefined, err => { e.st = 'fail'; st.pre.fail++; PC.delete(k); for (const c of e.cbs) L0.call(c[3], c[4], c[0], c[1], c[2]); }); }
   const preBusy = () => { let n = 0; for (const e of PC.values()) if (e.st === 'loading') n++; return n; };
+  /* minimax/g50early: تحميل أهل القرية والحيوانات والخيول بيبدأ مع «المدينة جاهزة» (بانتظار WARM2) — ?g50early=0 أو ?v50g5=0 = السلوك القديم بالزبط */
+  const startDownloads = function () { if (st.dlOn) return; st.dlOn = 1; try { VWORK.preload && VWORK.preload(); } catch (e) {} try { FAUNA.preload && FAUNA.preload(); } catch (e) {} try { const L = hi() ? '' : '-lite'; for (const f of ['horse-bay', 'horse-black', 'horse-cream', 'horse-chestnut']) prefetch('horses37/' + f + L + '.glb'); prefetch('shops/stable-v6-horse-clips.glb'); if (!hi()) { prefetch('animals36/cow-lite.glb'); prefetch('animals36/sheep-lite.glb'); } import('./shops/stable-v6-horses.js').catch(() => {}); } catch (e) {} };
+  api.early = function () { if (!on || st.earlyDone) return; if (QS.get('g50early') === '0' || QS.get('v50g5') === '0') { st.earlyDone = 1; return; } if (!(window.cityReady && window.cityReady())) return; st.earlyDone = 1; st.forcePal = true; startDownloads(); };
   /* (٢) فحوصات الجاهزية — كل وحدة إلها مهلة، إذا ملف علق ما منعلّق اللاعب */
   const waitOk = (name, ok, maxMs) => { if (ok) return true; const w = st.waits[name] || (st.waits[name] = RN()); if (RN() - w > maxMs) { if (st.timeouts.indexOf(name) < 0) st.timeouts.push(name); return true; } return false; };
   const palOk = () => { try { if (!window.EST50 || !EST50.st.on || !EST50.g50) return true; const s = EST50.g50(); return s.inited && s.n >= 2 && s.c4 === 0 && s.far !== 'loading'; } catch (e) { return true; } };
@@ -3456,7 +3459,7 @@ const G50 = (() => {
     return [...U.values()]; }
   const BUD = () => (S.preset === 'vlow' ? 250000 : S.preset === 'low' ? 350000 : 600000);
   const force = (o, stop) => { for (let p = o; p && p !== stop; p = p.parent) { if (!p.visible) { saved.push([p, 0, false]); p.visible = true; forced.add(p); } if (p.isLOD && p.autoUpdate) { saved.push([p, 2, true]); p.autoUpdate = false; } } };
-  api.pre = function () { if (BL.on) blendPre(); if (FZ.list.length && (ORG.x !== FZ.ox || ORG.z !== FZ.oz)) fzSweep(); if (ph !== 'warm' || !items) return; const t0 = RN(); forced = new Set(); let v = 0, n = 0; const b = BUD();
+  api.pre = function () { try { api.early(); } catch (e) {} if (BL.on) blendPre(); if (FZ.list.length && (ORG.x !== FZ.ox || ORG.z !== FZ.oz)) fzSweep(); if (ph !== 'warm' || !items) return; const t0 = RN(); forced = new Set(); let v = 0, n = 0; const b = BUD();
     while (ki < items.length && (n === 0 || v + items[ki].v <= b)) { const u = items[ki++]; if (!u.root.parent) continue;
       force(u.root, scene); for (const o of u.meshes) { if (!o.parent) continue; force(o, u.root); if (o.frustumCulled) { saved.push([o, 1, true]); o.frustumCulled = false; } }
       v += u.v; n++; }
@@ -3475,18 +3478,17 @@ const G50 = (() => {
       if (st.played) return true;
       if (ph === 'final') return finish();
       if (ph === 'base') { st.tBase = Math.round(RN() - st.t0); phase('force', 'تحميل القصر والحديقة وأهل القرية والحيوانات');
-        st.forcePal = true; st.forceVW = true;
-        try { VWORK.preload && VWORK.preload(); } catch (e) {} try { FAUNA.preload && FAUNA.preload(); } catch (e) {}
-        try { const L = hi() ? '' : '-lite'; for (const f of ['horse-bay', 'horse-black', 'horse-cream', 'horse-chestnut']) prefetch('horses37/' + f + L + '.glb'); prefetch('shops/stable-v6-horse-clips.glb'); if (!hi()) { prefetch('animals36/cow-lite.glb'); prefetch('animals36/sheep-lite.glb'); } import('./shops/stable-v6-horses.js').catch(() => {}); } catch (e) {}
+        st.forcePal = true; st.forceVW = true; startDownloads();
         return false; }
       if (ph === 'force') { const a = waitOk('palace', palOk(), 150000), b = waitOk('villagers', vwOk(), 120000), c = waitOk('animals', faOk(), 120000), d = waitOk('horses', preBusy() === 0, 90000);
         st.p = 0.62 + 0.13 * ((a ? 1 : 0) + (b ? 1 : 0) + (c ? 1 : 0) + (d ? 1 : 0)) / 4;
         if (!(a && b && c && d)) return false;
         phase('compile', 'تجهيز الشيدرات (المؤثرات والمواد)'); st.tc0 = RN(); tpl = templates(); const grp = new THREE.Group(); grp.name = 'g50tpl'; for (const r of tpl) grp.add(r);
         const done = () => { compDone = true; st.compileMs = Math.round(RN() - st.tc0); for (const r of tpl) grp.remove(r); };
-        try { const p1 = renderer.compileAsync ? renderer.compileAsync(scene, camera) : Promise.resolve(renderer.compile(scene, camera));
-          const p2 = tpl.length ? (renderer.compileAsync ? renderer.compileAsync(grp, camera, scene) : Promise.resolve(renderer.compile(grp, camera, scene))) : Promise.resolve();
-          Promise.all([p1, p2]).then(done, e => { st.err = 'compile ' + (e && e.message); done(); }); } catch (e) { st.err = 'compile ' + (e && e.message); done(); }
+        try { const variants = () => { const p1 = renderer.compileAsync ? renderer.compileAsync(scene, camera) : Promise.resolve(renderer.compile(scene, camera));
+            const p2 = tpl.length ? (renderer.compileAsync ? renderer.compileAsync(grp, camera, scene) : Promise.resolve(renderer.compile(grp, camera, scene))) : Promise.resolve();
+            return Promise.all([p1, p2]); };
+          Promise.resolve().then(() => WARM2.compileVariants ? WARM2.compileVariants(variants) : variants()).then(done, e => { st.err = 'compile ' + (e && e.message); done(); }); } catch (e) { st.err = 'compile ' + (e && e.message); done(); }
         return false; }
       if (ph === 'compile') { st.p = 0.75 + 0.1 * Math.min(1, (RN() - tPh) / 20000); if (!waitOk('compile', compDone, 90000)) return false;
         items = buildItems(); ki = 0; st.warm.tot = items.length; phase('warm', 'رفع المدينة لكرت الشاشة'); return false; }
