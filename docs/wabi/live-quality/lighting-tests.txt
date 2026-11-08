@@ -1,0 +1,1 @@
+PASS 24 directional/configuration cases with 20 back-and-forth switches each: real Three.js materials restored, dummy light count bounded, original textures never disposed. Mock renderer only; no GPU assertion.

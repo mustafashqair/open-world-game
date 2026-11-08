@@ -1,0 +1,12 @@
+--- a/v50g3/code/part-001.txt
++++ b/v50g3/code/part-001.txt
+@@ -492,7 +492,8 @@
+ }
+ let faunaT = 0;
+ /* v50g5 gc6e: قائمة «أقرب ٨ حيوانات» في faunaVis بتستخدم مصفوفات معاد استخدامها على LOW/vlow بدل مصفوفة وأزواج جديدة كل ٠٫٢ث — نفس القيم ونفس الترتيب (فرز مستقر) وما في مرجع يبقى بعد الاستدعاء. ?gc6e=0 أو ?v50g5=0 = v50g3 بالضبط */
+-const GC6E = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](gc6e|v50g5)=0\b/.test(location.search); const FV6 = { c: [], pair: [] }, FCMP6 = (p, q) => p[0] - q[0];
++let GC6E = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](gc6e|v50g5)=0\b/.test(location.search); const FV6 = { c: [], pair: [] }, FCMP6 = (p, q) => p[0] - q[0];
++window.__LIVEPRESET?.on('gc6e', () => { GC6E = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](gc6e|v50g5)=0\b/.test(location.search); FV6.c.length = 0; FV6.pair.length = 0; });
+ function faunaVis(dt) {                          // أداء الهاتف: أقرب ٨ حيوانات فقط ضمن ٢٠٠م تظهر؛ والبقية مخفية
+   faunaT -= dt; if (faunaT > 0) return; faunaT = 0.2; const c = GC6E ? (FV6.c.length = 0, FV6.c) : []; let fp6 = 0;
+   for (const w of WOLVES) { w.vis = false; const d = Math.hypot(PL.x - w.x, PL.z - w.z); if (d <= 200) { if (GC6E) { const t6 = FV6.pair[fp6] || (FV6.pair[fp6] = [0, null]); t6[0] = d; t6[1] = w; c.push(t6); fp6++; } else c.push([d, w]); } }

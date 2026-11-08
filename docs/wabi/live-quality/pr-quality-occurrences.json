@@ -1,0 +1,634 @@
+[
+  {
+    "pr": 7,
+    "head": "fd7cfbb06d3ea598fd5ec86bbd0cf074e926025f",
+    "matches": []
+  },
+  {
+    "pr": 8,
+    "head": "314e72a9b82be2076dcce4e6a3678981951dd9f5",
+    "matches": [
+      {
+        "file": "v50g3/code/part-000.txt",
+        "line": 17,
+        "code": "// v50g4-4: LOW/very-low only; ?v50g4p=0 (or ?v50g4=0) restores legacy pacing."
+      },
+      {
+        "file": "v50g3/code/part-000.txt",
+        "line": 18,
+        "code": "const G4P = () => Q4.get('v50g4') !== '0' && Q4.get('v50g4p') !== '0' && (S.preset === 'low' || S.preset === 'vlow');"
+      },
+      {
+        "file": "v50g3/code/part-000.txt",
+        "line": 21,
+        "code": "  return G4P() && cap > 0 && Number.isFinite(cap) ? Math.min(pr, Math.sqrt(cap / Math.max(1, innerWidth * innerHeight))) : pr;"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 4418,
+        "code": "addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); if (G4P()) renderer.setPixelRatio(g4PixelRatio()); renderer.setSize(innerWidth, innerHeight); });"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3646,
+        "code": "// v50g4-4: absolute deadlines from the rAF stamp preserve the fractional remainder at 60/90/120 Hz (LOW/very-low only)."
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3647,
+        "code": "const G4PACE = { deadline: 0, last: null, interval: 0, rawDt: 0, frames: 0 };"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3648,
+        "code": "window.__g4Pacing = G4PACE;"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3649,
+        "code": "addEventListener('visibilitychange', () => { G4PACE.deadline = 0; G4PACE.last = null; });"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3652,
+        "code": "  const g4p = G4P(), tn4 = Number.isFinite(rafTime) ? rafTime : performance.now();"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3656,
+        "code": "    if (interval !== G4PACE.interval) { G4PACE.interval = interval; G4PACE.deadline = 0; }"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3658,
+        "code": "      if (tn4 + 0.01 < G4PACE.deadline) return;"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3659,
+        "code": "      if (!G4PACE.deadline) G4PACE.deadline = tn4;"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3660,
+        "code": "      G4PACE.deadline += (Math.floor(Math.max(0, tn4 - G4PACE.deadline) / interval) + 1) * interval;"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3663,
+        "code": "    G4PACE.deadline = 0; G4PACE.last = null;"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3667,
+        "code": "  const rawDt = g4p && G4PACE.last !== null ? Math.max(0, (tn4 - G4PACE.last) / 1000) : clockDt;"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3668,
+        "code": "  if (g4p) { G4PACE.last = tn4; G4PACE.rawDt = rawDt; G4PACE.frames++; }"
+      }
+    ]
+  },
+  {
+    "pr": 14,
+    "head": "49aa2d98d176ec48b4d081a3615a57052c6e3136",
+    "matches": [
+      {
+        "file": "docs/performance/v50g4-2.md",
+        "line": 3,
+        "code": "LOW/very-low only. Disable with `?v50g4t=0` or `?v50g4=0` and reload."
+      },
+      {
+        "file": "docs/performance/v50g4-2.md",
+        "line": 21,
+        "code": "The script writes genuine UASTC + Zstd KTX2 with mipmaps, max edge 512 on LOW,"
+      },
+      {
+        "file": "v50g3/code/part-000.txt",
+        "line": 202,
+        "code": "installTierTextures(THREE, KTX2Loader, () => S.preset, () => renderer);   // v50g4-2: LOW/very-low only; ?v50g4t=0 (or ?v50g4=0) = stock TextureLoader"
+      },
+      {
+        "file": "v50g4/textures.js",
+        "line": 1,
+        "code": "// v50g4-2. No renderer or loader behavior changes outside LOW/very-low."
+      }
+    ]
+  },
+  {
+    "pr": 17,
+    "head": "cbc9f8a00724588ce90bcb2cc7d0039b0b5dcbe6",
+    "matches": [
+      {
+        "file": "v50g3/code/part-000.txt",
+        "line": 22,
+        "code": "// v50g4-1: LOW/very-low only; ?v50g4s=0 (or ?v50g4=0) = v50g3 loading exactly. linear-target (offscreen/reflection) variants are skipped before Play by default — ~12 s less loading on the emulator, worst case a one-time compile the first time such a material is drawn, as in v50g3; ?g4slin=1 brings them back. ?g4sfin=0 skips the finish pass."
+      },
+      {
+        "file": "v50g3/code/part-000.txt",
+        "line": 23,
+        "code": "const G4S = () => Q4.get('v50g4') !== '0' && Q4.get('v50g4s') !== '0' && ['low', 'vlow'].includes(S.preset);"
+      },
+      {
+        "file": "v50g3/code/part-000.txt",
+        "line": 24,
+        "code": "const G4UPLOAD = createUploadQueue(G4S), G4ROOTS = new Set();"
+      },
+      {
+        "file": "v50g3/code/part-000.txt",
+        "line": 33,
+        "code": "const G4SEEN = new Set(), G4SLIN = Q4.get('g4slin') === '1', G4SFIN = Q4.get('g4sfin') !== '0', G4SLOADMS = Math.max(2, +(Q4.get('g4sload') || 12)), G4TOMS = Math.max(1000, +(Q4.get('g4toms') || 90000)), G4FAIL = Q4.get('g4failcompile') === '1';   // ?g4toms=N: timeout of every v50g4-1 loading wait (default 90 s); ?g4failcompile=1: test switch — the queued compile never reports done   // v50g4-1 (Tab): shader signatures already queued — persists across the gate pass and the finish pass"
+      },
+      {
+        "file": "v50g3/code/part-000.txt",
+        "line": 72,
+        "code": "        const fin = () => { try { if (G4S()) { if (!window.G50?.st.played) G4ROOTS.add(g.scene); G4UPLOAD.add(() => onLoad && onLoad(g), g4Bytes(g.scene)); } else onLoad && onLoad(g); } catch (x) { console.error('[v42] onLoad ' + key, x); } }; if (TCAP.cap() || TCAP.capc()) TCAP.run(g, key).then(fin, fin); else fin(); }, onProgress, fail); };"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 257,
+        "code": "      w.onmessage = e => { w.busy = false; CT.n++; CT.ms += performance.now() - w.t0; if (CT.n === 80) console.info('[أداء] متوسط زمن توليد القطعة (Worker): ' + (CT.ms / CT.n).toFixed(1) + ' م.ث'); const d = e.data; if (G4S()) G4UPLOAD.add(() => addChunk(d.cx, d.cz, d.res, d.r, d.gr, d), Object.values(d.r).reduce((n, a) => n + (a?.byteLength || 0), 0)); else addChunk(d.cx, d.cz, d.res, d.r, d.gr, d); };   // v50g4-1: the attach itself is deferred; the job (6th arg) travels with it so a stale check can run at attach time"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 2971,
+        "code": "const G2L = (() => { const L3 = G3V('lights'), on0 = G2V('pre') || L3, on = on0 || G4S(), N = L3 ? 0 : G4S() && S.preset === 'low' ? 12 : Math.max(1, Math.min(9, +(Q4.get('g2pl') || 4))),   /* v50g4-1: LOW gets a fixed 12 point lights (no recompiles when the count changes); on0 = exactly v50g3 */   /* v50g3: بلا أضواء نقطية حية على «منخفضة جدا» */ set = new Set(), dum = [], hid = [], vis = [], v3 = new THREE.Vector3(); const api = { on, N, L3, set, pre() {}, post() {}, st: { real: 0, hid: 0, dum: 0 } }; window.G2L = api; if (!on) return api;"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 2975,
+        "code": "  api.pre = cam => { if (!on0 && !G4S()) { for (const l of dum) l.visible = false; return; } vis.length = 0; for (const l of set) { if (!l.parent || !l.visible) continue; let p = l.parent, ok = true; while (p) { if (!p.visible) { ok = false; break; } if (!p.parent) { if (p !== scene) ok = false; break; } p = p.parent; } if (ok && (!cam || l.layers.test(cam.layers))) vis.push(l); }"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3429,
+        "code": "    if (e) { PC.delete(k); if (e.st === 'ok') { setTimeout(() => { try { if (G4S()) G4UPLOAD.add(() => onLoad && onLoad(e.g), g4Bytes(e.g.scene)); else onLoad && onLoad(e.g); } catch (x) { console.error('[v50g] onLoad ' + k, x); } }, 0); return; } if (e.st === 'loading') { e.cbs.push([onLoad, onProgress, onError, this, url]); return; } }"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3455,
+        "code": "      const key = G4S() ? o : top || o; let u = U.get(key); if (!u) U.set(key, u = { root: key, meshes: [], v: 0 }); u.meshes.push(o); u.v += vcount(o); });"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3459,
+        "code": "  api.pre = function () { if (BL.on) blendPre(); if (FZ.list.length && (ORG.x !== FZ.ox || ORG.z !== FZ.oz)) fzSweep(); if (ph !== 'warm' || !items) return; if (G4S()) G4UPLOAD.resume(); const t0 = RN(); forced = new Set(); let v = 0, n = 0; const b = BUD();"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3460,
+        "code": "    while (ki < items.length && (n === 0 || v + items[ki].v <= b)) { const next = items[ki]; if (G4S() && !G4UPLOAD.allow(next.v * 32)) break; const u = items[ki++]; if (!u.root.parent) continue;"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3464,
+        "code": "    st.warm.n = ki; st.warm.verts += v; st.warm.frames++; st.warm.ms += RN() - t0; if (G4S()) G4UPLOAD.pause(); };"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3474,
+        "code": "  if (G4S()) { const gl = renderer.getContext(), link = gl.linkProgram.bind(gl); gl.linkProgram = program => { g4ShaderState.links++; if (st.played) g4ShaderState.playLinks++; return link(program); }; }"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3476,
+        "code": "    // v50g4-1 (Tab port): signatures persist across passes (G4SEEN), so the finish pass only queues what is new;"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3478,
+        "code": "    const textures = new Set(), linear = G4SLIN ? new THREE.WebGLRenderTarget(1, 1) : null;"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3490,
+        "code": "      if (G4SEEN.has(sig)) return; G4SEEN.add(sig);"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3548,
+        "code": "        try { if (G4S()) { g4Compile([scene, ...tpl, ...G4ROOTS], done); return false; } const p1 = renderer.compileAsync ? renderer.compileAsync(scene, camera) : Promise.resolve(renderer.compile(scene, camera));"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3552,
+        "code": "      if (ph === 'compile') { st.p = 0.75 + 0.1 * Math.min(1, (RN() - tPh) / 20000); if (!waitOk('compile', compDone, G4S() ? G4TOMS : 90000)) return false;   /* v50g4-1: the compile wait keeps a timeout on every preset (90 s, ?g4toms= on LOW/very-low); queued compiles keep running after it */"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3557,
+        "code": "      if (ph === 'tex') { const t0 = RN(); while (ti < texList.length && RN() - t0 < (G4S() ? 2 : 12)) { const t = texList[ti++]; if (G4S()) g4Texture(t); else try { renderer.initTexture(t); } catch (e) {} } st.tex.n = ti; st.p = 0.95 + 0.05 * (texList.length ? ti / texList.length : 1);"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3558,
+        "code": "        if (ti < texList.length || (G4S() && !waitOk('g4queue', !G4UPLOAD.pending, G4TOMS))) return false;"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3581,
+        "code": "    if (G4S() && G4SFIN && g4Final !== 2 && !waitOk('g4final', false, G4TOMS)) { if (!g4Final) { g4Final = 1; phase('final', st.step); g4Compile([scene, ...templates(), ...G4ROOTS], () => { g4Final = 2; }); } return false; }   /* v50g4-1: second pass = only signatures not queued yet; bounded by its own timeout (G4TOMS) */"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3582,
+        "code": "    if (G4S()) G4ROOTS.clear();"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3717,
+        "code": "  if (G4S()) { if (globalThis.__g4Budget) globalThis.__g4Budget.ms = G50.st.played ? 2 : G4SLOADMS; G4UPLOAD.begin(); G4UPLOAD.pump(); }   // v50g4-1: queue pump — 2 ms/frame after Play, G4SLOADMS (?g4sload=, default 12) while the loading screen is up"
+      }
+    ]
+  },
+  {
+    "pr": 18,
+    "head": "33f0cdbb69dd90f37830a7f76a5b992eec33e9b6",
+    "matches": [
+      {
+        "file": "v50g3/code/part-000.txt",
+        "line": 25,
+        "code": "// v50g4-3: LOW/very-low only; ?v50g4r=0 (or ?v50g4=0) = v50g3 streaming exactly; ?g4mb=N overrides the budget (MiB)"
+      },
+      {
+        "file": "v50g3/code/part-000.txt",
+        "line": 27,
+        "code": "const G4R = () => G4RES !== null && Q4.get('v50g4') !== '0' && Q4.get('v50g4r') !== '0' && ['low', 'vlow'].includes(S.preset);"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 255,
+        "code": "  return Math.abs(j.cx - PL.cx) <= S.view + 1 && Math.abs(j.cz - PL.cz) <= S.view + 1 && !!want && want.res === j.res && want.gr === j.gr && j.epoch === g4WorldEpoch && j.veg === S.veg && j.preset === S.preset;"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 260,
+        "code": "  if (j) { if ((G4R() || j.preset !== S.preset) && !g4Valid(j)) { G4RES.st.stale++; pending.delete(j.k); return true; } return false; }"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 264,
+        "code": "function g4Chunks() {   // same rings/LOD as updateChunks(); the radius steps down one ring at a time under memory pressure (floor: LOW 3, very-low 2)"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 265,
+        "code": "  const R = G4RES.terrainRadius(S.view, S.preset === 'low' ? 3 : 2), jobs = []; g4Wanted.clear();"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 269,
+        "code": "    const d = Math.max(Math.abs(dx), Math.abs(dz)), res = S.preset === 'vlow' && V4ON('ter4') ? (d <= 1 ? 32 : d <= 2 ? 16 : 8) : d <= 2 ? 32 : d <= 5 ? 16 : 8;"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 271,
+        "code": "    const j = { cx, cz, k, gr, res, d2, veg: S.veg, epoch: g4WorldEpoch, preset: S.preset };"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3646,
+        "code": "  () => { const mb = Number(Q4.get('g4mb')); return (Number.isFinite(mb) && mb > 0 ? mb : S.preset === 'vlow' ? 192 : 256) * 1048576; });"
+      }
+    ]
+  },
+  {
+    "pr": 19,
+    "head": "e3d70a685737e82615245cffb81692b4d54f3d30",
+    "matches": [
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 4162,
+        "code": "  const atmoDead5 = X => ATMO5.on && (S.preset === 'low' || S.preset === 'vlow') && !(X && X.tier && X.tier !== 'none');"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 4164,
+        "code": "    if (F.atmo && !A.L && !(S.preset === 'vlow' && V4ON('atmo4'))) { if (atmoDead5(X)) ATMO5.skip++; else { if (!A.loading) ATMO5.loads++; atmoLoad(); } }"
+      }
+    ]
+  },
+  {
+    "pr": 20,
+    "head": "565554467dd411a865b937df63da212caea9e921",
+    "matches": [
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 249,
+        "code": "RAF5.low = () => RAF5.on && (S.preset === 'low' || S.preset === 'vlow');"
+      }
+    ]
+  },
+  {
+    "pr": 21,
+    "head": "fc9fe8218355d548aaf334ae24b8b30010873b84",
+    "matches": []
+  },
+  {
+    "pr": 22,
+    "head": "a62d8f5c8d6f73a0a2db09834aafc8d42bf5436f",
+    "matches": [
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 142,
+        "code": "    const T3A = T3.on && (S.preset === 'low' || S.preset === 'vlow') && T3.was; T3.was = T3.on && (S.preset === 'low' || S.preset === 'vlow'); T3.passes++;   // أول تمريرة بعد التبديل لمنخفض = رفع كامل متل v50g3"
+      }
+    ]
+  },
+  {
+    "pr": 23,
+    "head": "c66cc6591ea9b465ba2f95437a08c75c234a57e8",
+    "matches": [
+      {
+        "file": "v50g3/code/part-000.txt",
+        "line": 1905,
+        "code": "  const want = () => st.on && (S.preset === 'low' || S.preset === 'vlow') ? fs2 : fs0;"
+      }
+    ]
+  },
+  {
+    "pr": 24,
+    "head": "3b344a33b6003282140bac6d0485a5f3203f6b67",
+    "matches": [
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3473,
+        "code": "  let w2ran = false; function wave2() { if (w2ran) return; w2ran = true;   /* v50g5 pre2: الموجة الثانية مرة واحدة — أوّل مَن يطلبها يشغّلها (الإقلاع على LOW/vlow أو شاشة البداية) */"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3477,
+        "code": "  api.wave2 = wave2;   /* v50g5 pre2: يسمح للإقلاع بتشغيلها مبكراً على LOW/vlow */"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3484,
+        "code": "        wave2();   /* v50g5 pre2: نفس جُمل الموجة الثانية نفسها (مرة واحدة — قد شغّلها الإقلاع قبلها على LOW) */"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 4207,
+        "code": "try { if (window.G50 && G50.wave2 && (S.preset === 'low' || S.preset === 'vlow') && !/[?&](v50g5|pre2)=0\\b/.test(location.search)) G50.wave2(); } catch (e) {}   /* v50g5 pre2: موجّة G50 الثانية من الإقلاع على LOW/vlow فقط؛ ?pre2=0 أو ?v50g5=0 = v50g3 بالضبط */"
+      }
+    ]
+  },
+  {
+    "pr": 25,
+    "head": "f5bb2212d7c0d46a1b9c569aba26eaa37b6d1c35",
+    "matches": [
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 1519,
+        "code": "  const CORE5 = ['cow', 'bull', 'sheep', 'ram', 'woolsheep', 'chicken', 'goose', 'peacock', 'raven'];   /* v50g5 faun1: نواة أنواع المزارع والمدينة (farmFor/cityFarm/peacocks) — تُحمَّل قبل اللعب على LOW/vlow والبقية عند الحاجة */"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 1520,
+        "code": "  const FAUN1 = () => (S.preset === 'low' || S.preset === 'vlow') && !/[?&](faun1|v50g5)=0\\b/.test(location.search);   /* v50g5 faun1: ?faun1=0 أو ?v50g5=0 = v50g3 بالضبط */"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 1521,
+        "code": "  F.faun1 = FAUN1; F.core5 = () => CORE5.every(k => TPL[k] || BAD[k]);   /* v50g5 faun1: جاهزية النواة — بوابة «animals» بتستناها على LOW/vlow بدل كل الأنواع */"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 1522,
+        "code": "  F.preload = () => { for (const k of (FAUN1() ? CORE5 : [...Object.keys(F36), 'eagle'])) need(k, () => {}); }; F.pending = () => Q.length + active;   // v50g: كل أنواع الحيوانات قبل اللعب — v50g5 faun1: على LOW/vlow النواة فقط"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 3443,
+        "code": "  const faOk = () => { try { if (FAUNA.faun1 && FAUNA.faun1()) return FAUNA.core5(); return !FAUNA.pending || FAUNA.pending() === 0; } catch (e) { return true; } };   /* v50g5 faun1: على LOW/vlow بوابة «animals» بتستنى النواة فقط */"
+      }
+    ]
+  },
+  {
+    "pr": 26,
+    "head": "73206f73a0a21752a17f8b6ea90464d9181c6bcb",
+    "matches": [
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 3556,
+        "code": "  const vlwalk = VLWALK.on && S.preset === 'vlow', borrowed = vlwalk && !VLWALK.busy;"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 3560,
+        "code": "  const L = n.L; gatherTreeSolids(n.x, n.z, 50, treeOb); const ws5 = FRAME4.cc5 || vlwalk, walkSolid = ws5 ? null : L.solid.concat(treeOb); navGoal(n, tx, tz); tx = n.gx; tz = n.gz; const nkI = NPCK.must(n) ? NPCK.exitGoal(n) : null; if (nkI) { tx = nkI[0]; tz = nkI[1]; }   // npck: غاطس جوّا المنطقة → أقرب مخرج أول"
+      }
+    ]
+  },
+  {
+    "pr": 27,
+    "head": "f5aca593ea04e3ec66c113933cc832cc7cc17e21",
+    "matches": [
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 71,
+        "code": "  const BILL1 = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](billatlas|v50g5)=0\\b/.test(location.search);   /* v50g5 billatlas: تصغير أطلس اللوحات على LOW/vlow بس — ?billatlas=0 أو ?v50g5=0 = v50g3 بالضبط */"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 72,
+        "code": "  const NT = 12, NC = 8, TW = BILL1 ? (S.preset === 'vlow' ? 128 : 192) : 256, TH = BILL1 ? (S.preset === 'vlow' ? 256 : 384) : 512;   // ١٢ خانة: ٨ أعمدة × صفّان — v50g5 billatlas: 192×384 على «منخفض» و128×256 على «منخفضة جدا» (نفس النسبة)، والباقي 256×512"
+      }
+    ]
+  },
+  {
+    "pr": 28,
+    "head": "8189ec87414a3905b15cad686b7691cbc5fa720b",
+    "matches": [
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 2679,
+        "code": "  const FIRE5 = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](fire5|v50g5)=0\\b/.test(location.search);   /* v50g5 fire5: بلا تحديث لنارٍ مخفية على LOW/vlow — ?fire5=0 أو ?v50g5=0 = v50g3 بالضبط */"
+      },
+      {
+        "file": "v50g3/code/part-002.txt",
+        "line": 2709,
+        "code": "        if (!fireLoop) { fireLoop = true; const P = new THREE.Vector3(); const tick = () => { const t = performance.now() / 1000; for (const F of FIRE36) { const cam = typeof camera !== 'undefined' ? camera : null; if (cam) { F.grp.getWorldPosition(P); F.f.group.visible = P.distanceToSquared(cam.position) < 90 * 90; } if (FIRE5 && !F.f.group.visible) continue; F.f.update(t); } requestAnimationFrame(tick); }; requestAnimationFrame(tick); } }"
+      }
+    ]
+  },
+  {
+    "pr": 29,
+    "head": "acc445651d1a5d7dc6a3bb48134da84d67cc7e55",
+    "matches": [
+      {
+        "file": "v50g3/code/part-000.txt",
+        "line": 2141,
+        "code": "  const Q = window.__QUALITY || 'mobile', LOW = Q === 'low', lowTreeFix = V4ON('lowtree') && V4ON('v50g5');"
+      },
+      {
+        "file": "v50g3/code/part-000.txt",
+        "line": 2144,
+        "code": "  const vl33 = () => { const v = S.preset === 'vlow' && V4ON('tree4'); R_MID = v ? 26 : R0_33[0]; R_LITE = v ? 48 : R0_33[1]; R_BILL = v ? 420 : R0_33[2]; MAX_HI = (v || (S.preset === 'low' && lowTreeFix)) ? 0 : R0_33[3]; };   // v50d4"
+      }
+    ]
+  },
+  {
+    "pr": 30,
+    "head": "166b102e36b9ec76f4494c857cfc2e11a3e33c99",
+    "matches": [
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 4896,
+        "code": "  const load1 = (S.preset === 'low' || S.preset === 'vlow') && Q4.get('load1') !== '0' && Q4.get('v50g5') !== '0';"
+      }
+    ]
+  },
+  {
+    "pr": 31,
+    "head": "497b0541198a84b16ee7bbdaaaa524b35c15661d",
+    "matches": [
+      {
+        "file": "v50g3/code/part-000.txt",
+        "line": 1990,
+        "code": "  if ((S.preset === 'low' || S.preset === 'vlow') && Q4.get('load2') !== '0' && Q4.get('v50g5') !== '0' && parts.every(([g, col]) => col.length === 3)) {"
+      }
+    ]
+  },
+  {
+    "pr": 32,
+    "head": "a5ad4c9eb32b6a0be1ac4e2bca734e4cced86fde",
+    "matches": [
+      {
+        "file": "v50g3/code/part-000.txt",
+        "line": 216,
+        "code": "  if (!(S.preset === 'low' || S.preset === 'vlow') || Q4.get('load3') === '0' || Q4.get('v50g5') === '0') return null;"
+      }
+    ]
+  },
+  {
+    "pr": 33,
+    "head": "a3d860cb224a28fb48afdfebb3196d2438df9497",
+    "matches": [
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 4295,
+        "code": "/* v50g5 gc6a: قائمة «الأقرب» في تحديث القرى بتستخدم مصفوفات معاد استخدامها على LOW/vlow بدل مصفوفة وزوج جديد بكل إطار — نفس القيم ونفس الترتيب (فرز مستقر على نفس الأعداد) وما في مرجع يبقى بعد الاستدعاء. ?gc6a=0 أو ?v50g5=0 = v50g3 بالضبط */"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 4296,
+        "code": "const GC6A = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](gc6a|v50g5)=0\\b/.test(location.search); const NR6 = { near: [], pair: [] }, CMP6 = (a, b) => a[0] - b[0];"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 4301,
+        "code": "  NPCF++; const near = GC6A ? (NR6.near.length = 0, NR6.near) : []; let np6 = 0; for (const n of NPCS) { n.skel = false; if (n.dead || n.sleeping) continue; const dd = Math.hypot(n.x - PL.x, n.z - PL.z); if (dd < 40) { if (GC6A) { const t6 = NR6.pair[np6] || (NR6.pair[np6] = [0, null]); t6[0] = dd; t6[1] = n; near.push(t6); np6++; } else near.push([dd, n]); } }"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 4302,
+        "code": "  if (qO) qT = wP.lap('v_nearscan', qT); near.sort(GC6A ? CMP6 : (a, b) => a[0] - b[0]); const MAXA = (FRAME4.vl && V4ON('npc4')) ? 5 : S.pop < 0.6 ? 8 : 14; for (let i = 0; i < near.length && i < MAXA; i++) near[i][1].skel = true; const g2n = G2V('npc'); if (g2n) for (let i = 0; i < near.length && i < 6; i++) near[i][1].__g2f = NPCF;   // أنيميشن هيكلي للأقرب فقط (<٤٠م) وبحد أقصى"
+      }
+    ]
+  },
+  {
+    "pr": 34,
+    "head": "445f76d44389ede13fe012ab71e40f4c0171a7c5",
+    "matches": [
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 3594,
+        "code": "/* v50g5 gc6b: npcGoal بترجّع مصفوفة مشتركة معاد استخدامها على LOW/vlow (المُنعطف الوحيد updateNPC بيقرأ gl[0..3] فورًا وما في استدعاء متداخل ولا مرجع يُحفظ) — نفس القيم بالضبط. ?gc6b=0 أو ?v50g5=0 = v50g3 بالضبط */"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 3595,
+        "code": "const GC6B = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](gc6b|v50g5)=0\\b/.test(location.search); const GL6 = [0, 0, '', 0], GL6W = ['wander', 'poi', 'shop', 'post'];"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 3596,
+        "code": "const G6 = (x, z, s, f) => { if (GC6B) { GL6[0] = x; GL6[1] = z; GL6[2] = s; GL6[3] = f; return GL6; } return f === undefined ? [x, z, s] : [x, z, s, f]; };"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 3788,
+        "code": "      if (!n.chat && n.fk37 !== 1 && n.chatCd <= 0 && n.stillT < 1.5 && (GC6B ? GL6W : ['wander', 'poi', 'shop', 'post']).includes(gl[2]))           // محادثة بين NPCs متجاورين"
+      }
+    ]
+  },
+  {
+    "pr": 35,
+    "head": "bfafb78288610e732c359a1c0ad3e2a9a55f2a14",
+    "matches": [
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 3698,
+        "code": "/* v50g5 gc6c: مصفوفة أشجار updateNPC معادة الاستخدام على LOW/vlow (gatherTreeSolids تدفع إليها فقط وpushOut يقرأها فقط، ولا مرجع يبقى بعد الاستدعاء) — نفس القيم بالضبط. ?gc6c=0 أو ?v50g5=0 = v50g3 بالضبط */"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 3699,
+        "code": "const GC6C = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](gc6c|v50g5)=0\\b/.test(location.search); const TC6 = [];"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 3811,
+        "code": "  const treeOb = GC6C ? (TC6.length = 0, TC6) : []; gatherTreeSolids(n.x, n.z, 2, treeOb); pushOut(n, NPC_R, treeOb, 2);"
+      }
+    ]
+  },
+  {
+    "pr": 36,
+    "head": "34dcf17a022c90e4fa40a8a8e7349ea03624ca97",
+    "matches": [
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 5072,
+        "code": "/* v50g5 gc6d: مصفوفة أشجار banUpdateOne معادة الاستخدام على LOW/vlow (gatherTreeSolids تدفع إليها فقط وpushOut يقرأها فقط، ولا مرجع يبقى بعد الاستدعاء) — نفس القيم بالضبط. ?gc6d=0 أو ?v50g5=0 = v50g3 بالضبط */"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 5073,
+        "code": "const GC6D = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](gc6d|v50g5)=0\\b/.test(location.search); const BD6 = [];"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 5107,
+        "code": "  const out = GC6D ? (BD6.length = 0, BD6) : []; gatherTreeSolids(b.x, b.z, 2, out); pushOut(b, 0.45, out, 2);"
+      }
+    ]
+  },
+  {
+    "pr": 37,
+    "head": "7d3f29639d1f40131d363e6d9ce2ad56878e027e",
+    "matches": [
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 494,
+        "code": "/* v50g5 gc6e: قائمة «أقرب ٨ حيوانات» في faunaVis بتستخدم مصفوفات معاد استخدامها على LOW/vlow بدل مصفوفة وأزواج جديدة كل ٠٫٢ث — نفس القيم ونفس الترتيب (فرز مستقر) وما في مرجع يبقى بعد الاستدعاء. ?gc6e=0 أو ?v50g5=0 = v50g3 بالضبط */"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 495,
+        "code": "const GC6E = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](gc6e|v50g5)=0\\b/.test(location.search); const FV6 = { c: [], pair: [] }, FCMP6 = (p, q) => p[0] - q[0];"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 497,
+        "code": "  faunaT -= dt; if (faunaT > 0) return; faunaT = 0.2; const c = GC6E ? (FV6.c.length = 0, FV6.c) : []; let fp6 = 0;"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 498,
+        "code": "  for (const w of WOLVES) { w.vis = false; const d = Math.hypot(PL.x - w.x, PL.z - w.z); if (d <= 200) { if (GC6E) { const t6 = FV6.pair[fp6] || (FV6.pair[fp6] = [0, null]); t6[0] = d; t6[1] = w; c.push(t6); fp6++; } else c.push([d, w]); } }"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 499,
+        "code": "  for (const a of ANIMALS) { a.vis = false; const d = Math.hypot(PL.x - a.x, PL.z - a.z); if (d <= 200 && !a.gone) { if (GC6E) { const t6 = FV6.pair[fp6] || (FV6.pair[fp6] = [0, null]); t6[0] = d; t6[1] = a; c.push(t6); fp6++; } else c.push([d, a]); } }"
+      },
+      {
+        "file": "v50g3/code/part-001.txt",
+        "line": 500,
+        "code": "  c.sort(GC6E ? FCMP6 : (p, q) => p[0] - q[0]); for (let i = 0; i < c.length && i < 8; i++) c[i][1].vis = true; }"
+      }
+    ]
+  }
+]

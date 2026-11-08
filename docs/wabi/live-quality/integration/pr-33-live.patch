@@ -1,0 +1,12 @@
+--- a/v50g3/code/part-001.txt
++++ b/v50g3/code/part-001.txt
+@@ -4293,7 +4293,8 @@
+ })();
+ 
+ /* v50g5 gc6a: قائمة «الأقرب» في تحديث القرى بتستخدم مصفوفات معاد استخدامها على LOW/vlow بدل مصفوفة وزوج جديد بكل إطار — نفس القيم ونفس الترتيب (فرز مستقر على نفس الأعداد) وما في مرجع يبقى بعد الاستدعاء. ?gc6a=0 أو ?v50g5=0 = v50g3 بالضبط */
+-const GC6A = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](gc6a|v50g5)=0\b/.test(location.search); const NR6 = { near: [], pair: [] }, CMP6 = (a, b) => a[0] - b[0];
++let GC6A = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](gc6a|v50g5)=0\b/.test(location.search); const NR6 = { near: [], pair: [] }, CMP6 = (a, b) => a[0] - b[0];
++window.__LIVEPRESET?.on('gc6a', () => { GC6A = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](gc6a|v50g5)=0\b/.test(location.search); NR6.near.length = 0; NR6.pair.length = 0; });
+ function updateVillages(dt) { const wP = window.PRF, qO = !!(wP && wP.on); let qT = qO ? performance.now() : 0; try { EST50.tick(); if (CITY2) CITY2X.tick(); } catch (e) { if (!window.__e50) { window.__e50 = 1; console.warn('[est50] tick', e); } } if (qO) qT = wP.lap('v_est50_city2x', qT); if (window.SFX42) window.SFX42.tick(dt); if (window.HIT42) window.HIT42.tick(dt); if (window.FX42) window.FX42.tick(dt); if (window.PHYS42) window.PHYS42.tick(dt); if (qO) qT = wP.lap('v_fx42_phys42', qT); if (LANT15) LANT15.tick(); if (qO) qT = wP.lap('v_lant15', qT); LOD16.tick(); if (qO) qT = wP.lap('v_lod16', qT); try { V3B.tick(dt); } catch (e) {} if (qO) qT = wP.lap('v_v3b', qT);
+   vilT -= dt; if (vilT <= 0) { vilT = 1; for (const v of VILLAGES) { const d = Math.hypot(v.x - PL.x, v.z - PL.z);
+     if (v.city) { if (d < 600 && !v.live && MODELS.ready && cityReady()) buildCity(v); else if (d > 900 && v.live) { if (window.__G50ON) G50.keep(v, false); else disposeVillage(v); } else if (d < 880 && v.live && window.__G50ON) G50.keep(v, true); }   // v50g: المدينة ما بتنمسح، بتنخفى

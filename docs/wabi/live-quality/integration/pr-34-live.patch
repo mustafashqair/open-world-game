@@ -1,0 +1,12 @@
+--- a/v50g3/code/part-001.txt
++++ b/v50g3/code/part-001.txt
+@@ -3592,7 +3592,8 @@
+ }
+ const FK37 = { R: 1.6, V: 1.2, W: 1.2 };   // v38 W: سرعة مشيه لبيته (م/ث) — مشية هادئة والخطوة متزامنة مع الأرض   // v37: نصف قطر الالتقاط عند الوصول للكاونتر
+ /* v50g5 gc6b: npcGoal بترجّع مصفوفة مشتركة معاد استخدامها على LOW/vlow (المُنعطف الوحيد updateNPC بيقرأ gl[0..3] فورًا وما في استدعاء متداخل ولا مرجع يُحفظ) — نفس القيم بالضبط. ?gc6b=0 أو ?v50g5=0 = v50g3 بالضبط */
+-const GC6B = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](gc6b|v50g5)=0\b/.test(location.search); const GL6 = [0, 0, '', 0], GL6W = ['wander', 'poi', 'shop', 'post'];
++let GC6B = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](gc6b|v50g5)=0\b/.test(location.search); const GL6 = [0, 0, '', 0], GL6W = ['wander', 'poi', 'shop', 'post'];
++window.__LIVEPRESET?.on('gc6b', () => { GC6B = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](gc6b|v50g5)=0\b/.test(location.search); GL6[0] = GL6[1] = 0; GL6[2] = ''; GL6[3] = undefined; });
+ const G6 = (x, z, s, f) => { if (GC6B) { GL6[0] = x; GL6[1] = z; GL6[2] = s; GL6[3] = f; return GL6; } return f === undefined ? [x, z, s] : [x, z, s, f]; };
+ function npcGoal(n) {                             // الروتين اليومي: لا توقف طويل؛ تنقّل بين نقاط الاهتمام بـA*
+   const T = ENV.T, v = n.v, L = n.L, hd = n.home.door;

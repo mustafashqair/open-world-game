@@ -1,0 +1,1 @@
+PASS 12 lifecycle directions: thaw owned objects, cancel pending freeze snapshots, restart entering vlow, reset animation selection and menu choice. Isolated state-machine test only.

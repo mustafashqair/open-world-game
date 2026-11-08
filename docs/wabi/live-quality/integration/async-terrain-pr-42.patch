@@ -1,0 +1,50 @@
+diff --git a/v50g3/code/part-001.txt b/v50g3/code/part-001.txt
+index b7d2b49..2b09729 100644
+--- a/v50g3/code/part-001.txt
++++ b/v50g3/code/part-001.txt
+@@ -245,16 +245,17 @@ function tb24Tick() {
+   TB24.n = n;
+ }
+ (function tb24Loop() { requestAnimationFrame(tb24Loop); try { tb24Tick(); } catch (e) { if (!TB24.err) { TB24.err = 1; console.warn('[v24] tb', e); } } })();
++let terrainGen = 0;
+ const CT = { n: 0, ms: 0 };
+ function makeWorkers() {                        // Web Worker من Blob؛ عند الفشل نعمل في الخيط الرئيسي
+   try {
+     const src = `const L=(${terrainLib})();onmessage=e=>{const d=e.data;if(d.world){L.setWorld(d.world);return;}L.init(d.seed);const r=L.chunk(d.cx,d.cz,d.res,d.ch,d.veg,d.gr);` +
+-      `postMessage({cx:d.cx,cz:d.cz,res:d.res,gr:d.gr,r},[r.pos.buffer,r.nor.buffer,r.col.buffer,r.rk.buffer,r.rp.buffer,r.ri.buffer,r.rq.buffer,r.cl.buffer]);}`;
++      `postMessage({cx:d.cx,cz:d.cz,res:d.res,gr:d.gr,gen:d.gen,r},[r.pos.buffer,r.nor.buffer,r.col.buffer,r.rk.buffer,r.rp.buffer,r.ri.buffer,r.rq.buffer,r.cl.buffer]);}`;
+     const url = URL.createObjectURL(new Blob([src], { type: 'text/javascript' }));
+     const n = Math.min(3, Math.max(1, (navigator.hardwareConcurrency || 4) - 2));
+     for (let i = 0; i < n; i++) {
+       const w = new Worker(url); w.busy = false; w.postMessage({ world: WORLD });     // حقول العالم تُمرَّر مرة واحدة
+-      w.onmessage = e => { w.busy = false; CT.n++; CT.ms += performance.now() - w.t0; if (CT.n === 80) console.info('[أداء] متوسط زمن توليد القطعة (Worker): ' + (CT.ms / CT.n).toFixed(1) + ' م.ث'); addChunk(e.data.cx, e.data.cz, e.data.res, e.data.r, e.data.gr); };
++      w.onmessage = e => { w.busy = false; if (e.data.gen !== terrainGen) return; CT.n++; CT.ms += performance.now() - w.t0; if (CT.n === 80) console.info('[أداء] متوسط زمن توليد القطعة (Worker): ' + (CT.ms / CT.n).toFixed(1) + ' م.ث'); addChunk(e.data.cx, e.data.cz, e.data.res, e.data.r, e.data.gr); };
+       w.onerror = () => { useWorker = false; w.busy = false; };
+       workers.push(w);
+     }
+@@ -265,7 +266,7 @@ function pump() {                               // توزيع المهام
+   if (useWorker && workers.length) {
+     for (const w of workers) { if (w.busy || !queue.length) continue;
+       const j = queue.shift(); w.busy = true; w.t0 = performance.now();
+-      w.postMessage({ seed: CFG.SEED, cx: j.cx, cz: j.cz, res: j.res, ch: CFG.CH, veg: S.veg, gr: j.gr }); }
++      w.postMessage({ seed: CFG.SEED, cx: j.cx, cz: j.cz, res: j.res, ch: CFG.CH, veg: S.veg, gr: j.gr, gen: j.gen }); }
+   } else if (queue.length) {                    // بديل: قطعة واحدة في كل إطار
+     const j = queue.shift(); addChunk(j.cx, j.cz, j.res, LIB.chunk(j.cx, j.cz, j.res, CFG.CH, S.veg, j.gr), j.gr);
+   }
+@@ -278,7 +279,7 @@ function updateChunks() {
+     if (cx < -39 || cx > 39 || cz < -39 || cz > 39) continue;          // حدود العالم ١٠×١٠ كم
+     const d = Math.max(Math.abs(dx), Math.abs(dz)), res = (S.preset === 'vlow' && V4ON('ter4')) ? (d <= 1 ? 32 : d <= 2 ? 16 : 8) : d <= 2 ? 32 : d <= 5 ? 16 : 8;   // مستويات التفصيل LOD
+     const k = cx + ',' + cz, c = chunks.get(k), gr = d <= 1 ? 1 : 0;
+-    if ((!c || c.res !== res || c.gr !== gr) && !pending.has(k)) list.push({ cx, cz, res, gr, d2, k });
++    if ((!c || c.res !== res || c.gr !== gr) && !pending.has(k)) list.push({ cx, cz, res, gr, d2, k, gen: terrainGen });
+   }
+   list.sort((a, b) => a.d2 - b.d2);
+   queue = list; for (const j of list) pending.add(j.k);
+@@ -4364,6 +4365,7 @@ function applySettings() {
+   applySettings.lastVeg = S.veg;
+   terrainMat.needsUpdate = true; updateChunks(); saveSettings(); LIVEPRESET.notify();
+ }
++LIVEPRESET.on('terrain-jobs', () => { terrainGen++; queue = []; pending.clear(); updateChunks(); });
+ window.__G50G = { preset: () => S.preset, setPreset: p => { setPreset(p); saveSettings(); }, view: () => S.view, setView: v => { S.view = Math.max(3, Math.min(13, +v || S.view)); saveSettings(); }, fps: () => !!S.fps, setFps: v => { S.fps = !!v; saveSettings(); try { buildPanel(); } catch (e) {} }, hud: v => { if (window.__g50hud) window.__g50hud(v); }, panel: v => togglePanel(v) };   // v50g
+ function fillRange(el) { const p = (el.value - el.min) / (el.max - el.min) * 100; el.style.setProperty('--fill', p + '%'); }
+ function buildPanel() { try { qPanel(); } catch (e) { console.warn('[quality]', e); } try { if (window.V40 && V40.panel) V40.panel(); } catch (e) {}

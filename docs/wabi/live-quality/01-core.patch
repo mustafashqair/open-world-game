@@ -1,0 +1,39 @@
+diff --git a/v50g3/code/part-000.txt b/v50g3/code/part-000.txt
+index f86d678..88129cd 100644
+--- a/v50g3/code/part-000.txt
++++ b/v50g3/code/part-000.txt
+@@ -211,6 +211,21 @@ const saveSettings = () => { try { localStorage.setItem('ow_settings2', JSON.str
+   }
+   try { localStorage.setItem('ow_q_applied', Q); } catch (e) {} saveSettings();
+ })();
++/* livepreset: لا يتغيّر مسار البدء؛ إشعار واحد بعد تطبيق الإعدادات فقط. */
++const LIVEPRESET = (() => {
++  const enabled = V4ON('livepreset') && V4ON('v50g5'), hooks = new Map(); let current = S.preset, epoch = 0;
++  const st = { switches: 0, maxMs: 0, slow: 0, errors: [], last: null };
++  const api = { enabled, st, epoch: () => epoch,
++    on(name, fn) { if (!enabled) return () => {}; hooks.set(name, fn); return () => { if (hooks.get(name) === fn) hooks.delete(name); }; },
++    notify() { if (!enabled || current === S.preset) return; const from = current, to = S.preset; current = to; const id = ++epoch, t0 = performance.now();
++      st.switches++; st.last = { from, to, epoch: id, hooks: [] };
++      for (const [name, fn] of hooks) { const t = performance.now(); try { fn({ from, to, epoch: id, current: () => epoch === id }); }
++        catch (e) { st.errors.push({ name, message: String(e && e.message || e) }); if (st.errors.length > 20) st.errors.shift(); console.warn('[livepreset]', name, e); }
++        st.last.hooks.push({ name, ms: performance.now() - t }); }
++      const ms = performance.now() - t0; st.last.ms = ms; st.maxMs = Math.max(st.maxMs, ms); if (ms > 500) st.slow++;
++    }
++  }; window.__LIVEPRESET = api; return api;
++})();
+ function qPanel() {
+   const el = document.getElementById('cQual'); if (!el) return;
+   const NM = { high: 'عالية', mobile: 'خفيفة' }, pref = window.__QUALITY_PREF || 'auto', run = window.__QUALITY || 'mobile';
+diff --git a/v50g3/code/part-001.txt b/v50g3/code/part-001.txt
+index ca9d3e1..b7d2b49 100644
+--- a/v50g3/code/part-001.txt
++++ b/v50g3/code/part-001.txt
+@@ -4362,7 +4362,7 @@ function applySettings() {
+   if (applySettings.lastVeg !== undefined && applySettings.lastVeg !== S.veg) {   // تغيّر الكثافة: إعادة بناء كل القطع
+     for (const c of chunks.values()) killChunk(c); chunks.clear(); pending.clear(); queue = []; }
+   applySettings.lastVeg = S.veg;
+-  terrainMat.needsUpdate = true; updateChunks(); saveSettings();
++  terrainMat.needsUpdate = true; updateChunks(); saveSettings(); LIVEPRESET.notify();
+ }
+ window.__G50G = { preset: () => S.preset, setPreset: p => { setPreset(p); saveSettings(); }, view: () => S.view, setView: v => { S.view = Math.max(3, Math.min(13, +v || S.view)); saveSettings(); }, fps: () => !!S.fps, setFps: v => { S.fps = !!v; saveSettings(); try { buildPanel(); } catch (e) {} }, hud: v => { if (window.__g50hud) window.__g50hud(v); }, panel: v => togglePanel(v) };   // v50g
+ function fillRange(el) { const p = (el.value - el.min) / (el.max - el.min) * 100; el.style.setProperty('--fill', p + '%'); }

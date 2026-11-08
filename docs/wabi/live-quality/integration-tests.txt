@@ -1,0 +1,1 @@
+PR17 integration patch syntax pass; prerequisite head cbc9f8a00724588ce90bcb2cc7d0039b0b5dcbe6 plus core; replaces standalone lighting draft, not additive to it.

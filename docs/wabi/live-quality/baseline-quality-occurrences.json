@@ -1,0 +1,722 @@
+[
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 14,
+    "code": "const Q4 = new URLSearchParams(location.search), V4ON = k => Q4.get(k) !== '0', VL4 = () => S.preset === 'vlow';   // v50d4"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 15,
+    "code": "const G2ON = !/[?&]v50g2=0\\b/.test(location.search), G2V = k => G2ON && S.preset === 'vlow' && Q4.get('g2' + k) !== '0';   /* v50g2 G2V: تحسينات المدينة على «منخفضة جدا» بس؛ ?v50g2=0 = v50g بالضبط، ?g2city=0 ?g2pal=0 ?g2npc=0 ?g2mm=0 ?g2cull=0 ?g2pre=0 كل وحدة لحالها */"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 16,
+    "code": "const G3ON = G2ON && !/[?&]v50g3=0\\b/.test(location.search), G3V = k => G3ON && S.preset === 'vlow' && Q4.get(k + '3') !== '0';   const L3AMB = { env: { value: null }, k: +(Q4.get('l3amb') || 1), n: 0, miss: 0, inject(sh, ei, hasOwnEnv) { const a = '#include <lights_fragment_end>', E0 = scene.environment, H = E0 && E0.image && E0.image.height; if (hasOwnEnv || !H || sh.fragmentShader.indexOf(a) < 0 || sh.fragmentShader.indexOf('void main()') < 0) { this.miss++; return; } this.n++; const mm = Math.log2(H) - 2, tw = 1 / (3 * Math.max(Math.pow(2, mm), 7 * 16)), th = 1 / H; sh.uniforms.uL3Env = this.env; sh.uniforms.uL3E = { value: ei * 0.95 }; const lib = '#define CUBEUV_TEXEL_WIDTH ' + tw.toFixed(9) + '\\n#define CUBEUV_TEXEL_HEIGHT ' + th.toFixed(9) + '\\n#define CUBEUV_MAX_MIP ' + mm.toFixed(1) + '\\n#ifndef ENVMAP_TYPE_CUBE_UV\\n#define ENVMAP_TYPE_CUBE_UV\\n#define L3_UNDEF_CUV\\n#endif\\n' + THREE.ShaderChunk.cube_uv_reflection_fragment + '\\n#ifdef L3_UNDEF_CUV\\n#undef ENVMAP_TYPE_CUBE_UV\\n#endif\\nuniform sampler2D uL3Env; uniform float uL3E;\\n'; sh.fragmentShader = sh.fragmentShader.replace('void main()', lib + 'void main()').replace(a, a + '\\n  reflectedLight.indirectDiffuse += diffuseColor.rgb * uL3E * textureCubeUV(uL3Env, inverseTransformDirection(normal, viewMatrix), 1.0).rgb;'); } };   /* v50g3 lights3: the Lambert twins still read the same sky light (the same sky map, diffuse part only) the original materials had */ window.__L3AMB = L3AMB;   /* v50g3 G3V: «منخفضة جدا» بس؛ ?v50g3=0 = v50g2 بالضبط، ?merge3=0 ?lights3=0 كل وحدة لحالها */"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 18,
+    "code": "const PP1ON = G2ON && !/[?&]pp1=0\\b/.test(location.search), PP1 = k => PP1ON && Q4.get('pp1' + k) !== '0', PP1LOW = () => S.preset === 'vlow' || S.preset === 'low';   /* v50g3 pp1 */"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 20,
+    "code": "const VLSAVED4 = (() => { try { return JSON.parse(localStorage.getItem('ow_settings2') || '{}').preset === 'vlow'; } catch (e) { return false; } })();"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 23,
+    "code": "  on() { if (q.get('vmdl') === '0' || (window.__QUALITY || 'mobile') === 'high') return false; try { return JSON.parse(localStorage.getItem('ow_settings2') || '{}').preset === 'vlow'; } catch (e) { return false; } } }; window.__VLOW4 = s; return s; })();"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 35,
+    "code": "  const TCAP = (() => { const q = new URLSearchParams(location.search); const ph = () => (window.__QUALITY || 'mobile') !== 'high';"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 51,
+    "code": "    try { if (VLOW4.has(key) && VLOW4.on()) { url = (VLOW4B.has(key) ? 'vlow4b/' : 'vlow4/') + key; VLOW4.n++; } } catch (x) {}"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 185,
+    "code": "  if (S.preset === 'low') Object.assign(S, PRESETS.low); if (S.preset === 'vlow') Object.assign(S, PRESETS.vlow);"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 191,
+    "code": "    window.__VLOWAUTO = { weak: wk, gpu: gp, mem: navigator.deviceMemory || null, from: S.preset };"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 192,
+    "code": "    if (wk && (S.preset === 'medium' || S.preset === 'low' || (S.preset === 'custom' && !localStorage.getItem('ow_settings2')))) { Object.assign(S, PRESETS.vlow, { preset: 'vlow' }); try { localStorage.setItem('ow_settings2', JSON.stringify(S)); localStorage.setItem('ow_lowauto_v50d2', '1'); } catch (e) {} } }"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 199,
+    "code": "  if (weak && (S.preset === 'medium' || S.preset === 'custom' && !localStorage.getItem('ow_settings2'))) { Object.assign(S, PRESETS.low, { preset: 'low' }); try { localStorage.setItem('ow_settings2', JSON.stringify(S)); } catch (e) {} }"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 204,
+    "code": "  const Q = window.__QUALITY || 'mobile'; let last = null; try { last = localStorage.getItem('ow_q_applied'); } catch (e) {}"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 207,
+    "code": "    if (S.preset !== 'high' && S.preset !== 'ultra') { try { localStorage.setItem('ow_q_prev', JSON.stringify(S)); } catch (e) {} Object.assign(S, PRESETS.high, { preset: 'high' }); }"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 216,
+    "code": "  const NM = { high: 'عالية', mobile: 'خفيفة' }, pref = window.__QUALITY_PREF || 'auto', run = window.__QUALITY || 'mobile';"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 753,
+    "code": "    const d = Math.hypot(PL.x - CITY.x, PL.z - (CITY.z - 40)); dg0.visible = d < Math.max(window.__QUALITY === 'high' ? 260 : 170, scene.fog && scene.fog.far ? scene.fog.far + 10 : 0); if (dg0.visible) for (const c of dg0.children) if (!c.visible) c.visible = true; };"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 961,
+    "code": "const renderer = new THREE.WebGLRenderer({ antialias: window.__QUALITY === 'high', powerPreference: 'high-performance' });"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 1709,
+    "code": "function npcLod(G, d) { if (!G.sk) return; const fg = NPC_FAR[G.kind], lim = window.__QUALITY === 'high' ? 34 : (FRAME4.vl && V4ON('npc4')) ? 10 : 22, far = !!fg && d > (G.far ? lim - 3 : lim); if (far !== G.far) { G.far = far; G.sk.geometry = far ? fg : G.g0; } "
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 1710,
+    "code": "  const reduced = PP1('mix') && PP1LOW();   // pp1 0b98fca"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 1959,
+    "code": "  let far = S.view * CFG.CH * 0.95 * ENV.fogK; if (G2V('city')) { const dcE = Math.min(Math.hypot(PL.x - CITY.x, PL.z - CITY.z), Math.hypot(PL.x - CITY.x, PL.z - CITY.z + 150)); G2C.d = dcE; G2C.k = dcE < CITY_WR + 20 ? 1 : dcE > CITY_WR + 120 ? 0 : 1 - (dcE - CITY_WR - 20) / 100; if (G2C.k > 0 && far > G2C.fog) far += (G2C.fog - far) * G2C.k; } else G2C.k = 0;   /* v50g2 */ scene.fog.color.copy(U.uHor.value); scene.fog.far = far; scene.fog.near = far * (ENV.fogK < 0.4 ? 0.1 : 0.45);"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 1961,
+    "code": "  if (G2C.k > 0 && G2V('city')) { const f = scene.fog, tf = G2C.fog; if (f.far > tf) { f.far += (tf - f.far) * G2C.k; f.near += (Math.min(f.near, f.far * 0.4) - f.near) * G2C.k; f.near = Math.max(f.near, f.far * 0.4 * G2C.k); } }   // v50g2: ضباب المدينة بعد تلوين v17 (كان يرجّعه ~٢٤٠م)"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 2081,
+    "code": "  const density=(region===1?.34:region===4?.025:.0015)*(window.__NAT19!==false&&region===1&&window.__QUALITY!=='high'?0.5:1), quality=Math.min(1,Math.max(.35,S.veg));"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 2141,
+    "code": "  const Q = window.__QUALITY || 'mobile', LOW = Q === 'low';"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 2143,
+    "code": "  let R_HI = 18, R_MID = 45, R_LITE = LOW ? 70 : 95, R_BILL = 560, R_NAT = 380, HYS = 2, MAX_HI = LOW ? 0 : 4, NB = 6000; const R0_33 = [R_MID, R_LITE, R_BILL, MAX_HI];"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "line": 2144,
+    "code": "  const vl33 = () => { const v = S.preset === 'vlow' && V4ON('tree4'); R_MID = v ? 26 : R0_33[0]; R_LITE = v ? 48 : R0_33[1]; R_BILL = v ? 420 : R0_33[2]; MAX_HI = v ? 0 : R0_33[3]; };   // v50d4"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 279,
+    "code": "    const d = Math.max(Math.abs(dx), Math.abs(dz)), res = (S.preset === 'vlow' && V4ON('ter4')) ? (d <= 1 ? 32 : d <= 2 ? 16 : 8) : d <= 2 ? 32 : d <= 5 ? 16 : 8;   // مستويات التفصيل LOD"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 768,
+    "code": "  const PH = (window.__QUALITY || 'mobile') !== 'high';                        // الموبايل: النسخ الخفيفة فقط (تكسترات 1024)"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 855,
+    "code": "  const PH = (window.__QUALITY || 'mobile') !== 'high', OFF = /[?&]vil4=0/.test(location.search);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1251,
+    "code": "  const well = new THREE.Mesh(HG.well, STONEM); well.position.set(0, LIB.height(v.x, v.z), 0); if (!VIL4.active()) g.add(well); topOf(L.solid[0], well.position.y + geoTop(HG.well));   // v10: سطح البئر"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1260,
+    "code": "  const RING = VIL4.active() ? 15 : 18; ribbon([pol(62, ga), pol(VIL4.active() ? 13 : 9, ga)], 4.4); ribbon(circle(RING, 48), 2.6); ribbon(circle(34, 64), 3);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1264,
+    "code": "  if (VIL4.active() && VIL4.SHK().length) { const sk = VIL4.SHK(); if (sk.length >= 3) { HK = sk.slice(0, 3); HW = [0.36, 0.3, 0.34]; } else if (sk.length === 2 || !V3H) { HK = [sk[0], sk[1] || sk[0], V3H ? 'v3b1' : sk[0]]; HW = [0.4, 0.4, 0.2]; } else { HK = [sk[0], 'v3b1', 'v3b3']; HW = [0.5, 0.25, 0.25]; } }   // v45v: بيوت خشب بسيطة (تصاميم ١ و٣ و٤)   // v41b: بيوت v3b بدل القديمة      // القرى: بيوت خشبية بالكامل فقط"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1267,
+    "code": "    const D = HOUSE_DEFS[key], x = v.x + Math.cos(ang) * rad, z = v.z + Math.sin(ang) * rad, fr = Math.hypot(D.w, D.d) / 2 * 0.88 * (VIL4.active() ? VIL4.hv(x, z).s : 1);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1271,
+    "code": "    const dl = DIRS[D.doorSide] || DIRS['+z'], yaw = Math.atan2(v.x - x, v.z - z) + (r() - 0.5) * (VIL4.active() ? 0.55 : 0.12) - Math.atan2(dl[0], dl[1]);   // الباب نحو الساحة"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1273,
+    "code": "    if (V3) (SH ? VIL4.shHouse : V3B.house)(L, v, key, x, z, mxh - Math.min(0.3, (mxh - mn) * 0.5) - 0.02, yaw, VIL4.active() ? VIL4.hv(x, z) : null);   // v41b: نسخة مكرّرة (InstancedMesh) + صناديق تصادم"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1288,
+    "code": "    if (V3 && VIL4.active()) try { VIL4.houseProps(L, v, key, x, z, 0, yaw, VIL4.hv(x, z).s); } catch (e) { console.warn('[vil4] props', e); }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1290,
+    "code": "  const n1 = VIL4.active() ? 10 : 8, a1 = [], n2 = VIL4.active() ? 15 : 10;   // v45v: قرية أكثف"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1291,
+    "code": "  for (let k = 0; k < n1; k++) { const ang = ga + 0.5 + (6.283 - 1.0) * (k + 0.5) / n1; a1.push(ang); place(pickKey(), (VIL4.active() ? 23.5 : 27) + r() * 1.5, ang + (r() - 0.5) * 0.05); }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1292,
+    "code": "  for (let k = 0; k < n2; k++) place(pickKey(), (VIL4.active() ? 40.5 + r() * 3.5 : 44 + r() * 2), ga + 0.35 + (6.283 - 0.7) * (k + 0.5) / n2 + (r() - 0.5) * 0.04);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1297,
+    "code": "    rg.setAttribute('rq', new THREE.Float32BufferAttribute(RQ, 3)); const m = new THREE.Mesh(rg, VIL4.active() ? VIL4.LANE : ROAD_VIL); m.receiveShadow = true; m.renderOrder = 1; g.add(m); }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1298,
+    "code": "  if (!VIL4.active()) { const P = [0, LIB.height(v.x, v.z) + 0.14, 0], I = [];"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1305,
+    "code": "  if (!(VIL4.active() ? VIL4.palisade(L, v, ga) : V3B.fence(L, v, ga))) { const WT = MODELS.wall && MODELS.wall.geo ? MODELS.wall : null, bx = WT ? WT.bb.max.x - WT.bb.min.x : 1.35, SY = 4.3;"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1320,
+    "code": "    const gm = new THREE.Mesh(mergeGeo(P), HM1); gm.castShadow = true; if (!VIL4.active()) gate.add(gm);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1324,
+    "code": "  for (const s of (VIL4.active() ? [] : [-1, 1])) { const q = pol(62, ga + s * 4.8 / 62); L.solid.push(topOf([q[0], q[1], 0.6], gate.position.y + 4.85));    // أعمدة البوابة"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1327,
+    "code": "  const nSt = S.pop > 0.5 ? 3 : 2, types = ['general', 'bakery', 'smith'], sa = VIL4.active() ? [ga + 1.05, ga + 2.15, ga - 1.05] : [ga + 2.0, ga + 3.14, ga + 4.3], KV4 = VIL4.active() && typeof KIOSK !== 'undefined' && /تل الأمل/.test(v.name || '');"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1328,
+    "code": "  for (let i = 0; i < nSt; i++) { const [sx, sz] = pol(VIL4.active() ? VIL4.KR : 13, sa[i]), yaw = Math.atan2(v.x - sx, v.z - sz), m = new THREE.Mesh(stallGeo(types[i]), HM1);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1332,
+    "code": "  if (VIL4.active()) try { VIL4.square(L, v, ga); } catch (e) { console.warn('[vil4] square', e); }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1334,
+    "code": "  const propCells = new Map(), instanceProps = PP1('inst') && PP1LOW();"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1341,
+    "code": "  for (const da of (VIL4.active() ? [] : [0.9, 2.55, 3.7, 5.0])) { const [bx, bz] = pol(16.5, ga + da), yaw = Math.atan2(v.x - bx, v.z - bz), m = new THREE.Mesh(BENCHG, HM1);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1346,
+    "code": "    if (!(VIL4.active() && VIL4.garden(L, v, x, z, y))) { const f = new THREE.Mesh(HG.field, FIELDM); f.position.set(x - v.x, y, z - v.z); addStaticProp(f); } L.obst.push([x, z, 3.2]); L.work.push([x, z]); L.poi.field.push({ x: x + 0.6, z: z + 0.6, type: 'field' }); i++; }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1348,
+    "code": "    const f = new THREE.Mesh(HG.stump, POSTM); f.position.set(x - v.x, y, z - v.z); if (!(VIL4.active() && VIL4.woodSpot(L, v, x, z, y))) addStaticProp(f); L.obst.push([x, z, 0.8]); L.solid.push(topOf([x, z, 0.6], y + geoTop(HG.stump))); L.wood.push([x + 1.2, z]); L.poi.wood.push({ x: x + 1.2, z, type: 'wood' }); i++; }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1361,
+    "code": "  if (VIL4.active()) try { VIL4.hedges(L, v, ga); VIL4.lanes(L, v); } catch (e) { console.warn('[vil4] edge', e); }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1363,
+    "code": "  L.roadF = (x, z) => { const rx = x - v.x, rz = z - v.z, rd = Math.hypot(rx, rz); if (rd < 9.5 || Math.abs(rd - (VIL4.active() ? 15 : 18)) < 1.6 || Math.abs(rd - 34) < 1.8) return 1;   // تفضيل الطرق والممرات"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1394,
+    "code": "  if (VIL4.active()) try { VIL4.finish(L, v); } catch (e) { console.warn('[vil4] finish', e); }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 1456,
+    "code": "  const HQ = (() => { const q = window.__QUALITY; if (q === 'high' || q === 'mobile') return q === 'high'; return !(matchMedia('(pointer: coarse)').matches || Math.min(innerWidth, innerHeight) < 600); })();"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2359,
+    "code": "    const geo = merge(parts, 6), mesh = new THREE.Mesh(geo, M); mesh.castShadow = window.__QUALITY === 'high'; mesh.receiveShadow = true; L.det.add(mesh); SHARED.add(geo);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2361,
+    "code": "      arr.forEach((p, i) => im.setMatrixAt(i, m4.compose(P.set(p[0], p[1], p[2]), Q.setFromAxisAngle(UP, p[3] || 0), S))); im.receiveShadow = true; im.castShadow = window.__QUALITY === 'high'; im.computeBoundingSphere(); L.det.add(im); return im; };"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2374,
+    "code": "  const HQ = () => window.__QUALITY === 'high', modelOf = g => g && g.userData && g.userData.mk ? MODELS[g.userData.mk] : null;"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2512,
+    "code": "  function dynTick() { const hq = window.__QUALITY === 'high', R = hq ? 95 : 48, R2 = R * R; ST.dyn = ST.dyn.filter(D => D.L.g.parent);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2584,
+    "code": "    all.computeBoundingSphere(); const km = new THREE.Mesh(all, stoneMat()); km.receiveShadow = true; km.castShadow = window.__QUALITY === 'high'; L.det.add(km); L.v17stone = km;"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 2619,
+    "code": "  const HQ = () => window.__QUALITY === 'high';"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3079,
+    "code": "      arr.forEach((p, i) => im.setMatrixAt(i, m4.compose(P3.set(p[0] - cx, p[1], p[2] - cz), Q.setFromAxisAngle(UP, p[3]), S3.set(p[4], p[4], p[4])))); im.castShadow = window.__QUALITY === 'high'; im.receiveShadow = true; im.computeBoundingSphere(); L.det.add(im); }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3142,
+    "code": "    { const mk = key => { const m = C15.geo[key] ? new THREE.Mesh(C15.geo[key], C15.mats) : new THREE.Mesh(cityRaw(key).geo, HM1); m.castShadow = window.__QUALITY === 'high'; m.position.set(gx - cx, H(gx, gz) - 0.1, gz - cz); m.rotation.y = yaw; m.scale.set(1.3 * GW(a), 1.3, 1.3); m.receiveShadow = true; det.add(m); return m; }; gmO = mk('wlG'); gmC = mk('wlC'); gmC.visible = false; }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3159,
+    "code": "    m.position.set(bx - cx, H(bx, bz) - 0.05, bz - cz); m.rotation.y = yaw; m.castShadow = !BR.k15 || window.__QUALITY === 'high'; m.receiveShadow = true; LOD16.addMesh(L, m) || det.add(m);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3196,
+    "code": "    im.castShadow = key === 'cCastle' || !!HREPC[key] || (!!C15.geo[key] && window.__QUALITY === 'high'); im.receiveShadow = true; im.computeBoundingSphere(); det.add(im); tris += arr.length * ((HREPC[key] && HREPC[key].tris) || (MODELS[key] && MODELS[key].tris) || 600); }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3269,
+    "code": "    im.castShadow = window.__QUALITY === 'high'; im.receiveShadow = false; im.computeBoundingSphere(); if (!window.__V16_TREES) { im.visible = false; pos.length = 0; } det.add(im); L.palms15 = im; L.palmPos15 = pos; }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3555,
+    "code": "  const L = n.L, treeOb = []; gatherTreeSolids(n.x, n.z, 50, treeOb); const ws5 = FRAME4.cc5, walkSolid = ws5 ? null : L.solid.concat(treeOb); navGoal(n, tx, tz); tx = n.gx; tz = n.gz; const nkI = NPCK.must(n) ? NPCK.exitGoal(n) : null; if (nkI) { tx = nkI[0]; tz = nkI[1]; }   // npck: غاطس جوّا المنطقة → أقرب مخرج أول"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3867,
+    "code": "  const pos = [], VC = WORLD.vclip || [], RC = WORLD.rclip || [], STEP = window.__QUALITY === 'high' ? 28 : 34;"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3886,
+    "code": "  const HQ = () => window.__QUALITY === 'high', NL = () => (HQ() ? 8 : 4);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 3944,
+    "code": "  const PH = (window.__QUALITY || 'mobile') !== 'high';"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4000,
+    "code": "  const D = 'npcs/vwork/', HQ = () => window.__QUALITY === 'high';"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4204,
+    "code": "  const PHN = () => !hq, MIXD = () => PHN() ? (S.preset === 'vlow' ? 30 : 45) : 70, VISD = () => PHN() ? (S.preset === 'vlow' ? 40 : 50) : 95;   // على الموبايل: بيختفو بعد 50م وبيوقف تحريكهم بعد 45م (موديلات 29–66 ألف مثلث)"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4206,
+    "code": "  function precompile(dt) { if (pcDone) return; pcT += dt; if (pcT < 2) return; pcT = 0; if (!started() || window.__QUALITY === 'high') return; pcDone = true; try { const t0 = performance.now(); (renderer.compileAsync ? renderer.compileAsync(scene, camera) : Promise.resolve(renderer.compile(scene, camera))).then(() => { st.precompileMs = Math.round(performance.now() - t0); }).catch(() => {}); } catch (e) {} }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4218,
+    "code": "  const NEAR = () => (window.__QUALITY === 'high' ? 340 : 260);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4241,
+    "code": "  function init() { inited = true; const PH = window.__QUALITY !== 'high', hi = /[?&]pal_hi\\b/.test(location.search), lite = PH && !hi;"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4251,
+    "code": "        const as4 = (palA() || (S.preset === 'medium' && V4ON('med5'))) && renderer.compileAsync; if (as4) { try { window.__LAM && __LAM.apply && __LAM.apply(r); } catch (e) {} g.add(r); r.visible = false; r.userData.c4 = 1; const add = () => { if (!r.userData.c4) return; r.userData.c4 = 0; r.visible = !GF4 || !!st.nearOn4 || !palA(); st.shown4 = (st.shown4 || 0) + 1; }; try { renderer.compileAsync(r, camera, scene).then(add, add); } catch (e) { add(); } setTimeout(add, 20000); } else g.add(r);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4278,
+    "code": "  const pal4 = () => S.preset === 'vlow' && V4ON('palv'), palL5 = () => S.preset === 'low' && V4ON('low5') && V4ON('pal5'), palA = () => pal4() || palL5();"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4287,
+    "code": "    if (GF4 || api.nearLoad) { const dp = Math.hypot(PL.x - X, PL.z - (Z - 30)); if (!palA()) { if (GF4) GF4.visible = false; if (!st.near4) st.nlWhy = 'preset:' + S.preset; nearLoad4(); for (const r of NR4) r.visible = !r.userData.c4; }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4288,
+    "code": "      else { if ((st.tk4 = (st.tk4 || 0) + 1) % 40 === 1 && st.tk4 < 1000) (st.plh = st.plh || []).push(Math.round(PL.x) + ',' + Math.round(PL.z) + ',' + Math.round(dp)); st.nc4 = dp < (palL5() ? 430 : 330) && st.tk4 > 150 ? (st.nc4 || 0) + 1 : 0; if (st.nc4 > 30 || st.far4 === 'fail' || (window.G50 && G50.st.forcePal)) { if (!st.near4) st.nlWhy = 'd' + Math.round(dp) + ':' + st.far4; nearLoad4(); } const g2p = pal4() && G2V('pal') && GF4 && GF4.children[0] && GF4.children[0].geometry.boundingBox; let g2d = 0; if (g2p) { const bb = g2p, lx = PL.x - X, lz = PL.z - Z; g2d = Math.hypot(Math.max(bb.min.x - lx, 0, lx - bb.max.x), Math.max(bb.min.z - lz, 0, lz - bb.max.z)); st.g2d = Math.round(g2d); }   // v50g2: بُعد اللاعب عن حدود القصر والحديقة"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4300,
+    "code": "  if (qO) qT = wP.lap('v_nearscan', qT); near.sort((a, b) => a[0] - b[0]); const MAXA = (FRAME4.vl && V4ON('npc4')) ? 5 : S.pop < 0.6 ? 8 : 14; for (let i = 0; i < near.length && i < MAXA; i++) near[i][1].skel = true; const g2n = G2V('npc'); if (g2n) for (let i = 0; i < near.length && i < 6; i++) near[i][1].__g2f = NPCF;   // أنيميشن هيكلي للأقرب فقط (<٤٠م) وبحد أقصى"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4304,
+    "code": "      if (FRAME4.lw && V4ON('npc4')) { const dd = Math.hypot(n.x - PL.x, n.z - PL.z); if (dd > 35 && !n.angry && !n.talking) { const k = dd > 90 ? 5 : 3; if ((NPCF + i) % k) continue; updateNPC(n, dt * k); continue; } }   // v50d4"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4355,
+    "code": "function setPreset(p) { S.preset = p; if (p !== 'custom') Object.assign(S, PRESETS[p]); applySettings(); buildPanel(); }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4367,
+    "code": "window.__G50G = { preset: () => S.preset, setPreset: p => { setPreset(p); saveSettings(); }, view: () => S.view, setView: v => { S.view = Math.max(3, Math.min(13, +v || S.view)); saveSettings(); }, fps: () => !!S.fps, setFps: v => { S.fps = !!v; saveSettings(); try { buildPanel(); } catch (e) {} }, hud: v => { if (window.__g50hud) window.__g50hud(v); }, panel: v => togglePanel(v) };   // v50g"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4371,
+    "code": "    b.className = 'chip' + (S.preset === p ? ' on' : ''); b.textContent = NAMES[p]; b.onclick = () => setPreset(p === 'custom' ? 'custom' : p); $('presets').appendChild(b); });"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4375,
+    "code": "    b.onclick = () => { S.preset = 'custom'; S.shadow = v; applySettings(); buildPanel(); }; $('shadows').appendChild(b); });"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4379,
+    "code": "  const cu = f => v => { S.preset = 'custom'; f(v); applySettings(); };"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4393,
+    "code": "$('sPr').oninput = e => { S.preset = 'custom'; S.pr = +e.target.value; applySettings(); fillRange(e.target); buildPanel(); };"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4394,
+    "code": "$('sView').oninput = e => { S.preset = 'custom'; S.view = +e.target.value; applySettings(); fillRange(e.target); buildPanel(); };"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4414,
+    "code": "  const i = ORDER.indexOf(S.preset);"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4415,
+    "code": "  if (i > 0) { setPreset(ORDER[i - 1]); toast('خُفِّضت الجودة تلقائياً إلى: ' + NAMES[S.preset]); }"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "line": 4416,
+    "code": "  else if (S.preset === 'custom' && S.view > 3) { S.view--; S.pr = Math.max(0.5, S.pr - 0.25); applySettings(); toast('خُفِّضت الجودة تلقائياً'); }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 337,
+    "code": "    h.vis = d < (window.__QUALITY === 'high' ? (h.pat ? 220 : 170) : (h.pat ? 110 : 90)); h.g.visible = h.vis;   // v23: أقصر على الجوال if (!h.vis) continue;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 431,
+    "code": "      const Q = window.__QUALITY || 'mobile';"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 462,
+    "code": "  const Q = window.__QUALITY || 'mobile', HQ = Q === 'high';"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1110,
+    "code": "  const MOB = window.__QUALITY === 'mobile' || (window.matchMedia && matchMedia('(pointer:coarse)').matches) || Math.min(innerWidth, innerHeight) < 560;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1546,
+    "code": "const V20 = (() => { const ST = { t: 0, lodN: 0, err: 0 }, HQ = () => window.__QUALITY === 'high', C3 = (r, g, b) => new THREE.Color(r, g, b);"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1823,
+    "code": "    const b = landBox(), res = window.__QUALITY === 'high' ? 1280 : 900, step = Math.max(b.x1 - b.x0, b.z1 - b.z0) / res;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 1901,
+    "code": "    const nat = window.__NAT19 !== false, density = (region === 1 ? .34 : region === 4 ? .025 : .0015) * (nat && region === 1 && window.__QUALITY !== 'high' ? 0.5 : 1), quality = Math.min(1, Math.max(.35, S.veg));"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2385,
+    "code": "    const g2m = !WM.open && G2V('mm'); if (!g2m) work(WM.open ? 6 : 3);"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2548,
+    "code": "  const high = () => window.__QUALITY === 'high';"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2776,
+    "code": "    const m = new THREE.Mesh(geo, shopDress22.mat || (shopDress22.mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, metalness: 0 }))); m.name = 'shop22_dress'; m.receiveShadow = true; m.castShadow = window.__QUALITY === 'high';"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2943,
+    "code": "const LOWQ = () => S.preset === 'vlow' && !/[?&]lowcull=0\\b/.test(location.search);"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2946,
+    "code": "  const L3 = G3V('lights'), L3BAD = /roughness|metalness|clearcoat|sheen|iridescence|transmission|anisotropy|physical|specularIntensity|reflectedLight\\.indirectSpecular|totalEmissiveRadiance\\s*\\*|envMapIntensity/i;   /* v50g3 lights3 */"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2963,
+    "code": "  function tick(dt) { if (!on || S.preset !== 'vlow' || window.__QUALITY === 'high') return; t -= dt; if (t > 0) return; t = (st.sw = (st.sw || 0) + 1) > 4 ? 10 : 2; try { sweep(); if (L3) check3(); } catch (e) { on = false; console.warn('[lam]', e); } }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2964,
+    "code": "  function apply(root) { if (!on || S.preset !== 'vlow' || window.__QUALITY === 'high') return; root.traverse(o => { if (!o.isMesh || !o.material || o.userData.noLam) return; if (L3 && o.isSkinnedMesh) for (const mm of (Array.isArray(o.material) ? o.material : [o.material])) if (mm && mm.userData && tw.get(mm) === undefined) mm.userData.sk3 = 1; if (Array.isArray(o.material)) { let ch = false; const a = o.material.map(mm => { const w = twin(mm); if (w) { ch = true; return w; } return mm; }); if (ch) o.material = a; } else { const w = twin(o.material); if (w) o.material = w; } }); }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2967,
+    "code": "  function pend(m) { if (!on || S.preset !== 'vlow' || window.__QUALITY === 'high' || !m) return false; if (m.type !== 'MeshStandardMaterial' && m.type !== 'MeshPhysicalMaterial') return false; return tw.get(m) !== null; }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2971,
+    "code": "const G2L = (() => { const L3 = G3V('lights'), on = G2V('pre') || L3, N = L3 ? 0 : Math.max(1, Math.min(9, +(Q4.get('g2pl') || 4))),   /* v50g3: بلا أضواء نقطية حية على «منخفضة جدا» */ set = new Set(), dum = [], hid = [], vis = [], v3 = new THREE.Vector3(); const api = { on, N, L3, set, pre() {}, post() {}, st: { real: 0, hid: 0, dum: 0 } }; window.G2L = api; if (!on) return api;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2989,
+    "code": "  const mob = () => window.__QUALITY !== 'high';"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 2991,
+    "code": "    sk.length = 0; sm.length = 0; mg.length = 0; bg.length = 0; lowOn = LOWQ() && mob(); const g2b = G2V('city'), g2l = window.G2L && G2L.on;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3016,
+    "code": "        if (mob()) { const dd = sp.center.distanceTo(cp) - sp.radius, lw = LOWQ(), lim = sp.radius < 2.5 ? (lw ? (VL4() ? 30 : 45) : 75) : sp.radius < 7 ? (lw ? (VL4() ? 60 : 95) : 150) : (lw && sp.radius < 20 ? (VL4() ? 120 : 170) : 1e9); if (dd > lim || (kc4 && dd > kc4)) continue; }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3025,
+    "code": "    const g2q = G2V('cull'), wP4 = window.PRF, pq = !!(wP4 && wP4.on); let tq = pq ? performance.now() : 0;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3026,
+    "code": "    if (fN - lastScan > (g2q ? 45 : FRAME4.lw && !watch.size ? 60 : 15)) { lastScan = fN; try { scan(); } catch (e) {} if (pq) tq = wP4.lap('c23_scan', tq); }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3027,
+    "code": "    kc4 = G2V('city') && G2C.k > 0 && scene.fog ? scene.fog.far + 4 : 0; pad4 = g2q;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3034,
+    "code": "        for (let i = 0; i < mg.length; i += 7) { const qx = Math.max(mg[i + 1], Math.min(cp.x, mg[i + 4])), qy = Math.max(mg[i + 2], Math.min(cp.y, mg[i + 5])), qz = Math.max(mg[i + 3], Math.min(cp.z, mg[i + 6])); if (Math.hypot(qx - cp.x, qy - cp.y, qz - cp.z) > (kc4 ? Math.min(kc4, 70) : VL4() ? 70 : 150)) far.push(mg[i]); }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3059,
+    "code": "  const mob = window.__QUALITY !== 'high', WARM = OPTIN('warm') || OPTIN('live');"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3136,
+    "code": "  const mob = window.__QUALITY !== 'high', BUDGET = mob ? 3 : 4, SCAN_EVERY = 24;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3159,
+    "code": "  const M3 = () => G3V('merge'), RETRY3 = new WeakMap();   /* v50g3 merge3 */"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3180,
+    "code": "  function anchorOf(o) { const cellOnly = PP1('inst') && PP1LOW(); for (let p = o.parent; p; p = p.parent) { if (p === scene) return scene; if (DYN.has(p) || (cellOnly && p.parent === scene)) return p; } return null; }   // pp1 d8bfa54 (very-low/low)"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3321,
+    "code": "      if (zf !== frameN && frameN % ((FRAME4.lw || FRAME4.md) ? SCAN_EVERY * 4 : SCAN_EVERY) === 1 || !ZL.length) { zf = frameN; zeroList(); }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3441,
+    "code": "  const hi = () => window.__QUALITY === 'high';"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3457,
+    "code": "  const BUD = () => (S.preset === 'vlow' ? 250000 : S.preset === 'low' ? 350000 : 600000);"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3515,
+    "code": "  function g2pre() { if (!G2V('pre') || st.g2pre) return; st.g2pre = { n: 0, ms: 0, err: 0 }; const t0 = RN(), roots = templates();"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3519,
+    "code": "    if (PP1('sh') && PP1LOW() && !st.finalCompile) { st.finalCompile = { done: false, ms: 0, err: '' }; phase('final', st.step); const t0 = RN();   /* pp1 11c5308 */"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3541,
+    "code": "  const M = { live: false, t0: 0, last: 0, iv: 0, ema: 8, frames: 0, err: '', want: QS.get('g50live') !== '0' && S.preset !== 'vlow' };"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3569,
+    "code": "  function fzPlan() { if (S.preset !== 'vlow' || QS.get('frz') === '0') return; const t0 = RN(), cand = [];"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3604,
+    "code": "  P.updateMatrixWorld = function (force) { if (FRAME4.hid && !this.visible && this.parent) { if (FRAME4.vl) return; if (this.__sk4 === undefined) this.__sk4 = hasSk(this); if (this.__sk4) return; } if (FRAME4.mc) return mc5.call(this, force); return o.call(this, force); };"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3605,
+    "code": "  FRAME4.hidOn = on; })();"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3607,
+    "code": "  P.update = function (dt) { if (!on || !(dt > 0) || !(FRAME4.lw || FRAME4.md)) return o.call(this, dt);"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3612,
+    "code": "    if (!vis) { if (PP1('mix') && PP1LOW()) { this.__a4 = 0; MIX5.delete(this); st.mixSkip++; return this; } if (FRAME4.vl) this.__a4 = Math.min(this.__a4, 0.6); else MIX5.add(this); st.mixSkip++; return this; }   // pp1 0b98fca: hidden time discarded (very-low/low)"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3613,
+    "code": "    let k = FRAME4.vl ? (d < 14 ? 1 : d < 30 ? 2 : 4) : FRAME4.lw ? (d < 20 ? 1 : d < 40 ? 2 : 4) : 1; if (FRAME4.lw && window.__G50ON === true && G50.a6) k = G50.a6(this, d, k); if (!this.__h4) this.__h4 = 1 + ((Math.random() * 7) | 0);"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3623,
+    "code": "    el.textContent = 'v50g ' + S.preset + ' pr ' + renderer.getPixelRatio().toFixed(2) + '\\nfps ' + fps.toFixed(1) + '  frame p50 ' + q(F.ft, 0.5).toFixed(0) + ' p95 ' + q(F.ft, 0.95).toFixed(0) + ' ms\\nlogic ' + q(F.lg, 0.5).toFixed(1) + ' ms  render ' + q(F.rd, 0.5).toFixed(1) + ' ms (p95 ' + q(F.rd, 0.95).toFixed(0) + ')\\ncalls ' + r.calls + '  tris ' + (r.triangles / 1000).toFixed(0) + 'k  tex ' + renderer.info.memory.textures + '\\nmix ' + st.mixUpd + '/' + st.mixSkip + '  merge ' + (window.MERGE48 ? MERGE48.ST.maxMs.toFixed(1) : '-') + '  pal ' + (window.EST50 ? EST50.st.loaded : '-') + '\\n' + (performance.memory ? 'heap ' + (performance.memory.usedJSHeapSize / 1048576).toFixed(0) + ' MB' : '');"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3648,
+    "code": "  { const fc5 = window.__G50ON === true ? (window.__G50FC | 0) : 0, cap5 = fc5 ? (fc5 < 50 ? 25 : 12) : (S.preset === 'vlow' ? 25 : 0); if (FCAP_ON && cap5) { const tn = performance.now(); if (tn - FCAP_T < cap5) return; FCAP_T = tn; } }   // v50d3 + v50g: حد الإطارات من الإعدادات (تلقائي = منخفضة جدا ٣٠ متل قبل)   // v50d3: «منخفضة جدا» = ٣٠ إطار ثابتة (أنعم من ٣٥–٥٠ متقلّبة وأبرد عالجهاز)"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3654,
+    "code": "  { const tn = performance.now(); if (FRAME4.t0) FRAME4.ft.push(tn - FRAME4.t0); FRAME4.t0 = tn; FRAME4.n++; FRAME4.vl = VL4(); FRAME4.lw = FRAME4.vl || (S.preset === 'low' && V4ON('low5')); FRAME4.md = S.preset === 'medium' && V4ON('med5'); FRAME4.hid = (FRAME4.lw || FRAME4.md) && FRAME4.hidOn; FRAME4.mc = ((FRAME4.lw && !FRAME4.vl) || FRAME4.md) && MC5ON; FRAME4.cc5 = ((FRAME4.lw && !FRAME4.vl) || FRAME4.md) && CC5ON; if (FRAME4.ft.length > 240) FRAME4.ft.shift(); }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3667,
+    "code": "  hudT += PP1FPS ? frameMs / 1000 : HUDFIX ? rawDt : dt; if (hudT > 0.4) { hudT = 0; const fl = $('fpsL'); if (fl) { fl.hidden = !S.fps; if (S.fps) fl.textContent = 'FPS: ' + (HUDFIX ? fpsReal : fpsShown) + ' · ' + NAMES[S.preset]; } }"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3769,
+    "code": "  const HQ = () => window.__QUALITY === 'high';"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 3840,
+    "code": "    const p = S.preset; if (p === 'low' || p === 'vlow' || (p === 'custom' && S.shadow === 0)) return 'none';"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4026,
+    "code": "    const hq = window.__QUALITY === 'high', res = F.wRes || (hq ? 512 : 256);"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4069,
+    "code": "    const want = F.water && S.preset !== 'low' && S.preset !== 'vlow';   /* v50d2: «منخفض» = الماء القديم بلا انعكاس (الانعكاس بيرسم المشهد مرتين) */"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4077,
+    "code": "    WS.every = window.__QUALITY === 'high' ? 1 : 2;"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4140,
+    "code": "    c.qualityPreset = window.__QUALITY === 'high' ? 'medium' : 'low';"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4162,
+    "code": "    if (F.atmo && !A.L && !(S.preset === 'vlow' && V4ON('atmo4'))) atmoLoad();"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "line": 4197,
+    "code": "  if (F.atmo && !(VLSAVED4 && V4ON('atmo4'))) setTimeout(atmoLoad, 50);"
+  },
+  {
+    "file": "index.html",
+    "line": 1162,
+    "code": "  window.__QUALITY = tier; window.__QUALITY_PREF = pref;"
+  },
+  {
+    "file": "index.html",
+    "line": 1192,
+    "code": "    window.__QUALITY_PREF = v; return (v === 'auto' ? autoTier() : v) !== tier;"
+  },
+  {
+    "file": "index.html",
+    "line": 1194,
+    "code": "  window.__qStats = function () { return { tier: tier, pref: window.__QUALITY_PREF, auto: autoTier(), used: Object.assign({}, USED), bad: Object.keys(BAD) }; };"
+  }
+]

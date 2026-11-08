@@ -1,0 +1,38 @@
+[
+  {
+    "baseRefName": "tab/v50g3",
+    "headRefName": "wabi/livepreset-core",
+    "headRefOid": "953902c76948d371b842fb1f9dccf711290f6ad8",
+    "isDraft": true,
+    "number": 42,
+    "state": "OPEN",
+    "url": "https://github.com/mustafashqair/open-world-game/pull/42"
+  },
+  {
+    "baseRefName": "tab/v50g3",
+    "headRefName": "wabi/livepreset-lifecycle",
+    "headRefOid": "61460d539f7392e6352dce7d63d67768e1cb57f7",
+    "isDraft": true,
+    "number": 43,
+    "state": "OPEN",
+    "url": "https://github.com/mustafashqair/open-world-game/pull/43"
+  },
+  {
+    "baseRefName": "tab/v50g3",
+    "headRefName": "wabi/livepreset-lighting",
+    "headRefOid": "5308e96787fb5ea256e048b649fee842cf83afce",
+    "isDraft": true,
+    "number": 44,
+    "state": "OPEN",
+    "url": "https://github.com/mustafashqair/open-world-game/pull/44"
+  },
+  {
+    "baseRefName": "tab/v50g3",
+    "headRefName": "wabi/livepreset-props",
+    "headRefOid": "b32b519dba7083d22cf240e9cbbc9698faecaa67",
+    "isDraft": true,
+    "number": 45,
+    "state": "OPEN",
+    "url": "https://github.com/mustafashqair/open-world-game/pull/45"
+  }
+]
