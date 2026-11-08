@@ -1,0 +1,37 @@
+[
+  {
+    "branch": "wabi/livepreset-core",
+    "commit": "953902c76948d371b842fb1f9dccf711290f6ad8",
+    "file": "v50g3/code/part-000.txt",
+    "md5": "4bf140d06f5ee6af7a039144b68e8e8c",
+    "sha256": "1aff5b031746a92c67985740b011fc4e26646c75748d85be50e6a29e2be90d5c"
+  },
+  {
+    "branch": "wabi/livepreset-core",
+    "commit": "953902c76948d371b842fb1f9dccf711290f6ad8",
+    "file": "v50g3/code/part-001.txt",
+    "md5": "aa90f7d32e8f87730f212355de6e331c",
+    "sha256": "f320b886bf4547adf774ea646dba4d314bce20eb8d106c34aa809ab2022744a1"
+  },
+  {
+    "branch": "wabi/livepreset-lifecycle",
+    "commit": "61460d539f7392e6352dce7d63d67768e1cb57f7",
+    "file": "v50g3/code/part-002.txt",
+    "md5": "425a22202223db78f0b17336406f49f6",
+    "sha256": "2e45fca6dbb28c528bdf97efb98375100553e58ed52207cb24af92dad9e3c58c"
+  },
+  {
+    "branch": "wabi/livepreset-lighting",
+    "commit": "5308e96787fb5ea256e048b649fee842cf83afce",
+    "file": "v50g3/code/part-002.txt",
+    "md5": "4fed3887ef4f01f07b107e786328ff5d",
+    "sha256": "5cad472d96548d41f1b12c720f76bb6e2c95ad996b1d6d804db8a534f45fbc7a"
+  },
+  {
+    "branch": "wabi/livepreset-props",
+    "commit": "b32b519dba7083d22cf240e9cbbc9698faecaa67",
+    "file": "v50g3/code/part-001.txt",
+    "md5": "53aca645785807c5cdf8f37be8700446",
+    "sha256": "63672ba2b8881d58895da6c1ba1cd24f83d6ad00226fecede905fba9e4e6fd95"
+  }
+]

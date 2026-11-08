@@ -1,0 +1,12 @@
+--- a/v50g3/code/part-001.txt
++++ b/v50g3/code/part-001.txt
+@@ -5070,7 +5070,8 @@
+   b.piv.rotation.set(0, 0, 0); b.piv.position.set(0, 0, 0); if (b.sk) b.sk.cur = null;
+ }
+ /* v50g5 gc6d: مصفوفة أشجار banUpdateOne معادة الاستخدام على LOW/vlow (gatherTreeSolids تدفع إليها فقط وpushOut يقرأها فقط، ولا مرجع يبقى بعد الاستدعاء) — نفس القيم بالضبط. ?gc6d=0 أو ?v50g5=0 = v50g3 بالضبط */
+-const GC6D = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](gc6d|v50g5)=0\b/.test(location.search); const BD6 = [];
++let GC6D = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](gc6d|v50g5)=0\b/.test(location.search); const BD6 = [];
++window.__LIVEPRESET?.on('gc6d', () => { GC6D = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](gc6d|v50g5)=0\b/.test(location.search); BD6.length = 0; });
+ function banUpdateOne(b, dt, day) {
+   const c = b.camp, dP = Math.hypot(PL.x - b.x, PL.z - b.z);
+   if (b.dead) {

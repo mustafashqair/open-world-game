@@ -1,0 +1,8 @@
+{
+  "allMatch": true,
+  "directions": 24,
+  "cycles": 160,
+  "maxSwitchRenderMs": 502.8999999994412,
+  "errors": [],
+  "failures": []
+}

@@ -1,0 +1,77 @@
+--- a/v50g3/code/part-001.txt
++++ b/v50g3/code/part-001.txt
+@@ -68,14 +68,43 @@
+       undefined, () => { T.loading--; T.failed.push(url); console.warn('[v34] تعذّر تحميل', url); });
+   }
+   // ── اللوحة البعيدة: صورة كل نموذج متوسط التفصيل تُخبز مرة واحدة في أطلس (٨ خانات)، وتُرسم كلوحة واحدة تواجه الكاميرا (ليست تقاطعاً) ──
+-  const BILL1 = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](billatlas|v50g5)=0\b/.test(location.search);   /* v50g5 billatlas: تصغير أطلس اللوحات على LOW/vlow بس — ?billatlas=0 أو ?v50g5=0 = v50g3 بالضبط */
+-  const NT = 12, NC = 8, TW = BILL1 ? (S.preset === 'vlow' ? 128 : 192) : 256, TH = BILL1 ? (S.preset === 'vlow' ? 256 : 384) : 512;   // ١٢ خانة: ٨ أعمدة × صفّان — v50g5 billatlas: 192×384 على «منخفض» و128×256 على «منخفضة جدا» (نفس النسبة)، والباقي 256×512
++  let BILL1 = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](billatlas|v50g5)=0\b/.test(location.search);   /* v50g5 billatlas: تصغير أطلس اللوحات على LOW/vlow بس — ?billatlas=0 أو ?v50g5=0 = v50g3 بالضبط */
++  const NT = 12, NC = 8; let TW = BILL1 ? (S.preset === 'vlow' ? 128 : 192) : 256, TH = BILL1 ? (S.preset === 'vlow' ? 256 : 384) : 512;   // ١٢ خانة: ٨ أعمدة × صفّان — v50g5 billatlas: 192×384 على «منخفض» و128×256 على «منخفضة جدا» (نفس النسبة)، والباقي 256×512
++  function liveBakeAtlas(keys) {
++    const rt = new THREE.WebGLRenderTarget(TW * NC, TH * 2, { generateMipmaps: true, minFilter: THREE.LinearMipmapLinearFilter, magFilter: THREE.LinearFilter, depthBuffer: true });
++    const sc = new THREE.Scene(), cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100), info = [], tmp = [];
++    sc.add(new THREE.AmbientLight(0xffffff, 1.0));
++    const prevRT = renderer.getRenderTarget(), prevAC = renderer.autoClear, cc = new THREE.Color(), ca = renderer.getClearAlpha(); renderer.getClearColor(cc);
++    const prevSc = renderer.getScissorTest(), vp = new THREE.Vector4(), sv = new THREE.Vector4(); renderer.getViewport(vp); renderer.getScissor(sv);
++    try {
++      renderer.setRenderTarget(rt); renderer.setClearColor(0x46552e, 0); renderer.autoClear = false; renderer.setScissorTest(false); renderer.clear(true, true, true); renderer.setScissorTest(true);
++      keys.forEach((k, ti) => {
++        const src = T.sets[k].lods[1].parts.src || [], grp = new THREE.Group(), bb = new THREE.Box3(), V = new THREE.Vector3();
++        for (const s of src) { const m = new THREE.Mesh(s.geo, new THREE.MeshBasicMaterial({ map: s.map || null, color: s.color, vertexColors: s.vc, alphaTest: s.at ? 0.2 : 0, side: THREE.DoubleSide }));
++          m.matrixAutoUpdate = false; m.matrix.copy(s.local); grp.add(m); tmp.push(m.material);
++          const pa = s.geo.attributes.position; for (let i = 0; i < pa.count; i += 2) { V.fromBufferAttribute(pa, i).applyMatrix4(s.local); bb.expandByPoint(V); } }
++        const yb = Math.max(bb.min.y, -0.3), bw = Math.max(bb.max.x - bb.min.x, bb.max.z - bb.min.z), w = Math.max(bw, (bb.max.y - yb) / 2) * 1.06, h = w * 2, yc = yb + h / 2 - 0.15 * w, y0 = yc - h / 2;
++        // نظرة من فوق قليلاً (١٠°) كي تظهر أوراق الصنوبر الأفقية كما تراها عين اللاعب
++        cam.left = -w / 2; cam.right = w / 2; cam.bottom = -h / 2; cam.top = h / 2; cam.position.set(0, yc + 50 * Math.sin(0.17), 50 * Math.cos(0.17)); cam.lookAt(0, yc, 0); cam.updateProjectionMatrix(); cam.updateMatrixWorld();
++        sc.add(grp); const cx0 = (ti % NC) * TW, cy0 = Math.floor(ti / NC) * TH; renderer.setViewport(cx0, cy0, TW, TH); renderer.setScissor(cx0, cy0, TW, TH); renderer.render(sc, cam); sc.remove(grp);
++        info.push({ w, h, y0 });
++      });
++      return { rt, info };
++    } catch (e) { rt.dispose(); throw e; }
++    finally {
++      renderer.setScissorTest(prevSc); renderer.setRenderTarget(prevRT); renderer.setViewport(vp); renderer.setScissor(sv); renderer.setClearColor(cc, ca); renderer.autoClear = prevAC;
++      for (const m of tmp) m.dispose();
++    }
++  }
+   function bakeBill() {
+     const keys = []; for (const sp of SPEC) for (const size of SIZES) keys.push(sp + '-' + size);
+     if (T.bill || keys.some(k => !T.sets[k].lods[1])) return;
+     try {
+-      const rt = new THREE.WebGLRenderTarget(TW * NC, TH * 2, { generateMipmaps: true, minFilter: THREE.LinearMipmapLinearFilter, magFilter: THREE.LinearFilter, depthBuffer: true });
+-      const sc = new THREE.Scene(), cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100), info = [], tmp = [];
++      let rt, info;
++      if (window.__LIVEPRESET?.enabled) ({ rt, info } = liveBakeAtlas(keys));
++      else {
++      rt = new THREE.WebGLRenderTarget(TW * NC, TH * 2, { generateMipmaps: true, minFilter: THREE.LinearMipmapLinearFilter, magFilter: THREE.LinearFilter, depthBuffer: true });
++      const sc = new THREE.Scene(), cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100), tmp = []; info = [];
+       sc.add(new THREE.AmbientLight(0xffffff, 1.0));
+       const prevRT = renderer.getRenderTarget(), prevAC = renderer.autoClear, cc = new THREE.Color(), ca = renderer.getClearAlpha(); renderer.getClearColor(cc);
+       const prevSc = renderer.getScissorTest(), vp = new THREE.Vector4(), sv = new THREE.Vector4(); renderer.getViewport(vp); renderer.getScissor(sv);
+@@ -93,7 +122,8 @@
+       });
+       renderer.setScissorTest(prevSc); renderer.setRenderTarget(prevRT); renderer.setViewport(vp); renderer.setScissor(sv); renderer.setClearColor(cc, ca); renderer.autoClear = prevAC;
+       for (const m of tmp) m.dispose();
+-      for (const k of keys) delete T.sets[k].lods[1].parts.src;
++      }
++      if (!window.__LIVEPRESET?.enabled) for (const k of keys) delete T.sets[k].lods[1].parts.src;
+       // الهندسة: مربع واحد لكل شجرة بعيدة (حرف x بين -0.5 و0.5، y بين 0 و1)
+       const g = new THREE.InstancedBufferGeometry();
+       g.setAttribute('position', new THREE.BufferAttribute(new Float32Array([-0.5, 0, 0, 0.5, 0, 0, 0.5, 1, 0, -0.5, 1, 0]), 3));
+@@ -116,6 +146,16 @@
+       console.info('[v34] لوحات الأشجار البعيدة جاهزة', info.map(q => q.w.toFixed(1) + 'x' + q.h.toFixed(1)).join(' '));
+     } catch (e) { T.failed.push('bill'); console.warn('[v34] لوحات بعيدة', e); }
+   }
++  window.__LIVEPRESET?.on('billatlas', () => {
++    const active = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](billatlas|v50g5)=0\b/.test(location.search);
++    const w = active ? (S.preset === 'vlow' ? 128 : 192) : 256, h = w * 2;
++    if (w === TW && h === TH) return;
++    const ow = TW, oh = TH; TW = w; TH = h;
++    if (!T.bill) { BILL1 = active; return; }
++    try { const fresh = liveBakeAtlas(T.bill.keys), old = T.bill.rt;
++      T.bill.mesh.material.map = fresh.rt.texture; T.bill.rt = fresh.rt; T.bill.info = fresh.info; old.dispose(); BILL1 = active; T.dirty = true;
++    } catch (e) { TW = ow; TH = oh; throw e; }
++  });
+   function start() { if (T.started) return; T.started = true;
+     for (const sp of SPEC) for (const size of SIZES) { T.sets[sp + '-' + size] = { sp, size, lods: [null, null, null], req: [false, false, false], hiWanted: false }; load(sp, size, 1); load(sp, size, 2); }
+     T.ready = true; T.rebuildChunks(); }

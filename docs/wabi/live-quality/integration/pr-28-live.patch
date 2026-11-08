@@ -1,0 +1,12 @@
+--- a/v50g3/code/part-002.txt
++++ b/v50g3/code/part-002.txt
+@@ -2676,7 +2676,8 @@
+     try { beasts37(grp, Mt); } catch (e) { console.warn('[v37] beasts ' + e); }
+     ST.barn37 = { x: +A.x.toFixed(1), z: +A.z.toFixed(1), yaw: +yaw.toFixed(3), slope: +(gmax - gy).toFixed(2), cols: (Mt.COL || []).length }; return true; }
+   const FIRE36 = []; let fireMod = null, fireLoop = false;
+-  const FIRE5 = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](fire5|v50g5)=0\b/.test(location.search);   /* v50g5 fire5: بلا تحديث لنارٍ مخفية على LOW/vlow — ?fire5=0 أو ?v50g5=0 = v50g3 بالضبط */
++  let FIRE5 = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](fire5|v50g5)=0\b/.test(location.search);   /* v50g5 fire5: بلا تحديث لنارٍ مخفية على LOW/vlow — ?fire5=0 أو ?v50g5=0 = v50g3 بالضبط */
++  window.__LIVEPRESET?.on('fire5', () => { FIRE5 = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](fire5|v50g5)=0\b/.test(location.search); });
+ 
+   // v38: محل الحداد v7 — مبنى يُدخل إليه (بلا دمج: ملف النار يحتاج العقد بأسمائها)، الحداد يشتغل جوّا: ينفخ الكير ويدق بالمطرقة بإيديه الاثنتين والشرر يطير
+   function bs38Prep(g) { g.scene.updateMatrixWorld(true); const box = new THREE.Box3(), bx = new THREE.Box3(), COL = [], SKIP = [], mk = {}, v = new THREE.Vector3(), q = new THREE.Quaternion(), s = new THREE.Vector3(); let tris = 0, calls = 0;

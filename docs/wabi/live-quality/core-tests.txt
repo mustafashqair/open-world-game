@@ -1,0 +1,12 @@
+[livepreset] fail Error: expected
+    at /home/user/workspace/livepreset/tests/core.cjs:3:736
+    at Object.notify (evalmachine.<anonymous>:8:76)
+    at Object.<anonymous> (/home/user/workspace/livepreset/tests/core.cjs:3:780)
+    at Module._compile (node:internal/modules/cjs/loader:1929:14)
+    at Object..js (node:internal/modules/cjs/loader:2060:10)
+    at Module.load (node:internal/modules/cjs/loader:1651:32)
+    at Module._load (node:internal/modules/cjs/loader:1443:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+PASS: initial no-op, 12 directions, same-preset no-op, custom, unsubscribe, epoch invalidation, both kill switches, handler failure isolation

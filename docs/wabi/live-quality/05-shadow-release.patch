@@ -1,0 +1,14 @@
+--- a/v50g3/code/part-001.txt
++++ b/v50g3/code/part-001.txt
+@@ -4353,6 +4353,11 @@
+ $('gear').onclick = () => { if (window.__G50ON && window.SG50) SG50.open(true); else togglePanel(true); };   // v50g: زر الإعدادات بالعبة = إعدادات v50g (وقف مؤقت) $('close').onclick = () => togglePanel(false);
+ function toast(t) { const el = $('toast'); el.textContent = t; el.style.opacity = 1; clearTimeout(toast.t); toast.t = setTimeout(() => el.style.opacity = 0, 2500); }
+ function setPreset(p) { S.preset = p; if (p !== 'custom') Object.assign(S, PRESETS[p]); applySettings(); buildPanel(); }
++// livepreset: release only the sun-owned targets after switching shadows off.
++if (window.__LIVEPRESET?.enabled) window.__LIVEPRESET.on('sun-shadow-targets', () => {
++  if (S.shadow > 0) return;
++  sun.shadow.dispose(); sun.shadow.map = null; sun.shadow.mapPass = null;
++});
+ function applySettings() {
+   renderer.setPixelRatio(Math.min(S.pr, devicePixelRatio || 1)); renderer.setSize(innerWidth, innerHeight);
+   const far = S.view * CFG.CH; scene.fog.near = far * 0.45; scene.fog.far = far * 0.95;

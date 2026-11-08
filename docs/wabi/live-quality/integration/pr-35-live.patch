@@ -1,0 +1,12 @@
+--- a/v50g3/code/part-001.txt
++++ b/v50g3/code/part-001.txt
+@@ -3696,7 +3696,8 @@
+   n.flash = Math.max(0, n.flash - dt * 4); n.mat.emissive.setRGB(n.flash * 0.8, n.flash * 0.06, n.flash * 0.03);
+ }
+ /* v50g5 gc6c: مصفوفة أشجار updateNPC معادة الاستخدام على LOW/vlow (gatherTreeSolids تدفع إليها فقط وpushOut يقرأها فقط، ولا مرجع يبقى بعد الاستدعاء) — نفس القيم بالضبط. ?gc6c=0 أو ?v50g5=0 = v50g3 بالضبط */
+-const GC6C = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](gc6c|v50g5)=0\b/.test(location.search); const TC6 = [];
++let GC6C = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](gc6c|v50g5)=0\b/.test(location.search); const TC6 = [];
++window.__LIVEPRESET?.on('gc6c', () => { GC6C = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](gc6c|v50g5)=0\b/.test(location.search); TC6.length = 0; });
+ function updateNPC(n, dt) {
+   const v = n.v, L = n.L, dx = PL.x - n.x, dz = PL.z - n.z, d = Math.hypot(dx, dz);
+   n.y = LIB.height(n.x, n.z); n.g.position.set(n.x - v.x, n.y, n.z - v.z); n.g.rotation.y = n.face;

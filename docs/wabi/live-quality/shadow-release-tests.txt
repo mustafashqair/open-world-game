@@ -1,0 +1,1 @@
+PASS: disabled no-op, enabled keeps shadow-on maps, 20 release cycles, map+mapPass disposal once, repeated off no-op; Three r170 object test, not GPU allocation test

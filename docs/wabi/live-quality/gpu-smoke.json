@@ -1,0 +1,873 @@
+{
+  "renderer": "WebKit WebGL",
+  "fixture": "isolated box + seven lights, not the game",
+  "fresh": {
+    "high": {
+      "preset": "high",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0
+    },
+    "vlow": {
+      "preset": "vlow",
+      "hash": 1662564857,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 2,
+      "dummy": 4
+    },
+    "low": {
+      "preset": "low",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0
+    },
+    "medium": {
+      "preset": "medium",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0
+    }
+  },
+  "samples": [
+    {
+      "preset": "vlow",
+      "hash": 1662564857,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 2,
+      "dummy": 4,
+      "elapsed": 171.6000000005588,
+      "match": true
+    },
+    {
+      "preset": "low",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 9.700000000186265,
+      "match": true
+    },
+    {
+      "preset": "medium",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 3.599999999627471,
+      "match": true
+    },
+    {
+      "preset": "high",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 6.3999999994412065,
+      "match": true
+    },
+    {
+      "preset": "vlow",
+      "hash": 1662564857,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 2,
+      "dummy": 4,
+      "elapsed": 108.79999999981374,
+      "match": true
+    },
+    {
+      "preset": "low",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 4,
+      "match": true
+    },
+    {
+      "preset": "medium",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 2.7999999998137355,
+      "match": true
+    },
+    {
+      "preset": "high",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 2.199999999254942,
+      "match": true
+    },
+    {
+      "preset": "vlow",
+      "hash": 1662564857,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 2,
+      "dummy": 4,
+      "elapsed": 185.19999999925494,
+      "match": true
+    },
+    {
+      "preset": "low",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 7.3999999994412065,
+      "match": true
+    },
+    {
+      "preset": "medium",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 5.400000000372529,
+      "match": true
+    },
+    {
+      "preset": "high",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 2.6000000005587935,
+      "match": true
+    },
+    {
+      "preset": "vlow",
+      "hash": 1662564857,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 2,
+      "dummy": 4,
+      "elapsed": 300.90000000037253,
+      "match": true
+    },
+    {
+      "preset": "low",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 5.3999999994412065,
+      "match": true
+    },
+    {
+      "preset": "medium",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 13.900000000372529,
+      "match": true
+    },
+    {
+      "preset": "high",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 3,
+      "match": true
+    },
+    {
+      "preset": "vlow",
+      "hash": 1662564857,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 2,
+      "dummy": 4,
+      "elapsed": 194.40000000037253,
+      "match": true
+    },
+    {
+      "preset": "low",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 5.3999999994412065,
+      "match": true
+    },
+    {
+      "preset": "medium",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 3.599999999627471,
+      "match": true
+    },
+    {
+      "preset": "high",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 4.1000000005587935,
+      "match": true
+    },
+    {
+      "preset": "vlow",
+      "hash": 1662564857,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 2,
+      "dummy": 4,
+      "elapsed": 201.30000000074506,
+      "match": true
+    },
+    {
+      "preset": "low",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 7.199999999254942,
+      "match": true
+    },
+    {
+      "preset": "medium",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 7,
+      "match": true
+    },
+    {
+      "preset": "high",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 3.6000000005587935,
+      "match": true
+    },
+    {
+      "preset": "vlow",
+      "hash": 1662564857,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 2,
+      "dummy": 4,
+      "elapsed": 522.5,
+      "match": true
+    },
+    {
+      "preset": "low",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 9.700000000186265,
+      "match": true
+    },
+    {
+      "preset": "medium",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 7.099999999627471,
+      "match": true
+    },
+    {
+      "preset": "high",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 16.200000000186265,
+      "match": true
+    },
+    {
+      "preset": "vlow",
+      "hash": 1662564857,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 2,
+      "dummy": 4,
+      "elapsed": 240.79999999981374,
+      "match": true
+    },
+    {
+      "preset": "low",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 5,
+      "match": true
+    },
+    {
+      "preset": "medium",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 3.5,
+      "match": true
+    },
+    {
+      "preset": "high",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 3.7999999998137355,
+      "match": true
+    },
+    {
+      "preset": "vlow",
+      "hash": 1662564857,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 2,
+      "dummy": 4,
+      "elapsed": 190.1000000005588,
+      "match": true
+    },
+    {
+      "preset": "low",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 5.7999999998137355,
+      "match": true
+    },
+    {
+      "preset": "medium",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 7.7000000001862645,
+      "match": true
+    },
+    {
+      "preset": "high",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 3,
+      "match": true
+    },
+    {
+      "preset": "vlow",
+      "hash": 1662564857,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 2,
+      "dummy": 4,
+      "elapsed": 203.8999999994412,
+      "match": true
+    },
+    {
+      "preset": "low",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 6.099999999627471,
+      "match": true
+    },
+    {
+      "preset": "medium",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 3.2999999998137355,
+      "match": true
+    },
+    {
+      "preset": "high",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 2.900000000372529,
+      "match": true
+    },
+    {
+      "preset": "vlow",
+      "hash": 1662564857,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 2,
+      "dummy": 4,
+      "elapsed": 209.29999999981374,
+      "match": true
+    },
+    {
+      "preset": "low",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 5.2000000001862645,
+      "match": true
+    },
+    {
+      "preset": "medium",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 5.400000000372529,
+      "match": true
+    },
+    {
+      "preset": "high",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 3,
+      "match": true
+    },
+    {
+      "preset": "vlow",
+      "hash": 1662564857,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 2,
+      "dummy": 4,
+      "elapsed": 201,
+      "match": true
+    },
+    {
+      "preset": "low",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 5.1000000005587935,
+      "match": true
+    },
+    {
+      "preset": "medium",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 2.8999999994412065,
+      "match": true
+    },
+    {
+      "preset": "high",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 3.7999999998137355,
+      "match": true
+    },
+    {
+      "preset": "vlow",
+      "hash": 1662564857,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 2,
+      "dummy": 4,
+      "elapsed": 197.90000000037253,
+      "match": true
+    },
+    {
+      "preset": "low",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 6.099999999627471,
+      "match": true
+    },
+    {
+      "preset": "medium",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 7.2999999998137355,
+      "match": true
+    },
+    {
+      "preset": "high",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 3.7999999998137355,
+      "match": true
+    },
+    {
+      "preset": "vlow",
+      "hash": 1662564857,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 2,
+      "dummy": 4,
+      "elapsed": 202.20000000018626,
+      "match": true
+    },
+    {
+      "preset": "low",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 5.599999999627471,
+      "match": true
+    },
+    {
+      "preset": "medium",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 3.1000000005587935,
+      "match": true
+    },
+    {
+      "preset": "high",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 3.6000000005587935,
+      "match": true
+    },
+    {
+      "preset": "vlow",
+      "hash": 1662564857,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 2,
+      "dummy": 4,
+      "elapsed": 214.90000000037253,
+      "match": true
+    },
+    {
+      "preset": "low",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 5.1000000005587935,
+      "match": true
+    },
+    {
+      "preset": "medium",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 3.400000000372529,
+      "match": true
+    },
+    {
+      "preset": "high",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 2.199999999254942,
+      "match": true
+    },
+    {
+      "preset": "vlow",
+      "hash": 1662564857,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 2,
+      "dummy": 4,
+      "elapsed": 276.40000000037253,
+      "match": true
+    },
+    {
+      "preset": "low",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 14.099999999627471,
+      "match": true
+    },
+    {
+      "preset": "medium",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 10.599999999627471,
+      "match": true
+    },
+    {
+      "preset": "high",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 12.099999999627471,
+      "match": true
+    },
+    {
+      "preset": "vlow",
+      "hash": 1662564857,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 2,
+      "dummy": 4,
+      "elapsed": 299.8999999994412,
+      "match": true
+    },
+    {
+      "preset": "low",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 6,
+      "match": true
+    },
+    {
+      "preset": "medium",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 8,
+      "match": true
+    },
+    {
+      "preset": "high",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 3.7000000001862645,
+      "match": true
+    },
+    {
+      "preset": "vlow",
+      "hash": 1662564857,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 2,
+      "dummy": 4,
+      "elapsed": 305,
+      "match": true
+    },
+    {
+      "preset": "low",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 8.899999999441206,
+      "match": true
+    },
+    {
+      "preset": "medium",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 7.6000000005587935,
+      "match": true
+    },
+    {
+      "preset": "high",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 3.5,
+      "match": true
+    },
+    {
+      "preset": "vlow",
+      "hash": 1662564857,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 2,
+      "dummy": 4,
+      "elapsed": 289.79999999981374,
+      "match": true
+    },
+    {
+      "preset": "low",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 11.400000000372529,
+      "match": true
+    },
+    {
+      "preset": "medium",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 3.6000000005587935,
+      "match": true
+    },
+    {
+      "preset": "high",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 3.7000000001862645,
+      "match": true
+    },
+    {
+      "preset": "vlow",
+      "hash": 1662564857,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 2,
+      "dummy": 4,
+      "elapsed": 318.3999999994412,
+      "match": true
+    },
+    {
+      "preset": "low",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 4.3999999994412065,
+      "match": true
+    },
+    {
+      "preset": "medium",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 2.7000000001862645,
+      "match": true
+    },
+    {
+      "preset": "high",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0,
+      "elapsed": 2.7000000001862645,
+      "match": true
+    }
+  ],
+  "maxFrameMs": 522.5,
+  "allHashesMatch": true,
+  "last": {
+    "preset": "high",
+    "hash": 2544707053,
+    "textures": 0,
+    "geometries": 1,
+    "programs": 1,
+    "dummy": 0
+  },
+  "hooks": {
+    "switches": 83,
+    "maxMs": 12.099999999627471,
+    "slow": 0,
+    "errors": [],
+    "last": {
+      "from": "medium",
+      "to": "high",
+      "epoch": 83,
+      "hooks": [
+        {
+          "name": "lambert-materials",
+          "ms": 0
+        },
+        {
+          "name": "point-light-budget",
+          "ms": 0
+        }
+      ],
+      "ms": 0
+    }
+  },
+  "pageErrors": []
+}

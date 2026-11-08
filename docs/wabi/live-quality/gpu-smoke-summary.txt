@@ -1,0 +1,57 @@
+{
+  "renderer": "WebKit WebGL",
+  "fixture": "isolated box + seven lights, not the game",
+  "fresh": {
+    "high": {
+      "preset": "high",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0
+    },
+    "vlow": {
+      "preset": "vlow",
+      "hash": 1662564857,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 2,
+      "dummy": 4
+    },
+    "low": {
+      "preset": "low",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0
+    },
+    "medium": {
+      "preset": "medium",
+      "hash": 2544707053,
+      "textures": 0,
+      "geometries": 1,
+      "programs": 1,
+      "dummy": 0
+    }
+  },
+  "samples": "80 samples in artifact",
+  "maxFrameMs": 522.5,
+  "allHashesMatch": true,
+  "last": {
+    "preset": "high",
+    "hash": 2544707053,
+    "textures": 0,
+    "geometries": 1,
+    "programs": 1,
+    "dummy": 0
+  },
+  "hooks": {
+    "switches": 83,
+    "maxMs": 12.099999999627471,
+    "slow": 0,
+    "errors": [],
+    "last": "omitted"
+  },
+  "pageErrors": []
+}

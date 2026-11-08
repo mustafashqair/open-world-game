@@ -1,0 +1,1 @@
+3c026af41418d3002e8a6c6188d9b54e  v50g3/code/part-001.txt (core + shadow patch)

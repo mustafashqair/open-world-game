@@ -1,0 +1,9 @@
+{
+  "outcome": "timed_out",
+  "command_exit_code": -9,
+  "timed_out": true,
+  "cancelled": false,
+  "usable_game_state": false,
+  "switch_parity": "not verified",
+  "cause": "unknown"
+}

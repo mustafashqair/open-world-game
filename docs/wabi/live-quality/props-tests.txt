@@ -1,0 +1,1 @@
+PASS 12 directions ×20 cycles; draw objects, instance matrices, source identity, disposal exercised. No WebGL game test. Disposed generated instances=160

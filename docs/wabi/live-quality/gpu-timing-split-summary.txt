@@ -1,0 +1,11 @@
+{
+  "allMatch": true,
+  "directions": 24,
+  "cycles": 160,
+  "maxSwitchRenderMs": 351.29999999981374,
+  "maxHookMs": 13.600000000558794,
+  "maxRenderSubmitMs": 54.299999999813735,
+  "maxReadbackWaitMs": 304.20000000018626,
+  "errors": [],
+  "failures": []
+}
