@@ -211,6 +211,21 @@ const saveSettings = () => { try { localStorage.setItem('ow_settings2', JSON.str
   }
   try { localStorage.setItem('ow_q_applied', Q); } catch (e) {} saveSettings();
 })();
+/* livepreset: لا يتغيّر مسار البدء؛ إشعار واحد بعد تطبيق الإعدادات فقط. */
+const LIVEPRESET = (() => {
+  const enabled = V4ON('livepreset') && V4ON('v50g5'), hooks = new Map(); let current = S.preset, epoch = 0;
+  const st = { switches: 0, maxMs: 0, slow: 0, errors: [], last: null };
+  const api = { enabled, st, epoch: () => epoch,
+    on(name, fn) { if (!enabled) return () => {}; hooks.set(name, fn); return () => { if (hooks.get(name) === fn) hooks.delete(name); }; },
+    notify() { if (!enabled || current === S.preset) return; const from = current, to = S.preset; current = to; const id = ++epoch, t0 = performance.now();
+      st.switches++; st.last = { from, to, epoch: id, hooks: [] };
+      for (const [name, fn] of hooks) { const t = performance.now(); try { fn({ from, to, epoch: id, current: () => epoch === id }); }
+        catch (e) { st.errors.push({ name, message: String(e && e.message || e) }); if (st.errors.length > 20) st.errors.shift(); console.warn('[livepreset]', name, e); }
+        st.last.hooks.push({ name, ms: performance.now() - t }); }
+      const ms = performance.now() - t0; st.last.ms = ms; st.maxMs = Math.max(st.maxMs, ms); if (ms > 500) st.slow++;
+    }
+  }; window.__LIVEPRESET = api; return api;
+})();
 function qPanel() {
   const el = document.getElementById('cQual'); if (!el) return;
   const NM = { high: 'عالية', mobile: 'خفيفة' }, pref = window.__QUALITY_PREF || 'auto', run = window.__QUALITY || 'mobile';
