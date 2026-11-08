@@ -1,0 +1,22 @@
+diff --git a/v50g3/code/part-002.txt b/v50g3/code/part-002.txt
+index b8edf56..87c67b9 100644
+--- a/v50g3/code/part-002.txt
++++ b/v50g3/code/part-002.txt
+@@ -1693,7 +1693,7 @@ const V20 = (() => { const ST = { t: 0, lodN: 0, err: 0 }, HQ = () => window.__Q
+     // الشبكات: رجال/نساء × قريب/بعيد + سلال
+     const cap = CW.S.length + CW.W.length; CW.M = [];
+     for (const gi of [0, 1]) for (const li of [0, 1]) { const VV = CW.V[gi][li], g = VV.g.clone(); g.setAttribute('aAnim', new THREE.InstancedBufferAttribute(new Float32Array(cap * 4), 4).setUsage(THREE.DynamicDrawUsage)); g.setAttribute('aTint', new THREE.InstancedBufferAttribute(new Float32Array(cap * 4), 4).setUsage(THREE.DynamicDrawUsage));
+-      const im = new THREE.InstancedMesh(g, vatMat(CW.tex[gi], VV), cap); im.count = 0; im.frustumCulled = false; im.castShadow = false; im.receiveShadow = true; im.instanceMatrix.setUsage(THREE.DynamicDrawUsage); im.userData.v20crowd = 1; L.det.add(im); CW.M.push({ im, g, h: VV.h, n: 0 }); }
++      const im = new THREE.InstancedMesh(g, vatMat(CW.tex ? CW.tex[gi] : null, VV), cap); im.count = 0; im.frustumCulled = false; im.castShadow = false; im.receiveShadow = true; im.instanceMatrix.setUsage(THREE.DynamicDrawUsage); im.userData.v20crowd = 1; L.det.add(im); CW.M.push({ im, g, h: VV.h, n: 0 }); }
+     const bk = new THREE.InstancedMesh(basketGeo(), pm, cap); bk.count = 0; bk.frustumCulled = false; bk.castShadow = false; bk.instanceMatrix.setUsage(THREE.DynamicDrawUsage); L.det.add(bk); CW.bk = bk;
+     CW.ok = true; console.info('[v20] حياة المدينة', JSON.stringify(CW.stat)); }
+   const _m4 = new THREE.Matrix4(), _q = new THREE.Quaternion(), _p = new THREE.Vector3(), _s = new THREE.Vector3(), _up = new THREE.Vector3(0, 1, 0), _fw = new THREE.Vector3();
+@@ -1735,7 +1735,7 @@ const V20 = (() => { const ST = { t: 0, lodN: 0, err: 0 }, HQ = () => window.__Q
+     for (const M of CW.M) { M.im.count = M.n; M.im.visible = M.n > 0; M.im.instanceMatrix.needsUpdate = true; M.g.attributes.aAnim.needsUpdate = true; M.g.attributes.aTint.needsUpdate = true; } CW.bk.visible = CW.bk.count > 0; CW.bk.instanceMatrix.needsUpdate = true; CW.nNear = nNear; }
+   async function crowdLoad() { if (CW.loading) return; CW.loading = true; try { const tl = new THREE.TextureLoader(), tex = u => new Promise((ok, no) => tl.load(u, t => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 2; ok(t); }, undefined, no));
+       const [m0, m1, f0, f1, tm, tf] = await Promise.all([vatLoad('crowd/male-0.bin'), vatLoad('crowd/male-1.bin'), vatLoad('crowd/female-0.bin'), vatLoad('crowd/female-1.bin'), tex('crowd/crowd-m.webp'), tex('crowd/crowd-f.webp')]);
+-      vatPaint(m0, tm.image, true); vatPaint(m1, tm.image, true); vatPaint(f0, tf.image, true); vatPaint(f1, tf.image, true); CW.V = [[m0, m1], [f0, f1]]; CW.tex = [tm, tf]; } catch (e) { CW.err = String(e && e.message || e); console.warn('[v20] الحشد', CW.err); } }
++      vatPaint(m0, tm.image, true); vatPaint(m1, tm.image, true); vatPaint(f0, tf.image, true); vatPaint(f1, tf.image, true); CW.V = [[m0, m1], [f0, f1]]; CW.tex = [tm, tf]; if (V4ON('memcrowd') && V4ON('v50g5') && (S.preset === 'vlow' || S.preset === 'low')) { tm.dispose(); tf.dispose(); CW.tex = null; } } catch (e) { CW.err = String(e && e.message || e); console.warn('[v20] الحشد', CW.err); } }
+   function crowdUpdate(dt) { const v = typeof CITYV !== 'undefined' ? CITYV : null, L = v && v.live; if (!L || !L.v18 || !L.nav18) return; if (!CW.V) { if (!CW.err) crowdLoad(); return; }
+     if (CW.L !== L || !CW.ok) { if (CW.L === L && CW.failed) return; try { CW.ok = false; crowdSetup(L); } catch (e) { CW.failed = true; CW.L = L; console.warn('[v20] setup', e); return; } } crowdTick(dt); }
+   function tick(dt) { try { timeFlow(dt); golden(dt); try { crowdUpdate(dt); } catch (e) { if (!CW.err2) { CW.err2 = String(e && e.stack || e); console.warn('[v20] crowd', e); } } ST.t -= dt; if (ST.t <= 0) { ST.t = 0.25; nearBuild(false); } } catch (e) { if (!ST.err) { ST.err = 1; console.warn('[v20] tick', e); } } }

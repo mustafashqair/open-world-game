@@ -1,0 +1,12 @@
+const assert=require('assert'),fs=require('fs');
+const path=require('path'); const root=path.join(process.env.BASE_REPO || path.resolve(__dirname,'../../..'),'v50g3/code/'); const p1=fs.readFileSync(root+'part-001.txt','utf8'),p2=fs.readFileSync(root+'part-002.txt','utf8');
+// Use actual existing ownership-specific drop body, not a rewritten disposal algorithm.
+const dropSource=p1.match(/function drop\(L\) \{[^\n]+/)[0];const E=new Map();const drop=new Function('E','return ('+dropSource+')')(E);let disposed=0;for(let cycle=0;cycle<20;cycle++){const live={};const keep={};E.set('active',{L:keep,im:[{dispose(){}}]});E.set('retired',{L:live,im:[{dispose(){disposed++}},null]});drop(live);assert.equal(E.size,1);assert.equal(E.get('active').L,keep);E.clear()}assert.equal(disposed,20);
+// Revised memlod helper: teardown owns attached instances exactly once; detached ones still disposed.
+const patch=fs.readFileSync(require('path').join(__dirname,'memlod.patch'),'utf8');const revised=patch.split('\n').find(x=>x.startsWith('+  function drop(')).slice(1);const newDrop=new Function('E','return ('+revised+')')(E);
+for(let cycle=0;cycle<20;cycle++) { const root={},parent={parent:root},live={},keep={},calls={a:0,b:0,k:0};const attached={parent,dispose(){calls.a++}},orphan={parent:null,dispose(){calls.b++}},active={parent:null,dispose(){calls.k++}};E.set('a',{L:live,im:[attached,orphan,null]});E.set('k',{L:keep,im:[active]});newDrop(live,root);assert.deepEqual(calls,{a:0,b:1,k:0});attached.dispose();assert.deepEqual(calls,{a:1,b:1,k:0});assert.equal(E.size,1);E.clear(); }
+E.set('legacy',{L:'legacy',im:[{dispose(){disposed++}}]});newDrop('legacy');assert.equal(disposed,21);assert.equal(E.size,0);
+// Verify the source map argument is unused inside vatMat after declaration.
+const vat=p2.slice(p2.indexOf('function vatMat('),p2.indexOf('function vatMat(')+p2.slice(p2.indexOf('function vatMat(')).indexOf('\n  function ',10));assert(vat.length>0);assert(!/\bmap\b/.test(vat.slice(vat.indexOf('{')+1)));
+const scene={parent:null},detached={parent:null},attached={parent:scene},child={parent:detached};const fzAttached=o=>{while(o&&o!==scene)o=o.parent;return o===scene};assert(fzAttached(attached));assert(!fzAttached(child));assert(!fzAttached(detached));
+console.log('PASS: existing LOD16.drop 20 cycles retains active owner; vatMat map unused; nested attachment predicate; revised drop avoids duplicate teardown for 20 cycles. Not a gameplay/GPU test.');

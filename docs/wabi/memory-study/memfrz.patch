@@ -1,0 +1,27 @@
+diff --git a/v50g3/code/part-002.txt b/v50g3/code/part-002.txt
+index b8edf56..5f4697f 100644
+--- a/v50g3/code/part-002.txt
++++ b/v50g3/code/part-002.txt
+@@ -3565,17 +3565,19 @@ const G50 = (() => {
+      وحارس بيفحص ١٠٠٠ منهم كل إطار: أول ما واحد يتحرّك بيرجع طبيعي للأبد. ?frz=0 للإيقاف ═══ */
+   const FZ = { on: false, t: 0, cand: null, list: [], snap: [], i: 0, n: 0, un: 0, ms: 0 };
+   const trs = o => { const p = o.position, q = o.quaternion, s = o.scale; return [p.x, p.y, p.z, q._x, q._y, q._z, q._w, s.x, s.y, s.z]; };
++  const memFZ = () => V4ON('memfrz') && V4ON('v50g5') && (S.preset === 'vlow' || S.preset === 'low');
++  const fzAttached = o => { while (o && o !== scene) o = o.parent; return o === scene; };
+   const same = (o, c) => { const p = o.position, q = o.quaternion, s = o.scale; return c[0] === p.x && c[1] === p.y && c[2] === p.z && c[3] === q._x && c[4] === q._y && c[5] === q._z && c[6] === q._w && c[7] === s.x && c[8] === s.y && c[9] === s.z; };
+   function fzPlan() { if (S.preset !== 'vlow' || QS.get('frz') === '0') return; const t0 = RN(), cand = [];
+     const walk = (o, dyn) => { let sk = !!(o.isSkinnedMesh || o.isBone); const d2 = dyn || o.isBone || o === avatar || o.isCamera || o.isLight || o.isPoints || o.isSprite; for (let i = 0; i < o.children.length; i++) if (walk(o.children[i], d2)) sk = true; if (!sk && !d2 && o !== scene && o.matrixAutoUpdate) cand.push(o); return sk; };
+     try { walk(scene, false); } catch (e) { return; } FZ.cand = cand; FZ.snap = cand.map(trs); FZ.t = RN(); FZ.on = true; FZ.ms += RN() - t0; st.frz = { cand: cand.length }; }
+-  function fzSweep() { FZ.ox = ORG.x; FZ.oz = ORG.z; const L = FZ.list, sn = FZ.snap2; for (let i = L.length - 1; i >= 0; i--) { const o = L[i]; if (!same(o, sn[i])) { o.matrixAutoUpdate = true; L[i] = L[L.length - 1]; sn[i] = sn[sn.length - 1]; L.pop(); sn.pop(); FZ.un++; } } FZ.sw = (FZ.sw || 0) + 1; if (st.frz) st.frz.sweeps = FZ.sw; }   // إعادة توسيط العالم (كل ٤٠٠ م): فحص كامل قبل الرسم
++  function fzSweep() { FZ.ox = ORG.x; FZ.oz = ORG.z; const L = FZ.list, sn = FZ.snap2; for (let i = L.length - 1; i >= 0; i--) { const o = L[i]; if (!same(o, sn[i]) || (memFZ() && !fzAttached(o))) { o.matrixAutoUpdate = true; L[i] = L[L.length - 1]; sn[i] = sn[sn.length - 1]; L.pop(); sn.pop(); FZ.un++; } } FZ.sw = (FZ.sw || 0) + 1; if (st.frz) st.frz.sweeps = FZ.sw; }   // إعادة توسيط العالم (كل ٤٠٠ م): فحص كامل قبل الرسم
+   function fzTick() { const t0 = RN();
+     if (FZ.cand) { if (RN() - FZ.t < 3000) return; const c = FZ.cand, sn = FZ.snap; FZ.cand = null; FZ.snap = null;
+-      for (let i = 0; i < c.length; i++) { const o = c[i]; if (!o.parent || !same(o, sn[i])) continue; o.updateMatrix(); o.matrixAutoUpdate = false; FZ.list.push(o); FZ.snap2 = FZ.snap2 || []; FZ.snap2.push(sn[i]); }
++      for (let i = 0; i < c.length; i++) { const o = c[i]; if (!o.parent || !same(o, sn[i]) || (memFZ() && !fzAttached(o))) continue; o.updateMatrix(); o.matrixAutoUpdate = false; FZ.list.push(o); FZ.snap2 = FZ.snap2 || []; FZ.snap2.push(sn[i]); }
+       FZ.n = FZ.list.length; FZ.ox = ORG.x; FZ.oz = ORG.z; st.frz = { cand: c.length, frozen: FZ.n, ms: 0, un: 0 }; FZ.ms += RN() - t0; return; }
+     const L = FZ.list, sn = FZ.snap2; if (!L.length) { FZ.on = false; return; } let k = Math.min(1000, L.length);
+-    while (k-- > 0) { if (FZ.i >= L.length) FZ.i = 0; const o = L[FZ.i]; if (!same(o, sn[FZ.i])) { o.matrixAutoUpdate = true; L[FZ.i] = L[L.length - 1]; sn[FZ.i] = sn[sn.length - 1]; L.pop(); sn.pop(); FZ.un++; } else FZ.i++; }
++    while (k-- > 0) { if (FZ.i >= L.length) FZ.i = 0; const o = L[FZ.i]; if (!same(o, sn[FZ.i]) || (memFZ() && !fzAttached(o))) { o.matrixAutoUpdate = true; L[FZ.i] = L[L.length - 1]; sn[FZ.i] = sn[sn.length - 1]; L.pop(); sn.pop(); FZ.un++; } else FZ.i++; }
+     FZ.ms += RN() - t0; if (st.frz) { st.frz.un = FZ.un; st.frz.ms = +FZ.ms.toFixed(1); st.frz.left = L.length; } }
+   /* ═══ REA ٤ (منخفضة ومنخفضة جدا بس): أقرب ٦ شخصيات متحركة بتتحرّك كامل، الباقي بمعدّل أقل (نفس الوقت الكلي، بس تحديث أندر). ?anim6=0 ═══ */
+   const A6 = { on: QS.get('anim6') !== '0', f: -1, cur: [], thr: Infinity, full: 0, cut: 0 };
