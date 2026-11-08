@@ -2944,13 +2944,13 @@ const LOWQ = () => S.preset === 'vlow' && !/[?&]lowcull=0\b/.test(location.searc
 const LAM = (() => { const tw = new Map(), st = { n: 0, skip: 0 }; let t = 0, on = !/[?&]lowlam=0\b/.test(location.search); const dflt = THREE.Material.prototype.onBeforeCompile;
   const keys = ['map', 'alphaMap', 'aoMap', 'aoMapIntensity', 'lightMap', 'lightMapIntensity', 'emissiveMap', 'emissiveIntensity', 'alphaTest', 'transparent', 'opacity', 'side', 'vertexColors', 'fog', 'depthWrite', 'depthTest', 'flatShading', 'name', 'visible', 'polygonOffset', 'polygonOffsetFactor', 'polygonOffsetUnits', 'alphaToCoverage', 'blending', 'toneMapped'];
   let L3 = G3V('lights'); const L3BAD = /roughness|metalness|clearcoat|sheen|iridescence|transmission|anisotropy|physical|specularIntensity|reflectedLight\.indirectSpecular|totalEmissiveRadiance\s*\*|envMapIntensity/i;   /* v50g3 lights3 */
-  const liveRefs = new Set(), liveSeen = new WeakSet(), liveWeak = typeof WeakRef === 'function';
+  const liveRefs = new Set(), liveWeak = typeof WeakRef === 'function'; let liveSeen = new WeakSet();
   function liveTrack(o) { if (!window.__LIVEPRESET?.enabled || liveSeen.has(o)) return; liveSeen.add(o); liveRefs.add(liveWeak ? new WeakRef(o) : o); }
   window.__LIVEPRESET?.on('lambert-materials', () => {
     const restore = m => m?.userData?.lamOf || m;
     for (const ref of liveRefs) { const o = liveWeak ? ref.deref() : ref; if (!o) { liveRefs.delete(ref); continue; } if (o.material) o.material = Array.isArray(o.material) ? o.material.map(restore) : restore(o.material); }
     for (const w of tw.values()) if (w) { GLB_MAT.delete(w); w.dispose(); }
-    tw.clear(); L3 = G3V('lights'); t = 0; st.sw = 0; apply(scene);
+    tw.clear(); liveRefs.clear(); liveSeen = new WeakSet(); L3 = G3V('lights'); t = 0; st.sw = 0; apply(scene);
   });
   function hook3(m) { if (m.onBeforeCompile === dflt) return true; try { const run = id => { const L = THREE.ShaderLib[id], sh = { shaderID: id, shaderType: id === 'lambert' ? 'MeshLambertMaterial' : 'MeshStandardMaterial', vertexShader: L.vertexShader, fragmentShader: L.fragmentShader, uniforms: THREE.UniformsUtils.clone(L.uniforms), defines: Object.assign({}, m.defines) }; m.onBeforeCompile.call(m, sh, renderer); const o = new Set((L.vertexShader + '\n' + L.fragmentShader).split('\n').map(l => l.trim())); return (sh.vertexShader + '\n' + sh.fragmentShader).split('\n').map(l => l.trim()).filter(l => l && !o.has(l)); };
       const a = run('standard'), b = new Set(run('lambert')); if (!a.length) return true; for (const l of a) { if (!b.has(l) || L3BAD.test(l)) return false; } return true; } catch (e) { return false; } }
