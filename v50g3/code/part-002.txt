@@ -1097,6 +1097,70 @@ function physicsAdvance(dt) {
   PHYS.lx = PL.x; PHYS.ly = PL.y; PHYS.lz = PL.z;   // نعرض (ونقرأ في باقي الإطار) موضعاً مُستوفى بين آخر خطوتين؛ يعود للمنطق أول الإطار التالي
   PL.x = PHYS.rx = PHYS.px + ex * a; PL.y = PHYS.ry = PHYS.py + ey * a; PL.z = PHYS.rz = PHYS.pz + ez * a; PHYS.sw = true;
 }
+/* ═══ dev50: وضع المطوّر — موقع الاختبار فقط (test بالنطاق أو ?dev=1، و?dev=0 يعطّله) — طيران حر: زر «طيران» للمس + F للحاسوب ═══
+   DEV=false (الموقع الرئيسي): لا مُستمِع ولا عنصر ولا أي تعديل على step() — الدالة الأصلية تبقى كما هي حرفياً */
+const DEV = (/test/.test(location.hostname) || /[?&]dev=1\b/.test(location.search)) && !/[?&]dev=0\b/.test(location.search);
+if (DEV) {
+  const FLY = { on: false, up: false, down: false };
+  const flyLand = () => {                  // إيقاف الطيران: هبوط آمن — القدم على (التضاريس أو أعلى سطح صلب تحتها) والسرعة صفر
+    SOL.length = 0; gatherSolids(PL.x, PL.z, 1.2, SOL);
+    const sg = solidGround(PL.x, PL.z, PL.y);
+    let gy = LIB.height(PL.x, PL.z); if (sg > -Infinity && sg > gy) gy = sg;
+    PL.y = Math.max(gy, CFG.SEA - 1.0); PL.vx = PL.vz = PL.vy = 0; PL.ground = true; PHYS.acc = 0; PHYS.sw = false;
+  };
+  const flyUiSync = () => { if (!flyPad) return; bUp.style.display = bDn.style.display = FLY.on ? '' : 'none'; bFly.classList.toggle('on', FLY.on); };
+  const flyToggle = () => {
+    if (!FLY.on && (MNT.on || ST.dead)) { toast(MNT.on ? 'لا يمكن الطيران وأنت راكب' : 'لا يمكن الطيران وأنت ميت'); return; }
+    FLY.on = !FLY.on;
+    if (FLY.on) { PL.ground = false; PL.vy = 0; toast('الطيران شغّال — F للإيقاف، مسافة للصعود وC للهبوط'); }
+    else { flyLand(); toast('أوقفتَ الطيران — هبطتَ بسلام'); }
+    flyUiSync();
+  };
+  function flyStep(dt) {                   // بلا جاذبية ولا تصادم ولا سباحة: حركة على اتجاه الكاميرا بالعصا/WASD + فوق/تحت
+    let f = inputLock() ? 0 : (keys.KeyW || keys.ArrowUp ? 1 : 0) - (keys.KeyS || keys.ArrowDown ? 1 : 0) - SV.y;
+    let s = inputLock() ? 0 : (keys.KeyD || keys.ArrowRight ? 1 : 0) - (keys.KeyA || keys.ArrowLeft ? 1 : 0) + SV.x;
+    const hl = Math.hypot(f, s), mag = Math.min(1, hl); if (hl > 0) { f /= hl; s /= hl; }
+    const run = !inputLock() && (keys.ShiftLeft || keys.ShiftRight || runToggle || (stickId !== null && mag > 0.9));
+    const sp = (run ? 75 : 25) * mag, sy = Math.sin(CAM.yaw), cy = Math.cos(CAM.yaw);
+    const tx = (-sy * f + cy * s) * sp, tz = (-cy * f - sy * s) * sp;
+    let ty = 0; if (FLY.up || keys.Space) ty += 1; if (FLY.down || keys.KeyC) ty -= 1; ty *= (run ? 75 : 25);
+    PL.x = Math.max(-CFG.HW + 100, Math.min(CFG.HW - 100, PL.x + tx * dt));   // حدود العالم نفسها
+    PL.z = Math.max(-CFG.HH + 100, Math.min(CFG.HH - 100, PL.z + tz * dt));
+    PL.y += ty * dt;
+    const gh = LIB.height(PL.x, PL.z);
+    if (PL.y < gh + 0.5) PL.y = gh + 0.5;                                      // الحد الأدنى: التضاريس + ٠٫٥م
+    if (PL.y > 400) PL.y = 400;                                                // الحد الأقصى ٤٠٠م
+    PL.vx = tx; PL.vz = tz; PL.vy = ty; PL.speed = Math.hypot(tx, tz); PL.ground = false; PL.swim = false;
+    if (PL.speed > 0.4) { const t = Math.atan2(-PL.vx, -PL.vz); let d = t - PL.face; d = Math.atan2(Math.sin(d), Math.cos(d)); PL.face += d * (1 - Math.exp(-dt * 12)); }
+    PL.cx = Math.floor(PL.x / CFG.CH); PL.cz = Math.floor(PL.z / CFG.CH);
+    if (Math.abs(PL.x - ORG.x) > 400 || Math.abs(PL.z - ORG.z) > 400) recenter();   // التوسيط وتدفق القطع يبقيان شغّالين بالطيران السريع
+  }
+  const stepGround = step;                 // فيزياء المشي الأصلية بلا أي تعديل
+  step = function (dt) { if (FLY.on) flyStep(dt); else stepGround(dt); };   // DEV فقط: عند الإيقاف يعمل كل شيء كما قبل تماماً
+  addEventListener('keydown', e => {       // F: تبديل الطيران. أثناء الطيران: مسافة فوق وC تحت (تعطَّل «مراوغة» C الأصلية هنا فقط)
+    if (inputLock()) return;
+    if (e.code === 'KeyF' && !e.repeat) flyToggle();
+    if (FLY.on && e.code === 'KeyC') { keys.KeyC = true; e.stopPropagation(); }
+  }, true);
+  let flyPad = null, bUp = null, bFly = null, bDn = null;   // أزرار اللمس داخل #touch (تختفي تلقائياً على الحاسوب)
+  const touch = document.getElementById('touch');
+  if (touch) {
+    const st = document.createElement('style');
+    st.textContent = '#flyPad{position:fixed;right:14px;bottom:calc(200px + var(--safeB));z-index:3;display:flex;flex-direction:column;gap:7px;align-items:center}' +
+      '#flyPad button{width:56px;height:44px;border-radius:12px;border:1px solid rgba(230,182,90,.5);color:#f2ecdc;background:radial-gradient(circle at 50% 35%,rgba(58,70,86,.9),rgba(14,19,27,.94));font:700 12px "Noto Naskh Arabic",Cairo,Tahoma,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 8px 20px rgba(0,0,0,.45)}' +
+      '#flyPad button.on{background:radial-gradient(circle at 50% 35%,#f3cd7a,#b7812c);border-color:#fff3cf;color:#1c1305}' +
+      '#flyPad button:active{transform:scale(.94)}';
+    document.head.appendChild(st);
+    flyPad = document.createElement('div'); flyPad.id = 'flyPad';
+    const mk = (lbl, hold) => { const b = document.createElement('button'); b.textContent = lbl; b.setAttribute('aria-label', lbl);
+      b.addEventListener('pointerdown', e => { e.preventDefault(); if (hold) { FLY[hold] = true; b.classList.add('on'); } else flyToggle(); });
+      if (hold) { const off = () => { FLY[hold] = false; b.classList.remove('on'); }; b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); }
+      return b; };
+    bUp = mk('فوق', 'up'); bFly = mk('طيران', null); bDn = mk('تحت', 'down');
+    flyPad.appendChild(bUp); flyPad.appendChild(bFly); flyPad.appendChild(bDn); touch.appendChild(flyPad); flyUiSync();
+  }
+  window.__DEV50 = { DEV, FLY, flyToggle };   // للفحص من الكونسول
+}
 /* ═══════════ v15: شريط الصحة الحجري + الدم (apply_blood_hp.py) ═══════════
    - شريط الصحة: إطار حجري بنجمة ثمانية، تعبئة حمراء بلمعة، نزول ناعم، أثر ضرر فاتح متأخر، وميض عند الضربة، نبض قلب تحت 25%.
    - أشرطة صحة صغيرة فوق الهدف المضروب (ذئب/حيوان/شخص/قاطع طريق) لثوانٍ.
@@ -2396,6 +2460,71 @@ mmpBuild = () => MAP20.mmRebuild(); mmpDraw = () => MAP20.mmDraw(); mmpTick = dt
 wmLayout = () => MAP20.wmLayout(); wmDraw = () => MAP20.wmDraw(); wmTick = dt => MAP20.wmTick(dt); openWM = () => MAP20.open(); closeWM = fromPop => MAP20.close(fromPop);
 window.MAP20 = MAP20; window.mapRelief = (x, z) => MAP20.relief(x, z);
 
+/* ═══ dev50: انتقال من خريطة العالم — زر «انتقال» ← نقرة واحدة على الخريطة ← علامة وتأكيد «انتقل هنا؟» — DEV فقط ═══ */
+if (DEV) {
+  const TP = { arm: false, last: null, mark: null, box: null, x: 0, z: 0 };
+  const tpOK = (x, z) => { if (LIB.height(x, z) < -1.0) return false; SOL.length = 0; gatherSolids(x, z, 1, SOL); return !SOL.length; };   // ماء/بحر أو داخل جدار أو بناء: مرفوض
+  const tpSpot = (x, z) => {              // أقرب بقعة صالحة (بحث حلزوني حتى ١٢٠م) بدل نقطة الماء أو داخل الجدران
+    if (tpOK(x, z)) return [x, z];
+    for (let r = 2; r <= 120; r += 2) { const n = Math.max(8, Math.round(Math.PI * r / 3));
+      for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2, sx = x + Math.cos(a) * r, sz = z + Math.sin(a) * r;
+        if (Math.abs(sx) > CFG.HW - 120 || Math.abs(sz) > CFG.HH - 120) continue; if (tpOK(sx, sz)) return [sx, sz]; } }
+    return null;
+  };
+  const tpClear = () => { if (TP.mark) { TP.mark.remove(); TP.mark = null; } if (TP.box) { TP.box.remove(); TP.box = null; } };
+  const tpGo = () => {
+    const sp = tpSpot(TP.x, TP.z); tpClear(); TP.arm = false; if (tpBtn) tpBtn.classList.remove('on');
+    if (!sp) { toast('لا يمكن الانتقال إلى هنا — ماء أو داخل بناء'); return; }
+    closeWM();
+    if (window.__DEV50 && __DEV50.FLY.on) __DEV50.flyToggle();               // كان طائراً؟ يهبط عند نقطة الانتقال
+    if (MNT.on) { const m = MNT.on; m.x = sp[0]; m.z = sp[1]; if (m.px != null) { m.px = sp[0]; m.pz = sp[1]; } if (m.real != null) m.real = 0; }   // الحصان ينتقل مع اللاعب (بلا نزول قسري)
+    PL.x = sp[0]; PL.z = sp[1];
+    SOL.length = 0; gatherSolids(PL.x, PL.z, 1.2, SOL);
+    const sg = solidGround(PL.x, PL.z, LIB.height(PL.x, PL.z) + 2);
+    let gy = LIB.height(PL.x, PL.z); if (sg > -Infinity && sg > gy) gy = sg;
+    PL.y = gy + 0.2; PL.vx = PL.vz = PL.vy = 0; PL.ground = true; PL.onSolid = sg > -Infinity && sg > gy - 0.2; PL.swim = false;
+    PHYS.acc = 0; PHYS.sw = false; IN.jump = false;
+    CAM.tx = PL.x; CAM.ty = PL.y + 1.6; CAM.tz = PL.z;
+    PL.cx = Math.floor(PL.x / CFG.CH); PL.cz = Math.floor(PL.z / CFG.CH);
+    recenter(); updateChunks(); pump();                                    // نفس مسار إعادة التوسيط وتدفق القطع
+    const key = PL.cx + ',' + PL.cz;
+    toast('جارٍ التحميل…');
+    let n = 0; const iv = setInterval(() => { if (chunks.has(key) || ++n > 250) { clearInterval(iv); if (chunks.has(key)) toast('وصلت'); } }, 120);   // حتى تصبح القطعة مقيمة (٣٠ث كحد أقصى)
+  };
+  const tpAsk = (wx, wz, sx, sy) => {
+    tpClear(); TP.x = wx; TP.z = wz;
+    const wmap = $('wmap');
+    TP.mark = document.createElement('div');
+    TP.mark.style.cssText = 'position:absolute;z-index:3;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;border:3px solid #ffd76a;background:rgba(90,140,255,.55);box-shadow:0 0 0 2px rgba(0,0,0,.35);pointer-events:none';
+    TP.mark.style.left = sx + 'px'; TP.mark.style.top = sy + 'px';
+    wmap.appendChild(TP.mark);
+    TP.box = document.createElement('div');
+    TP.box.style.cssText = 'position:absolute;left:50%;bottom:calc(70px + var(--safeB));transform:translateX(-50%);z-index:4;display:flex;gap:8px;align-items:center;background:rgba(19,25,33,.92);border:1px solid rgba(230,182,90,.5);border-radius:12px;padding:8px 12px;font:700 13px "Noto Naskh Arabic",Cairo,Tahoma,sans-serif;color:#f2ecdc;box-shadow:0 10px 30px rgba(0,0,0,.5)';
+    TP.box.textContent = 'انتقل هنا؟';
+    const mkB = (lbl, fn) => { const b = document.createElement('button'); b.textContent = lbl; b.style.cssText = 'padding:6px 14px;border-radius:9px;border:1px solid rgba(230,182,90,.55);cursor:pointer;font:700 12.5px "Noto Naskh Arabic",Cairo,Tahoma,sans-serif'; b.onclick = fn; return b; };
+    const okB = mkB('انتقال', tpGo); okB.style.background = 'linear-gradient(180deg,#f3cd7a,#b7812c)'; okB.style.color = '#1c1305';
+    const noB = mkB('إلغاء', tpClear); noB.style.background = 'rgba(255,255,255,.07)'; noB.style.color = '#f2ecdc';
+    TP.box.appendChild(okB); TP.box.appendChild(noB); wmap.appendChild(TP.box);
+  };
+  let tpBtn = null;
+  const wC = $('wC');
+  wC.addEventListener('pointerup', e => {   // قبل معالج الخريطة نفسه (capture): نفس تعريف «نقرة واحدة» — لا سحب ولا نقرة مزدوجة
+    const V = window.MAP20 && MAP20.V; if (!V) return;
+    const r = wC.getBoundingClientRect(), px = e.clientX - r.left, py = e.clientY - r.top, t = performance.now();
+    const single = V.ptr.size === 1 && V.tap && V.tap.mv < 8 && t - V.tap.t < 300;
+    const dbl = TP.last && t - TP.last.t < 330 && Math.hypot(TP.last.x - px, TP.last.y - py) < 30;
+    TP.last = { t, x: px, y: py };
+    if (!TP.arm || !single || dbl) return;
+    tpAsk(V.cx + (px - innerWidth / 2) / V.s, V.cz + (py - innerHeight / 2) / V.s, px, py);   // نفس معادلة التكبير بالقرص
+  }, true);
+  const openWM0 = openWM;                  // عند فتح الخريطة: نضيف زر «انتقال» إلى عمود أزرارها (مرة واحدة)
+  openWM = () => { openWM0(); const z = $('wZ');
+    if (z && !tpBtn) { tpBtn = document.createElement('button'); tpBtn.textContent = 'انتقال'; tpBtn.setAttribute('aria-label', 'انتقال إلى نقطة على الخريطة');
+      tpBtn.onclick = () => { tpClear(); TP.arm = !TP.arm; tpBtn.classList.toggle('on', TP.arm); if (TP.arm) toast('المس نقطة على الخريطة لاختيار مكان الانتقال'); };
+      z.appendChild(tpBtn); } };
+  const closeWM0 = closeWM;               // إغلاق الخريطة يلغي التسليح والعلامة وصندوق التأكيد
+  closeWM = fromPop => { closeWM0(fromPop); TP.arm = false; tpClear(); if (tpBtn) tpBtn.classList.remove('on'); };
+}
 /* ═══ v20 btn20: زر القتال يتبع السلاح في اليد (سيف/قوس/رمح/قبضة) + زر الصد «الصد» يظهر مع الدرع فقط ═══ */
 const BTN20 = (() => {
   const SVG = {    // أيقونات خطية ذهبية على كحلي — بلا صلبان: السيف بواقية قرصية، القوس بلا سهم معترض، الرمح بلا عارضة
