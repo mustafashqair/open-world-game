@@ -1242,6 +1242,22 @@ function signTex(txt) {
   x.fillStyle = '#f2e6c8'; x.font = 'bold 54px Tahoma, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.direction = 'rtl'; x.fillText(txt, 256, 68);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
 }
+/* livepreset: إعادة تجميع الأغراض الساكنة فقط؛ لا إعادة بناء القرية أو السكان. */
+window.__LIVEPRESET?.on('village-static-props', () => {
+  window.MERGE48?.resetPreset?.();
+  for (const v of VILLAGES) { const L = v.live, rec = L && L.__liveStaticProps; if (!rec) continue;
+    const active = PP1('inst') && PP1LOW(); if (active === rec.active) continue;
+    const next = [], groups = new Map();
+    for (const m of rec.source) { m.updateMatrix(); if (!active) { next.push(m); continue; }
+      const key = m.geometry.id + '|' + m.material.id + '|' + Math.floor(m.position.x / 32) + ',' + Math.floor(m.position.z / 32);
+      let a = groups.get(key); if (!a) groups.set(key, a = []); a.push(m); }
+    for (const a of groups.values()) { if (a.length < 2) { next.push(a[0]); continue; }
+      const im = new THREE.InstancedMesh(a[0].geometry, a[0].material, a.length);
+      a.forEach((m, i) => im.setMatrixAt(i, m.matrix)); im.computeBoundingBox(); im.computeBoundingSphere(); next.push(im); }
+    for (const m of rec.drawn) { L.g.remove(m); if (m.isInstancedMesh) m.dispose(); }
+    for (const m of next) L.g.add(m); rec.drawn = next; rec.active = active;
+  }
+});
 function buildVillage(v) {
   const r = rng(v.seed), g = new THREE.Group(), L = { g, houses: [], obst: [[v.x, v.z, 1.9]], solid: [[v.x, v.z, 1.45]], npcs: [], work: [], wood: [], stalls: [], gatePos: [], alarm: 0, ga: 0, animals: [], sus: null,
     poi: { plaza: [], well: [], bench: [], cross: [], stall: [], field: [], wood: [] } };
@@ -1332,7 +1348,9 @@ function buildVillage(v) {
   if (VIL4.active()) try { VIL4.square(L, v, ga); } catch (e) { console.warn('[vil4] square', e); }
   // pp1 d8bfa54: construction-time static props instanced inside 32m cells of this village (very-low / low only)
   const propCells = new Map(), instanceProps = PP1('inst') && PP1LOW();
-  const addStaticProp = m => { if (!instanceProps) { g.add(m); return; } m.updateMatrix();
+  const liveProps = window.__LIVEPRESET?.enabled ? { source: [], drawn: [], active: instanceProps } : null;
+  if (liveProps) L.__liveStaticProps = liveProps;
+  const addStaticProp = m => { if (liveProps) liveProps.source.push(m); if (!instanceProps) { g.add(m); if (liveProps) liveProps.drawn.push(m); return; } m.updateMatrix();
     const key = m.geometry.id + '|' + m.material.id + '|' + Math.floor(m.position.x / 32) + ',' + Math.floor(m.position.z / 32);
     let a = propCells.get(key); if (!a) propCells.set(key, a = []); a.push(m); };
   // ── نقاط الاهتمام: الساحة، البئر، الدكك ──
@@ -1346,9 +1364,9 @@ function buildVillage(v) {
     if (!(VIL4.active() && VIL4.garden(L, v, x, z, y))) { const f = new THREE.Mesh(HG.field, FIELDM); f.position.set(x - v.x, y, z - v.z); addStaticProp(f); } L.obst.push([x, z, 3.2]); L.work.push([x, z]); L.poi.field.push({ x: x + 0.6, z: z + 0.6, type: 'field' }); i++; }
   for (let i = 0, t = 0; i < 2 && t < 60; t++) { const [x, z] = pol(52 + r() * 4, ga + 0.5 + r() * 5.2), y = LIB.height(x, z); if (y < 2 || !fits(x, z, 1.6)) continue;
     const f = new THREE.Mesh(HG.stump, POSTM); f.position.set(x - v.x, y, z - v.z); if (!(VIL4.active() && VIL4.woodSpot(L, v, x, z, y))) addStaticProp(f); L.obst.push([x, z, 0.8]); L.solid.push(topOf([x, z, 0.6], y + geoTop(HG.stump))); L.wood.push([x + 1.2, z]); L.poi.wood.push({ x: x + 1.2, z, type: 'wood' }); i++; }
-  for (const a of propCells.values()) { if (a.length < 2) { g.add(a[0]); continue; }
+  for (const a of propCells.values()) { if (a.length < 2) { g.add(a[0]); if (liveProps) liveProps.drawn.push(a[0]); continue; }
     const m = new THREE.InstancedMesh(a[0].geometry, a[0].material, a.length);
-    a.forEach((o, i) => m.setMatrixAt(i, o.matrix)); m.computeBoundingBox(); m.computeBoundingSphere(); g.add(m); }
+    a.forEach((o, i) => m.setMatrixAt(i, o.matrix)); m.computeBoundingBox(); m.computeBoundingSphere(); g.add(m); if (liveProps) liveProps.drawn.push(m); }
   if (MODELS.vMill && MODELS.vMill.geo) for (let t = 0; t < 60; t++) {                      // طاحونة خشبية لكل قرية
     const [x, z] = pol(49 + r() * 6, ga + 0.5 + r() * 5.2); if (LIB.height(x, z) < 1.8 || !fits(x, z, 5.5)) continue;
     const M = MODELS.vMill, k = 8.8 / (M.bb.max.x - M.bb.min.x), gm = HCACHE.vMill || (HCACHE.vMill = M.geo.clone().scale(k, k, k)); SHARED.add(gm); const yaw = r() * 6.283;
