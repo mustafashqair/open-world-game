@@ -3591,33 +3591,36 @@ function pickPOI(n) {                             // نقطة اهتمام جد�
   return best || { x: (L.big ? n.x : n.v.x) + (Math.random() - 0.5) * 12, z: (L.big ? n.z : n.v.z) + (Math.random() - 0.5) * 12, type: 'plaza' };
 }
 const FK37 = { R: 1.6, V: 1.2, W: 1.2 };   // v38 W: سرعة مشيه لبيته (م/ث) — مشية هادئة والخطوة متزامنة مع الأرض   // v37: نصف قطر الالتقاط عند الوصول للكاونتر
+/* v50g5 gc6b: npcGoal بترجّع مصفوفة مشتركة معاد استخدامها على LOW/vlow (المُنعطف الوحيد updateNPC بيقرأ gl[0..3] فورًا وما في استدعاء متداخل ولا مرجع يُحفظ) — نفس القيم بالضبط. ?gc6b=0 أو ?v50g5=0 = v50g3 بالضبط */
+const GC6B = (S.preset === 'low' || S.preset === 'vlow') && !/[?&](gc6b|v50g5)=0\b/.test(location.search); const GL6 = [0, 0, '', 0], GL6W = ['wander', 'poi', 'shop', 'post'];
+const G6 = (x, z, s, f) => { if (GC6B) { GL6[0] = x; GL6[1] = z; GL6[2] = s; GL6[3] = f; return GL6; } return f === undefined ? [x, z, s] : [x, z, s, f]; };
 function npcGoal(n) {                             // الروتين اليومي: لا توقف طويل؛ تنقّل بين نقاط الاهتمام بـA*
   const T = ENV.T, v = n.v, L = n.L, hd = n.home.door;
   if (n.guard) {
-    if (n.castleG) { if (n.stT <= 0) { n.sd = -n.sd; n.stT = 4 + Math.random() * 3; } return [n.post[0] + n.sd * 1.6, n.post[1], 'post', n.gface]; }   // حرس القصر: مواقع ثابتة
+    if (n.castleG) { if (n.stT <= 0) { n.sd = -n.sd; n.stT = 4 + Math.random() * 3; } return G6(n.post[0] + n.sd * 1.6, n.post[1], 'post', n.gface); }   // حرس القصر: مواقع ثابتة
     if (n.gate && (n.shift === 0 ? (T >= 6 && T < 18) : (T < 6 || T >= 18))) {      // حارس البوابة: يتحرك على جانبي البوابة كل ٣-٦ ثوانٍ
       if (n.stT <= 0) { n.sd = -n.sd; n.stT = 3.5 + Math.random() * 2; }
       const p = L.gatePos[n.slot % L.gatePos.length], k = n.sd > 0 ? 0 : 3.6, rx = (v.x - p[0]), rz = (v.z - p[1]), rl = Math.hypot(rx, rz) || 1;   // بين البوابة ونقطة أقرب للداخل
-      return [p[0] + rx / rl * k, p[1] + rz / rl * k, 'post', n.gface]; }
+      return G6(p[0] + rx / rl * k, p[1] + rz / rl * k, 'post', n.gface); }
     if (n.stT <= 0) { const rr = (L.patrol || [36, 18.5])[n.slot % 2]; n.pa += Math.min(0.5, 40 / rr); n.pt = [v.x + Math.cos(n.pa) * rr, v.z + Math.sin(n.pa) * rr]; for (let k = 0; k < 12 && PAL3D && v.city && (ANX50.inEst(n.pt[0], n.pt[1], 5) || (NPCK.on && NPCK.sd(n.pt[0], n.pt[1]) < 3)); k++) { n.pa += 0.2; n.pt = [v.x + Math.cos(n.pa) * rr, v.z + Math.sin(n.pa) * rr]; } n.stT = 5; }
-    return [n.pt[0], n.pt[1], 'wander'];
+    return G6(n.pt[0], n.pt[1], 'wander');
   }
   if (n.shop && n.shop.type === 'fruit' && !window.__fk37off) { const k = n.shop.keeper, op = T >= 5 && T < 19; n.fk37 = op ? 1 : 2;   // v37: صاحب محل الطعام واقف عند الكاونتر طول الدوام؛ لا يتحرك إلا ليروح على بيته وقت السكرة (١٩:٠٠) ويطلع من بيته الصبح (٥:٠٠) راجع عالكاونتر
     if (Math.hypot(PL.x - n.x, PL.z - n.z) > 150) { n.lock37 = false; n.rt37 = null; }   // بعيد عن اللاعب: حركة مبسّطة مباشرة
-    else if (op && n.shop.r37 && !n.lock37 && !n.rt37 && Math.hypot(k[0] - n.x, k[1] - n.z) > 0.6) { const e = n.shop.r37[0]; return [e[0], e[1], 'post', n.shop.nf ?? n.shop.face]; }   // يدخل المحل من فتحة الكاونتر ثم ينزلق لنقطته
-    return op ? [k[0], k[1], 'post', n.shop.nf ?? n.shop.face] : [hd[0], hd[1], 'sleep']; }
-  if (T >= 22.5 || T < 5.5) return [hd[0], hd[1], 'sleep'];
-  if (ENV.rain > 0.4 && !n.shop) return [hd[0], hd[1], 'shelter'];
+    else if (op && n.shop.r37 && !n.lock37 && !n.rt37 && Math.hypot(k[0] - n.x, k[1] - n.z) > 0.6) { const e = n.shop.r37[0]; return G6(e[0], e[1], 'post', n.shop.nf ?? n.shop.face); }   // يدخل المحل من فتحة الكاونتر ثم ينزلق لنقطته
+    return op ? G6(k[0], k[1], 'post', n.shop.nf ?? n.shop.face) : G6(hd[0], hd[1], 'sleep'); }
+  if (T >= 22.5 || T < 5.5) return G6(hd[0], hd[1], 'sleep');
+  if (ENV.rain > 0.4 && !n.shop) return G6(hd[0], hd[1], 'shelter');
   if (n.shop) { if (T >= 7 && T < 19) { if (n.stT <= 0) { n.sd = -n.sd; n.stT = 3.5 + Math.random() * 2; }
-      return [n.shop.keeper[0] + n.shop.lat[0] * n.sd * (n.shop.sway ?? 2.3), n.shop.keeper[1] + n.shop.lat[1] * n.sd * (n.shop.sway ?? 2.3), 'post', n.shop.nf ?? n.shop.face]; }
-    return n.shop.s20 ? [n.shop.keeper[0], n.shop.keeper[1], 'sleep'] : [hd[0], hd[1], 'sleep']; }
+      return G6(n.shop.keeper[0] + n.shop.lat[0] * n.sd * (n.shop.sway ?? 2.3), n.shop.keeper[1] + n.shop.lat[1] * n.sd * (n.shop.sway ?? 2.3), 'post', n.shop.nf ?? n.shop.face); }
+    return n.shop.s20 ? G6(n.shop.keeper[0], n.shop.keeper[1], 'sleep') : G6(hd[0], hd[1], 'sleep'); }
   if (!n.poi) { n.poi = pickPOI(n); n.tx = n.poi.x + (Math.random() - 0.5) * 2.4; n.tz = n.poi.z + (Math.random() - 0.5) * 2.4; n.atP = false; } if (NPCK.on && NPCK.badGoal(n.tx, n.tz)) NPCK.repick(n, pickPOI);   // npck v2: ولا وجهة على طريق القصر
   if (L.big && n.farmer) { const din = Math.hypot(n.x - v.x, n.z - v.z), dtg = Math.hypot(n.tx - v.x, n.tz - v.z);       // العبور عبر أقرب بوابة
     if ((din < 146) !== (dtg < 146)) { let g0 = L.gates[0], bd = 1e9; for (const gt of L.gates) { if (NPCK.on && NPCK.sd(gt.x, gt.z) < 0) continue; const q = Math.hypot(gt.x - n.x, gt.z - n.z); if (q < bd) { bd = q; g0 = gt; } }
       const ar = g0.a * PI / 180, ux = Math.cos(ar), uz = -Math.sin(ar), rx = n.x - v.x, rz = n.z - v.z, rad = rx * ux + rz * uz, lat = Math.abs(rx * uz - rz * ux), inP = [v.x + ux * 140, v.z + uz * 140], outP = [v.x + ux * 160, v.z + uz * 160];
-      if (din < 146) return (rad < 138.5 || lat > 5.5) ? [inP[0], inP[1], 'wander'] : [outP[0] + ux * 5, outP[1] + uz * 5, 'wander'];       // خروج: نقطة داخل البوابة ثم إلى الخارج
-      return (rad > 161.5 || lat > 5.5) ? [outP[0], outP[1], 'wander'] : [inP[0] - ux * 5, inP[1] - uz * 5, 'wander']; } }
-  return [n.tx, n.tz, 'poi'];
+      if (din < 146) return (rad < 138.5 || lat > 5.5) ? G6(inP[0], inP[1], 'wander') : G6(outP[0] + ux * 5, outP[1] + uz * 5, 'wander');       // خروج: نقطة داخل البوابة ثم إلى الخارج
+      return (rad > 161.5 || lat > 5.5) ? G6(outP[0], outP[1], 'wander') : G6(inP[0] - ux * 5, inP[1] - uz * 5, 'wander'); } }
+  return G6(n.tx, n.tz, 'poi');
 }
 function animNPC(n, dt, d) { if (n.gm) glbAnim(n, dt, d); else if (n.rb) rigAnim(n, dt, d); else npcAnim(n, dt, d); }
 const NPC_GAIT = { Walk: 1.25, WalkF: 1.15, Run: 3.3 };   // السرعة الطبيعية للمقطع (م/ث) لمطابقة الخطوة مع سرعة الحركة
@@ -3782,7 +3785,7 @@ function updateNPC(n, dt) {
   else {
     if (n.sleeping && !rest) n.sleeping = false;
     if (!n.sleeping) {
-      if (!n.chat && n.fk37 !== 1 && n.chatCd <= 0 && n.stillT < 1.5 && ['wander', 'poi', 'shop', 'post'].includes(gl[2]))           // محادثة بين NPCs متجاورين
+      if (!n.chat && n.fk37 !== 1 && n.chatCd <= 0 && n.stillT < 1.5 && (GC6B ? GL6W : ['wander', 'poi', 'shop', 'post']).includes(gl[2]))           // محادثة بين NPCs متجاورين
         for (const m of L.npcs) { if (m === n || m.dead || m.sleeping || m.chat || m.chatCd > 0 || m.talking || m.fk37 === 1) continue;
           if (Math.hypot(m.x - n.x, m.z - n.z) < 5 && Math.random() < dt * 0.5) { const t = 3 + Math.random() * 2.5; n.chat = { w: m, t }; m.chat = { w: n, t }; break; } }
       const arrived = npcWalk(n, gl[0], gl[1], n.fk37 ? FK37.W : (n.guard ? (n.gm && n.gm.grd ? 1.8 : 2.8) : 2.2) * (ENV.rain > 0.2 ? 1.35 : 1) * (U.uNight.value > 0.5 ? 0.92 : 1), dt);
