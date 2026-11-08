@@ -3642,6 +3642,50 @@ const PRF = (() => { const on = /[?&]prof=1\b/.test(location.search), now = perf
   api.begin = function () { this.cur = {}; this.mixN = this.mixT = this.skN = this.skT = this.mwT = 0; if (this.mixSeen) this.mixSeen.clear(); return now(); };
   api.end = function (tStart) { const c = this.cur, r = renderer.info.render; c.total = now() - tStart; c.mix = this.mixT; c.mixN = this.mixN; c.mixU = this.mixSeen ? this.mixSeen.size : 0; c.skel = this.skT; c.skN = this.skN; c.mw = this.mwT; c.calls = r.calls; c.tris = r.triangles; c.t = tStart; this.fr.push(c); if (this.fr.length > 4000) this.fr.shift(); };
   return api; })();
+/* ═══ v50g5 blob5: ظلال لاصقة رخيصة على «منخفض/منخفضة جدا» (shadow=0 فيهما أصلاً): بقعة دائرية ناعمة تحت اللاعب وكل كائن حي قريب (٣٥م، ٤٨ كحد أقصى) — InstancedMesh واحد = نداء رسم واحد، خامة CanvasTexture ‏٦٤×٦٤ بتدرّج شعاعي شفاف، MeshBasicMaterial بلا أضواء ولا خرائط ظل، ميل مع ميل الأرض وتلاشي بالمسافة (شفافية كل نسخة من instanceColor)؛ ‏?blob5=0 أو ?v50g5=0 = إيقافها، والبوابة تُقرأ مرة عند التحميل ═══ */
+const BLOB5 = (S.preset === 'low' || S.preset === 'vlow') && !/[?&]blob5=0\b/.test(location.search) && !/[?&]v50g5=0\b/.test(location.search);
+const BLOB5M = BLOB5 ? (() => {
+  const MAX = 48, R5 = 35, TS = 64, st = { on: true, n: 0 };
+  const cv = document.createElement('canvas'); cv.width = cv.height = TS;
+  const g2 = cv.getContext('2d'), gr = g2.createRadialGradient(TS / 2, TS / 2, TS * 0.05, TS / 2, TS / 2, TS / 2);
+  gr.addColorStop(0, 'rgba(10,10,14,0.5)'); gr.addColorStop(0.6, 'rgba(10,10,14,0.3)'); gr.addColorStop(1, 'rgba(10,10,14,0)'); g2.fillStyle = gr; g2.fillRect(0, 0, TS, TS);
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
+  const geo = new THREE.PlaneGeometry(1, 1); geo.rotateX(-Math.PI / 2);   /* مستوٍ أفقي بمحاذاة الأرض */
+  const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1 });
+  mat.onBeforeCompile = sh => { sh.fragmentShader = sh.fragmentShader.replace('#include <color_fragment>', '#include <color_fragment>\n#ifdef USE_COLOR\n  diffuseColor.a *= vColor.r;   /* v50g5 blob5: شفافية كل نسخة من instanceColor.r */\n#endif'); };   /* instanceColor عند three ألوان فقط؛ الشفافية لكل نسخة تحتاج هذا السطر الواحد */
+  mat.customProgramCacheKey = () => 'blob5a';
+  const mesh = new THREE.InstancedMesh(geo, mat, MAX);
+  mesh.count = 0; mesh.frustumCulled = false; mesh.renderOrder = 2; mesh.matrixAutoUpdate = false; mesh.name = 'blob5_shadows'; mesh.userData.noCull23 = 1;   /* renderOrder=2: بعد التضاريس (0) والطرق (1)، وقبل برك الليل (3) */
+  const C5 = new THREE.Color(), M5 = new THREE.Matrix4(), V5 = new THREE.Vector3(), N5 = new THREE.Vector3(), U5 = new THREE.Vector3(0, 1, 0), Q5 = new THREE.Quaternion(), S5 = new THREE.Vector3();   /* scratch وحدات — صفر تخصيص داخل الإطار */
+  let nI = 0;
+  for (let i = 0; i < MAX; i++) mesh.setColorAt(i, C5.setScalar(1));   /* تخصيص مخزن instanceColor مرة واحدة عند التحميل */
+  mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage); mesh.instanceColor.setUsage(THREE.DynamicDrawUsage);
+  scene.add(mesh);
+  const SRC5 = [[NPCS, 0.55], [BANDITS, 0.55], [ANIMALS, 0.9], [WOLVES, 0.38]];   /* القوائم الحية وحجم كل نوع (متر) */
+  function put5(x, z, r, f) {           /* بقعة عند (x,z)؛ ترجع false عند امتلاء الخانات، وصفر تخصيص */
+    const h = LIB.height(x, z); if (h < 0.05) return true;   /* تحت الماء: لا ظل */
+    const e5 = 1.1; N5.set((h - LIB.height(x + e5, z)) / e5, 1, (h - LIB.height(x, z + e5)) / e5).normalize();   /* ميل البقعة مع الأرض من عيّنتي ارتفاع إضافيتين */
+    Q5.setFromUnitVectors(U5, N5); V5.set(x - ORG.x, h + 0.03, z - ORG.z); S5.set(r * 2, 1, r * 2);
+    M5.compose(V5, Q5, S5); mesh.setMatrixAt(nI, M5); mesh.setColorAt(nI, C5.setScalar(f)); nI++;
+    return nI < MAX;
+  }
+  function tick() {
+    if (S.preset !== 'low' && S.preset !== 'vlow') { if (mesh.count) mesh.count = 0; return; }   /* متوسط/عالٍ: مطابقان للأصل حتى لو بدّل اللاعب الإعداد أثناء اللعب */
+    const px = PL.x, pz = PL.z; nI = 0;
+    let go5 = true;
+    if (!ST.dead && !PL.swim) go5 = put5(px, pz, 0.55, 1);   /* ظل اللاعب أولاً */
+    for (let s = 0; go5 && s < SRC5.length; s++) { const list = SRC5[s][0], r5 = SRC5[s][1];
+      for (let i = 0; i < list.length; i++) { const o = list[i];
+        if (o.dead || !o.g || !o.g.visible) continue;   /* الميت والمخفي: لا ظل */
+        const d = Math.hypot(o.x - px, o.z - pz); if (d > R5) continue;
+        const f = (R5 - d) / 25; if (f <= 0) continue;   /* تلاشي بالمسافة: كامل حتى ~١٠م ثم يخفت حتى ٣٥م */
+        if (!put5(o.x, o.z, r5, f > 1 ? 1 : f)) { go5 = false; break; } } }
+    mesh.count = nI; st.n = nI;
+    if (nI) { mesh.instanceMatrix.needsUpdate = true; mesh.instanceColor.needsUpdate = true; }
+  }
+  window.__BLOB5 = { st, mesh, tick };
+  return { tick, st, mesh };
+})() : null;
 let FCAP_T = 0; const FCAP_ON = !/[?&]fcap=0\b/.test(location.search);
 function frame(rafTime) {
   requestAnimationFrame(frame);
@@ -3655,7 +3699,7 @@ function frame(rafTime) {
   const pON = PRF.on, pT0 = pON ? PRF.begin() : 0; let pT = pT0;
   physicsAdvance(dt); if (pON) pT = PRF.lap('physics', pT); updateCamera(dt); PMQ.tick(dt); if (pON) pT = PRF.lap('camera', pT);
   avatar.position.set(PL.x - ORG.x, PL.y, PL.z - ORG.z); avatar.rotation.y = PL.face;
-  updateCombat(dt); avatar.rotation.y = PL.face; updateAnim(dt); if (pON) pT = PRF.lap('player', pT); updateWolves(dt); updateBandits(dt); updateMounts(dt); updateAnimals(dt); updateArrows(dt); if (pON) pT = PRF.lap('creatures', pT); guardsCrowd(dt); updateVillages(dt); if (pON) pT = PRF.lap('villages', pT); if (VWORK.on) try { VWORK.tick(dt); } catch (e) { if (!VWORK.st.err) { VWORK.st.err = 1; console.warn('[vwork] tick', e); } } if (pON) pT = PRF.lap('vwork', pT); if (NPCK.on) NPCK.tickOthers(dt); if (pON) pT = PRF.lap('npck', pT);
+  updateCombat(dt); avatar.rotation.y = PL.face; updateAnim(dt); if (pON) pT = PRF.lap('player', pT); updateWolves(dt); updateBandits(dt); updateMounts(dt); updateAnimals(dt); updateArrows(dt); if (pON) pT = PRF.lap('creatures', pT); guardsCrowd(dt); updateVillages(dt); if (BLOB5M) BLOB5M.tick(); if (pON) pT = PRF.lap('villages', pT); if (VWORK.on) try { VWORK.tick(dt); } catch (e) { if (!VWORK.st.err) { VWORK.st.err = 1; console.warn('[vwork] tick', e); } } if (pON) pT = PRF.lap('vwork', pT); if (NPCK.on) NPCK.tickOthers(dt); if (pON) pT = PRF.lap('npck', pT);
   water.position.set(PL.x - ORG.x, CFG.SEA, PL.z - ORG.z);
   updateEnv(dt); if (window.V20) V20.tick(dt); goldSave20(dt); if (pON) pT = PRF.lap('env', pT);
   chunkT += dt; if (chunkT > 0.25) { chunkT = 0; updateChunks(); }
