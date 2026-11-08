@@ -1,0 +1,29 @@
+{
+  "format": 1,
+  "base": "65fc5d3628908efc89ecac7496f2b93998bf6c53",
+  "refs": {
+    "base": "65fc5d3628908efc89ecac7496f2b93998bf6c53",
+    "pr26": "73206f73a0a21752a17f8b6ea90464d9181c6bcb",
+    "pr29": "acc445651d1a5d7dc6a3bb48134da84d67cc7e55"
+  },
+  "gc": [
+    "a3d860cb224a28fb48afdfebb3196d2438df9497",
+    "445f76d44389ede13fe012ab71e40f4c0171a7c5",
+    "bfafb78288610e732c359a1c0ad3e2a9a55f2a14",
+    "34dcf17a022c90e4fa40a8a8e7349ea03624ca97",
+    "7d3f29639d1f40131d363e6d9ce2ad56878e027e"
+  ],
+  "comparisons": [
+    {
+      "preset": "vlow",
+      "scenario": "village",
+      "pair": "base-repeat",
+      "status": "inconclusive",
+      "reason": "baseline run incomplete"
+    }
+  ],
+  "limitations": [
+    "Native async image decode, worker message delivery and external modules are not fully ordered. Reproducibility is a prerequisite, never assumed.",
+    "Snapshots cover scalar simulation state and selected nested AI data, not all hidden closure/animation state. No complete behavioural proof claimed."
+  ]
+}

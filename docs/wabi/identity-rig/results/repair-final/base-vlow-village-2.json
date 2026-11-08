@@ -1,0 +1,68 @@
+{
+  "result": {
+    "boot": {
+      "body": "العالم المفتوح\nالعالم المفتوح\n\nمدينة وقصر وقرى وغابات… عالم كامل بانتظارك\n\nتحميل الشخصيات والمباني\n٩٪\nتحمّل ٧٧٫٩ ميغابايت · ١ ث\n💡 E للحكي مع الناس وفتح المحلات\nلعب\nالإعدادات\nv50g\nالعالم المفتوح\nجاري تحميل العالم...\n31%\nاستكشف القرى، وتحدث مع الشخصيات، واكتشف أسرار هذا العالم.\n100 / 100\n⬇ تنزيل للعب بدون نت\nv50g3",
+      "clock": {
+        "frame": 18,
+        "now": 600
+      },
+      "g50": {
+        "a6": {
+          "cur": [
+            6.766141586631434,
+            342.6454980455514
+          ],
+          "cut": 1,
+          "f": 13,
+          "full": 77,
+          "on": true,
+          "thr": 342.6454053270617
+        },
+        "compileMs": 0,
+        "err": "",
+        "forcePal": false,
+        "forceVW": false,
+        "idle": false,
+        "on": true,
+        "p": 0.17333333333333334,
+        "phase": "base",
+        "played": false,
+        "pre": {
+          "fail": 0,
+          "n": 0,
+          "ok": 0
+        },
+        "ready": false,
+        "step": "تحميل الشخصيات والمباني",
+        "t0": 200.00000000000003,
+        "tBase": 0,
+        "tReady": 0,
+        "tex": {
+          "n": 0,
+          "tot": 0
+        },
+        "timeouts": [],
+        "waits": {},
+        "warm": {
+          "frames": 0,
+          "ms": 0,
+          "n": 0,
+          "tot": 0,
+          "verts": 0
+        }
+      },
+      "game": true,
+      "module": true
+    },
+    "consoleErrors": [],
+    "errors": [],
+    "every": 1,
+    "frames": 90,
+    "name": "base-vlow-village-2",
+    "reason": "Error: boot did not reach G50 ready under controlled scheduler",
+    "requests": [],
+    "scope": "fixed-step test-mode sampled state; not production/visual identity",
+    "status": "incomplete"
+  },
+  "rows": []
+}

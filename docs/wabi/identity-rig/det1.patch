@@ -1,0 +1,732 @@
+diff --git a/v50g3/code/part-000.txt b/v50g3/code/part-000.txt
+index f86d678..8185a37 100644
+--- a/v50g3/code/part-000.txt
++++ b/v50g3/code/part-000.txt
+@@ -10,6 +10,11 @@ import { CSM } from 'three/addons/csm/CSM.js';
+ import { CSMShader } from 'three/addons/csm/CSMShader.js';
+ import { Water } from 'three/addons/objects/Water.js';
+ 
++// Test mode is installed before navigation by the external identity runner.
++const DET1 = /[?&]det=1\b/.test(location.search) && !/[?&]v50g5=0\b/.test(location.search) && window.__DET_CLOCK;
++if (/[?&]det=1\b/.test(location.search) && !window.__DET_CLOCK) console.error('[det] run with the pre-navigation harness; standalone det is not controlled');
++const D1RAND = () => DET1 ? DET1.random() : Math.random();
++
+ /* ═══ v42 GLB42: محمّل واحد لكل ملفات GLB — نفس المفكّكات (Meshopt/DRACO/KTX2) لكل اللوادر، إعادة محاولة للملف كله مع مهلة متزايدة، فحص بعد التحميل، وسجل لكل ملف ═══ */
+ const Q4 = new URLSearchParams(location.search), V4ON = k => Q4.get(k) !== '0', VL4 = () => S.preset === 'vlow';   // v50d4
+ const G2ON = !/[?&]v50g2=0\b/.test(location.search), G2V = k => G2ON && S.preset === 'vlow' && Q4.get('g2' + k) !== '0';   /* v50g2 G2V: تحسينات المدينة على «منخفضة جدا» بس؛ ?v50g2=0 = v50g بالضبط، ?g2city=0 ?g2pal=0 ?g2npc=0 ?g2mm=0 ?g2cull=0 ?g2pre=0 كل وحدة لحالها */
+@@ -50,12 +55,12 @@ const GLB42 = (() => {
+     cfg(this); const self = this, key = String(url).replace(/^\.\//, '').split('?')[0];
+     try { if (VLOW4.has(key) && VLOW4.on()) { url = (VLOW4B.has(key) ? 'vlow4b/' : 'vlow4/') + key; VLOW4.n++; } } catch (x) {}
+     const e = reg.get(key) || { st: 'loading', tries: 0, t0: now(), t1: null, err: null, n: 0 }; e.n++; e.st = 'loading'; reg.set(key, e);
+-    let done = false;
++    let done = false; const detAsset = DET1 ? DET1.assetTicket(key) : 0;
+     const fail = err => { if (done) return; const st = err && (err.response && err.response.status || (/HTTP (\d+)/.exec(String(err.message || err)) || [])[1]);
+       if (e.tries < 4 && +st !== 404 && +st !== 403) { const wait = [800, 2500, 6000][e.tries - 1] || 6000; console.warn('[v42] retry ' + key + ' #' + e.tries + ' (' + (err && err.message || err) + ')'); setTimeout(attempt, wait); return; }
+-      done = true; e.st = 'fail'; e.err = String(err && err.message || err).slice(0, 160); e.t1 = now(); console.warn('[v42] GLB failed after ' + e.tries + ' tries: ' + key); if (onError) onError(err); };
++      done = true; e.st = 'fail'; e.err = String(err && err.message || err).slice(0, 160); e.t1 = now(); console.warn('[v42] GLB failed after ' + e.tries + ' tries: ' + key); if (DET1) { DET1.assetError(detAsset, key + ': ' + err); return; } if (onError) onError(err); };
+     const attempt = () => { e.tries++; _load.call(self, url, g => { if (done) return; const bad = check(g); if (bad) return fail(new Error(key + ': ' + bad)); done = true; e.st = 'ok'; e.t1 = now(); e.err = null;
+-        const fin = () => { try { onLoad && onLoad(g); } catch (x) { console.error('[v42] onLoad ' + key, x); } }; if (TCAP.cap() || TCAP.capc()) TCAP.run(g, key).then(fin, fin); else fin(); }, onProgress, fail); };
++        const deliver = () => { try { onLoad && onLoad(g); } catch (x) { if (DET1) throw x; console.error('[v42] onLoad ' + key, x); } }; const fin = () => DET1 ? DET1.assetDone(detAsset, deliver) : deliver(); if (TCAP.cap() || TCAP.capc()) TCAP.run(g, key).then(fin, fin); else fin(); }, onProgress, fail); };
+     attempt();
+   };
+   const api = { reg, cfg,
+@@ -801,7 +806,7 @@ const NPCK = (() => {
+     for (const q of c) { const e = api.exit(q[0], q[1], st.goalPad); const r = e || q, d = Math.hypot(r[0] - p.x, r[1] - p.z); if (d < bd && !api.inBand(r[0], r[1])) { bd = d; b = r; } }
+     if (!b) return false; p.x = b[0]; p.z = b[1]; st.goalMoved++; return true; };
+   // نقطة اهتمام جديدة وقعت بالطريق أو جنب الحرم → اختيار تاني (لحد ٥ مرات)، وإلا بتنزاح لبرّا
+-  api.repick = (n, pick) => { for (let k = 0; k < 5; k++) { st.repick++; const p = pick(n); n.poi = p; n.tx = p.x + (Math.random() - 0.5) * 2.4; n.tz = p.z + (Math.random() - 0.5) * 2.4; if (!api.badGoal(n.tx, n.tz)) return; }
++  api.repick = (n, pick) => { for (let k = 0; k < 5; k++) { st.repick++; const p = pick(n); n.poi = p; n.tx = p.x + (D1RAND() - 0.5) * 2.4; n.tz = p.z + (D1RAND() - 0.5) * 2.4; if (!api.badGoal(n.tx, n.tz)) return; }
+     const q = { x: n.tx, z: n.tz }; api.goalOut(q); const e = api.exit(q.x, q.z, st.goalPad); if (e) { q.x = e[0]; q.z = e[1]; } n.tx = q.x; n.tz = q.z; st.goalMoved++; };
+   // أقرب نقطة برّا المنطقة (+pad)
+   api.exit = (x, z, pad) => { pad = pad || 0; if (api.sd(x, z) >= pad) return null; let best = null, bd = 1e9;
+@@ -1086,7 +1091,7 @@ const b64buf = t => { const bin = atob(t), u = new Uint8Array(bin.length); for (
+     MODELS[k] = res; done(); };
+   const onFail = (k, err) => { console.error('GLB FAIL', k, err && err.message || err); failed.push(k); MODELS[k] = null; done(); };
+   EMB42.ready.then(() => { for (const k of Object.keys(MDEF)) { const d = MDEF[k];
+-    try { if (EMB42.has(k)) loader.parse(EMB42.get(k), '', g => onLoad(k, d, g), err => onFail(k, err)); else onFail(k, new Error('النموذج غير مضمّن')); } catch (err) { onFail(k, err); } } EMB42.free(); },
++    try { const at = DET1 ? DET1.assetTicket('emb:' + k) : 0; if (EMB42.has(k)) loader.parse(EMB42.get(k), '', g => DET1 ? DET1.assetDone(at, () => onLoad(k, d, g)) : onLoad(k, d, g), err => DET1 ? DET1.assetError(at, err) : onFail(k, err)); else { if (DET1) DET1.assetError(at, 'missing embedded ' + k); else onFail(k, new Error('النموذج غير مضمّن')); } } catch (err) { onFail(k, err); } } EMB42.free(); },
+     err => { console.error('[v42] emb pack', err); for (const k of Object.keys(MDEF)) onFail(k, err); });
+   // v13: نماذج أهل البلد الجديدة (هيكل عظمي + مقاطع Idle/Walk/Walk2/Talk/Run). إن فشل التحميل يبقى الشكل القديم
+   const nl = new GLTFLoader(); nl.setMeshoptDecoder(MeshoptDecoder);
+@@ -1899,7 +1904,7 @@ const sky = new THREE.Mesh(new THREE.SphereGeometry(1000, 24, 16), new THREE.Sha
+ sky.frustumCulled = false; sky.renderOrder = -2; scene.add(sky);
+ // النجوم
+ const sp = new Float32Array(1800 * 3);
+-for (let i = 0; i < 1800; i++) { const u = Math.random() * 2 - 1, a = Math.random() * 6.283, s = Math.sqrt(1 - u * u);
++for (let i = 0; i < 1800; i++) { const u = D1RAND() * 2 - 1, a = D1RAND() * 6.283, s = Math.sqrt(1 - u * u);
+   sp.set([Math.cos(a) * s * 900, u * 900, Math.sin(a) * s * 900], i * 3); }
+ const starGeo = new THREE.BufferGeometry(); starGeo.setAttribute('position', new THREE.BufferAttribute(sp, 3));
+ const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0xffffff, size: 1.7, sizeAttenuation: false, transparent: true, opacity: 0, depthWrite: false, fog: false }));
+@@ -1923,7 +1928,7 @@ const water = new THREE.Mesh(new THREE.PlaneGeometry(9000, 9000).rotateX(-Math.P
+ water.renderOrder = 1; scene.add(water);
+ // المطر: خطوط تدور حول الكاميرا بالكامل داخل الـshader
+ const RN = 2400, rp = new Float32Array(RN * 6), rt = new Float32Array(RN * 2);
+-for (let i = 0; i < RN; i++) { const x = Math.random() * 30, y = Math.random() * 20, z = Math.random() * 30;
++for (let i = 0; i < RN; i++) { const x = D1RAND() * 30, y = D1RAND() * 20, z = D1RAND() * 30;
+   for (let j = 0; j < 2; j++) { rp.set([x, y, z], (i * 2 + j) * 3); rt[i * 2 + j] = j; } }
+ const rainGeo = new THREE.BufferGeometry(); rainGeo.setAttribute('position', new THREE.BufferAttribute(rp, 3)); rainGeo.setAttribute('tip', new THREE.BufferAttribute(rt, 1));
+ const RU = { uCam: { value: new THREE.Vector3() }, uOp: { value: 0 }, uTime: U.uTime, uWind: U.uWind };
+@@ -1935,7 +1940,7 @@ const rain = new THREE.LineSegments(rainGeo, new THREE.ShaderMaterial({ transpar
+ rain.frustumCulled = false; rain.visible = false; scene.add(rain);
+ function updateEnv(dt) {
+   const _T0 = ENV.T; ENV.T = (ENV.T + dt * 24 / 900) % 24; if (ENV.T < _T0) onNewDay(); U.uTime.value += dt;               // يوم كامل = ١٥ دقيقة
+-  if (ENV.auto) { ENV.wTimer -= dt; if (ENV.wTimer < 0) { ENV.wTimer = 90 + Math.random() * 120; const q = Math.random();
++  if (ENV.auto) { ENV.wTimer -= dt; if (ENV.wTimer < 0) { ENV.wTimer = 90 + D1RAND() * 120; const q = D1RAND();
+     setWeather(q < .66 ? 'clear' : q < .8 ? 'cloudy' : q < .86 ? 'fog' : q < .97 ? 'rain' : 'storm'); } }
+   const t = WTYPES[ENV.wType], k = 1 - Math.exp(-dt * 0.4);
+   for (const q of ['cloud', 'fogK', 'rain', 'storm']) ENV[q] += (t[q] - ENV[q]) * k;
+@@ -1950,7 +1955,7 @@ function updateEnv(dt) {
+     U.uHor.value.r *= TINT[0]; U.uHor.value.g *= TINT[1]; U.uHor.value.b *= TINT[2];
+     U.uZen.value.r *= 1 + (TINT[0] - 1) * 0.5; U.uZen.value.g *= 1 + (TINT[1] - 1) * 0.5; U.uZen.value.b *= 1 + (TINT[2] - 1) * 0.5; }
+   U.uSunCol.value.setRGB(1, .86, .62).lerp(cDu, dusk * 0.6); U.uNight.value = 1 - day; U.uCloud.value = ENV.cloud;
+-  ENV.flash = Math.max(0, ENV.flash - dt * 3); if (ENV.storm > 0.5 && Math.random() < dt * 0.15) ENV.flash = 1; U.uFlash.value = ENV.flash;
++  ENV.flash = Math.max(0, ENV.flash - dt * 3); if (ENV.storm > 0.5 && D1RAND() < dt * 0.15) ENV.flash = 1; U.uFlash.value = ENV.flash;
+   U.uWind.value = 0.4 + ENV.storm * 1.2 + ENV.rain * 0.3;
+   sun.position.copy(sd).multiplyScalar(200).add(avatar.position); sun.target.position.copy(avatar.position);
+   sun.color.copy(U.uSunCol.value); sun.intensity = 3.0 * day * (1 - ENV.cloud * 0.65);
+diff --git a/v50g3/code/part-001.txt b/v50g3/code/part-001.txt
+index ca9d3e1..240e070 100644
+--- a/v50g3/code/part-001.txt
++++ b/v50g3/code/part-001.txt
+@@ -254,8 +254,8 @@ function makeWorkers() {                        // Web Worker من Blob؛ عند
+     const n = Math.min(3, Math.max(1, (navigator.hardwareConcurrency || 4) - 2));
+     for (let i = 0; i < n; i++) {
+       const w = new Worker(url); w.busy = false; w.postMessage({ world: WORLD });     // حقول العالم تُمرَّر مرة واحدة
+-      w.onmessage = e => { w.busy = false; CT.n++; CT.ms += performance.now() - w.t0; if (CT.n === 80) console.info('[أداء] متوسط زمن توليد القطعة (Worker): ' + (CT.ms / CT.n).toFixed(1) + ' م.ث'); addChunk(e.data.cx, e.data.cz, e.data.res, e.data.r, e.data.gr); };
+-      w.onerror = () => { useWorker = false; w.busy = false; };
++      w.onmessage = e => { if (DET1) { DET1.terrainDone(w.detTicket, () => { w.busy = false; CT.n++; addChunk(e.data.cx, e.data.cz, e.data.res, e.data.r, e.data.gr); }); return; } w.busy = false; CT.n++; CT.ms += performance.now() - w.t0; if (CT.n === 80) console.info('[أداء] متوسط زمن توليد القطعة (Worker): ' + (CT.ms / CT.n).toFixed(1) + ' م.ث'); addChunk(e.data.cx, e.data.cz, e.data.res, e.data.r, e.data.gr); };
++      w.onerror = () => { if (DET1) DET1.terrainError(w.detTicket); useWorker = false; w.busy = false; };
+       workers.push(w);
+     }
+   } catch (err) { useWorker = false; }
+@@ -264,7 +264,7 @@ makeWorkers();
+ function pump() {                               // توزيع المهام
+   if (useWorker && workers.length) {
+     for (const w of workers) { if (w.busy || !queue.length) continue;
+-      const j = queue.shift(); w.busy = true; w.t0 = performance.now();
++      const j = queue.shift(); w.busy = true; w.t0 = performance.now(); if (DET1) w.detTicket = DET1.terrainTicket();
+       w.postMessage({ seed: CFG.SEED, cx: j.cx, cz: j.cz, res: j.res, ch: CFG.CH, veg: S.veg, gr: j.gr }); }
+   } else if (queue.length) {                    // بديل: قطعة واحدة في كل إطار
+     const j = queue.shift(); addChunk(j.cx, j.cz, j.res, LIB.chunk(j.cx, j.cz, j.res, CFG.CH, S.veg, j.gr), j.gr);
+@@ -431,7 +431,7 @@ function respawn() {
+ }
+ function hitWolf(w, dmg, kx, kz, byP) {
+   if (w.dead) return; if (window.FX42) window.FX42.sparks(w.x, w.z, LIB.height(w.x, w.z) + 0.6); w.hp -= dmg; w.flash = 1; w.x += kx; w.z += kz;
+-  if (w.hp <= 0) { w.dead = true; w.deadT = 0; if (byP) { const g = 8 + ((Math.random() * 8) | 0); ST.gold += g; toast('أسقطتَ ذئباً (+' + g + ' ذهب)'); } else toast('سقط ذئب'); }
++  if (w.hp <= 0) { w.dead = true; w.deadT = 0; if (byP) { const g = 8 + ((D1RAND() * 8) | 0); ST.gold += g; toast('أسقطتَ ذئباً (+' + g + ' ذهب)'); } else toast('سقط ذئب'); }
+ }
+ function meleeHit() { banditMelee();
+   const fx = -Math.sin(PL.face), fz = -Math.cos(PL.face);
+@@ -471,17 +471,17 @@ const ANN = { horse: 'حصاناً', horseW: 'حصاناً أبيض', donkey: '
+ function spawnFauna() {                          // تُستدعى بعد اكتمال تحميل النماذج
+   for (let i = 0; i < 8; i++) { const a = i * 2.4, r = 70 + i * 28, x = SPAWN.x + Math.cos(a) * r, z = SPAWN.z + Math.sin(a) * r; if (LIB.height(x, z) > 3) makeWolf(x, z, i); }
+   for (let g = 0; g < 0; g++) { let tries = 0;   // v14: قطعان الخيول البرّية محذوفة (الحصان للجنود فقط)
+-    while (tries++ < 80) { const a = Math.random() * 6.283, r = 120 + Math.random() * 520, x = SPAWN.x + Math.cos(a) * r, z = SPAWN.z + Math.sin(a) * r, h = LIB.height(x, z);
+-      if (h < 4 || h > 60) continue; const n2 = 2 + ((Math.random() * 3) | 0);
+-      for (let k = 0; k < n2; k++) makeAnimal(Math.random() < 0.3 ? 'horseW' : 'horse', x + Math.cos(k * 2.1) * 5, z + Math.sin(k * 2.1) * 5, null, false);
++    while (tries++ < 80) { const a = D1RAND() * 6.283, r = 120 + D1RAND() * 520, x = SPAWN.x + Math.cos(a) * r, z = SPAWN.z + Math.sin(a) * r, h = LIB.height(x, z);
++      if (h < 4 || h > 60) continue; const n2 = 2 + ((D1RAND() * 3) | 0);
++      for (let k = 0; k < n2; k++) makeAnimal(D1RAND() < 0.3 ? 'horseW' : 'horse', x + Math.cos(k * 2.1) * 5, z + Math.sin(k * 2.1) * 5, null, false);
+       break; } }
+ }
+ function makeWolf(x, z, seed) {
+   if (!MODELS.wolf) return;
+   const { inst, mixer, acts, mats } = skinnedInstance('wolf');
+   scene.add(inst);
+-  WOLVES.push({ g: inst, mixer, acts, mats, cur: null, x, z, y: LIB.height(x, z), face: Math.random() * 6.28, hp: 60, cd: 0, flash: 0, dead: false, deadT: 0, seed,
+-    home: [x, z], state: 'wander', tgt: null, eatT: 0, howlCd: 15 + Math.random() * 30, atkT: 0, atkDid: true, wa: Math.random() * 6.28 });
++  WOLVES.push({ g: inst, mixer, acts, mats, cur: null, x, z, y: LIB.height(x, z), face: D1RAND() * 6.28, hp: 60, cd: 0, flash: 0, dead: false, deadT: 0, seed,
++    home: [x, z], state: 'wander', tgt: null, eatT: 0, howlCd: 15 + D1RAND() * 30, atkT: 0, atkDid: true, wa: D1RAND() * 6.28 });
+ }
+ function wolfPrey(w) {                           // اختيار الفريسة: حيوانات القرى أولاً ثم الأهالي ثم اللاعب
+   let best = null, bs = 1e9;
+@@ -523,7 +523,7 @@ function updateWolves(dt) {
+     } else if (w.eatT > 0) {                     // التهام الفريسة
+       w.eatT -= dt; skPlay(w, 'Eating', 0.3);
+     } else {
+-      if (!w.tgt || w.tgt.o && w.tgt.o.dead || Math.random() < dt * 0.5) { const p = wolfPrey(w); w.tgt = p; if (p) w.state = p.d2 > 14 || night ? 'stalk' : 'chase'; }
++      if (!w.tgt || w.tgt.o && w.tgt.o.dead || D1RAND() < dt * 0.5) { const p = wolfPrey(w); w.tgt = p; if (p) w.state = p.d2 > 14 || night ? 'stalk' : 'chase'; }
+       const t = w.tgt;
+       if (t) {
+         if (t.k === 'p') { t.x = PL.x; t.z = PL.z; } else { t.x = t.o.x; t.z = t.o.z; }
+@@ -551,7 +551,7 @@ function updateWolves(dt) {
+         const nx = w.x + Math.sin(w.wa) * sp * dt * 3, nz = w.z + Math.cos(w.wa * 1.3) * sp * dt * 3;
+         if (LIB.height(nx, nz) > 0.5 && Math.hypot(nx - w.home[0], nz - w.home[1]) < 45) { w.x = nx; w.z = nz; }
+         w.face = aLerp(w.face, Math.atan2(-Math.sin(w.wa), -Math.cos(w.wa * 1.3)), Math.min(1, dt * 3));
+-        skPlay(w, Math.random() < 0.005 ? 'Idle' : 'Walk', 0.35);
++        skPlay(w, D1RAND() < 0.005 ? 'Idle' : 'Walk', 0.35);
+       }
+     }
+     w.y = LIB.height(w.x, w.z); w.g.position.set(w.x - ORG.x, w.y, w.z - ORG.z); w.g.rotation.y = w.face;
+@@ -562,14 +562,14 @@ function makeAnimal(kind, x, z, L, pen) {
+   if (!MODELS[kind]) return null;
+   const { inst, mixer, acts, mats } = skinnedInstance(kind);
+   scene.add(inst);
+-  const a = { kind, g: inst, mixer, acts, mats, cur: null, x, z, y: LIB.height(x, z), face: Math.random() * 6.28, hp: kind === 'donkey' ? 55 : 80,
+-    dead: false, deadT: 0, flash: 0, state: 'graze', t: 1 + Math.random() * 4, idleV: 'Idle', home: [x, z], rad: pen ? 4.2 : 42, L: L || null, fleeT: 0, thX: 0, thZ: 0, wx: x, wz: z };
++  const a = { kind, g: inst, mixer, acts, mats, cur: null, x, z, y: LIB.height(x, z), face: D1RAND() * 6.28, hp: kind === 'donkey' ? 55 : 80,
++    dead: false, deadT: 0, flash: 0, state: 'graze', t: 1 + D1RAND() * 4, idleV: 'Idle', home: [x, z], rad: pen ? 4.2 : 42, L: L || null, fleeT: 0, thX: 0, thZ: 0, wx: x, wz: z };
+   ANIMALS.push(a); if (L) L.animals.push(a); return a;
+ }
+ function hitAnimal(a, dmg, kx, kz, byP) {
+   if (a.dead) return; if (window.FX42) window.FX42.sparks(a.x, a.z, LIB.height(a.x, a.z) + 0.7); a.hp -= dmg; a.flash = 1; a.x += kx; a.z += kz; a.fleeT = 10; a.thX = PL.x; a.thZ = PL.z;
+   if (a.hp <= 0) { a.dead = true; a.deadT = 0; a.cur = null;
+-    if (byP) { const g = 5 + ((Math.random() * 9) | 0); ST.gold += g; toast('اصطدتَ ' + ANN[a.kind] + ' (+' + g + ' ذهب)');
++    if (byP) { const g = 5 + ((D1RAND() * 9) | 0); ST.gold += g; toast('اصطدتَ ' + ANN[a.kind] + ' (+' + g + ' ذهب)');
+       if (a.L) { REP.village -= 12; witnessGuards(a.L, null);   // قتل مواشي القرية: الحراس الذين يشهدون ذلك يغضبون
+         for (const m of a.L.npcs) { if (m.dead) continue; const dd = Math.hypot(m.x - a.x, m.z - a.z);
+           if (dd < 35) { m.alertT = 8; if (m.guard) m.inv = [a.x, a.z, 20]; else m.mem.saw = true; } } } } }
+@@ -595,16 +595,16 @@ function updateAnimals(dt) {
+       if (LIB.height(nx, nz) > 0.4) { a.x = nx; a.z = nz; }
+       a.face = aLerp(a.face, Math.atan2(-fx2, -fz2), Math.min(1, dt * 6)); skPlay(a, 'Gallop', 0.15);
+     } else {
+-      if (a.t <= 0) { const q = Math.random();
+-        if (q < 0.45) { a.state = 'graze'; a.t = 4 + Math.random() * 5; }
+-        else if (q < 0.72) { a.state = 'idle'; a.t = 3 + Math.random() * 3.5; a.idleV = Math.random() < 0.35 ? 'Idle_2' : 'Idle'; }
+-        else { a.state = 'walk'; a.t = 4 + Math.random() * 4; const ang = Math.random() * 6.283, rr = 2 + Math.random() * a.rad;
++      if (a.t <= 0) { const q = D1RAND();
++        if (q < 0.45) { a.state = 'graze'; a.t = 4 + D1RAND() * 5; }
++        else if (q < 0.72) { a.state = 'idle'; a.t = 3 + D1RAND() * 3.5; a.idleV = D1RAND() < 0.35 ? 'Idle_2' : 'Idle'; }
++        else { a.state = 'walk'; a.t = 4 + D1RAND() * 4; const ang = D1RAND() * 6.283, rr = 2 + D1RAND() * a.rad;
+           a.wx = a.home[0] + Math.cos(ang) * rr; a.wz = a.home[1] + Math.sin(ang) * rr; } }
+       if (a.state === 'walk') { const wx2 = a.wx - a.x, wz2 = a.wz - a.z, wl = Math.hypot(wx2, wz2);
+         if (wl > 1.2) { const nx = a.x + wx2 / wl * 1.7 * dt, nz = a.z + wz2 / wl * 1.7 * dt;
+           if (LIB.height(nx, nz) > 0.4) { a.x = nx; a.z = nz; }
+           a.face = aLerp(a.face, Math.atan2(-wx2, -wz2), Math.min(1, dt * 5)); skPlay(a, 'Walk', 0.3); }
+-        else { a.state = 'graze'; a.t = 3 + Math.random() * 3; } }
++        else { a.state = 'graze'; a.t = 3 + D1RAND() * 3; } }
+       else if (a.state === 'graze') skPlay(a, 'Eating', 0.35);
+       else skPlay(a, a.idleV, 0.35);
+     }
+@@ -617,7 +617,7 @@ function updateAnimals(dt) {
+ /* ═══════════ ٦د. القرى والـNPCs والذكاء الاصطناعي (المرحلة ٤، نسخة محسّنة) ═══════════ */
+ const rng = seed => { let a = seed | 0; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
+   t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; };
+-const E = id => document.getElementById(id), pickA = a => a[(Math.random() * a.length) | 0], aLerp = (a, b, t) => a + Math.atan2(sn(b - a), cs(b - a)) * t;
++const E = id => document.getElementById(id), pickA = a => a[(D1RAND() * a.length) | 0], aLerp = (a, b, t) => a + Math.atan2(sn(b - a), cs(b - a)) * t;
+ const REP = { village: 0, guard: 0 }, NPCS = [], DLG = { n: null }, VILLAGES = [];
+ const VN1 = ['وادي', 'تل', 'عين', 'نهر', 'جبل', 'سهل', 'ظل', 'نخل', 'حصن', 'مرج'], VN2 = ['الزيتون', 'الصفصاف', 'الغدير', 'الصقر', 'الربيع', 'النسيم', 'الغزلان', 'الحجر', 'الشمس', 'الأمل'];
+ const MN = ['أحمد', 'خالد', 'سليم', 'يوسف', 'نادر', 'عمر', 'فارس', 'ماهر', 'هاني', 'رامي', 'سعيد', 'حسن'], FN = ['ليلى', 'سلمى', 'نور', 'هدى', 'مريم', 'رنا', 'سناء', 'لينا'];
+@@ -3001,7 +3001,7 @@ const V18 = (() => { const D2R = Math.PI / 180, PI = Math.PI, ST = { t0: 0 };
+   function unstick(n, L) { if (!blk(L, n.x, n.z) || !inside(L, n.x, n.z, 0.05)) return false; const G = L.nav18, i0 = Math.floor(n.x - G.x0), j0 = Math.floor(n.z - G.z0);
+     for (let r = 1; r <= 10; r++) { let bd = 1e9, bi = -1, bj = -1; for (let dj = -r; dj <= r; dj++) for (let di = -r; di <= r; di++) { if (Math.max(Math.abs(di), Math.abs(dj)) !== r) continue; const i = i0 + di, j = j0 + dj; if (i < 0 || j < 0 || i >= G.n || j >= G.n || G.a[j * G.n + i]) continue; const d = di * di + dj * dj; if (d < bd) { bd = d; bi = i; bj = j; } }
+       if (bi >= 0) { n.x = G.x0 + bi + 0.5; n.z = G.z0 + bj + 0.5; n.path = null; ST.unstick = (ST.unstick || 0) + 1; return true; } } return false; }
+-  function farMove(n, L, gx, gz, s) { let left = s; n.fs = n.fs || (Math.random() < 0.5 ? 1 : -1);
++  function farMove(n, L, gx, gz, s) { let left = s; n.fs = n.fs || (D1RAND() < 0.5 ? 1 : -1);
+     while (left > 1e-3) { const st = Math.min(1, left), dx = gx - n.x, dz = gz - n.z, dl = Math.hypot(dx, dz); if (dl < 0.5) break; const a0 = Math.atan2(dx, dz); let moved = false;
+       for (const da of [0, 0.6, -0.6, 1.2, -1.2, 1.9, -1.9, 2.6, -2.6]) { const a = a0 + da * n.fs, nx = n.x + Math.sin(a) * st, nz = n.z + Math.cos(a) * st; if (blk(L, nx, nz)) continue; n.x = nx; n.z = nz; moved = true; break; }
+       if (!moved) { n.fs = -n.fs; break; } left -= st; } }
+@@ -3335,13 +3335,13 @@ function grdPlay(G, nm, fade, opt) {               // opt: { once, t0, ts, force
+   if (opt.once) { a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = true; } else { a.setLoop(THREE.LoopRepeat, Infinity); a.clampWhenFinished = false; }
+   a.timeScale = opt.ts || 1; a.play();
+   if (o && o !== a) a.crossFadeFrom(o, fade, false);
+-  a.time = opt.t0 !== undefined ? opt.t0 : (o ? 0 : Math.random() * a.getClip().duration);
++  a.time = opt.t0 !== undefined ? opt.t0 : (o ? 0 : D1RAND() * a.getClip().duration);
+   G.cur = nm; return a;
+ }
+ function grdStartAtk(n, G, dmg) {                  // مقطع ضربة عشوائي (Attack1/2/3) يبدأ قبيل لحظة الضربة؛ الضرر يقع لحظة وصول السلاح
+   const imp = GRD_IMP[G.key] || GRD_IMP.grdSw, pool = ['Attack1', 'Attack2', 'Attack3'].filter(k => G.acts[k]); if (!pool.length && G.acts.Attack) pool.push('Attack');
+   if (!pool.length) { if (dmg) hurt(dmg, n); return 0; }
+-  let nm = pool[(Math.random() * pool.length) | 0]; if (pool.length > 1 && nm === G.lastAtk) nm = pool[(pool.indexOf(nm) + 1) % pool.length]; G.lastAtk = nm;
++  let nm = pool[(D1RAND() * pool.length) | 0]; if (pool.length > 1 && nm === G.lastAtk) nm = pool[(pool.indexOf(nm) + 1) % pool.length]; G.lastAtk = nm;
+   const ti = imp[nm] || 0.8, TS = 1.5, lead = Math.min(ti, 0.5);
+   grdPlay(G, nm, 0.08, { once: true, force: true, ts: TS, t0: ti - lead });
+   G.atkLeft = (lead + 0.6) / TS; G.hitAt = dmg ? lead / TS : 0; G.dmg = dmg; G.react = 0;
+@@ -3363,7 +3363,7 @@ function grdAnim(n, dt, d) {                       // أنيميشن الحار
+     if (d < 75 && n.g.visible) G.mixer.update(dt); return; }
+   if (G.dead) { G.dead = false; G.cur = null; G.mixer.stopAllAction(); G.px = null; }
+   const atkNew = n.atkT > G.pAtk + 1e-3, hitNew = n.hitT > G.pHit + 1e-3; G.pAtk = n.atkT; G.pHit = n.hitT;
+-  if (hitNew) { const blk = n.blkT > 0, par = blk && A.Parry && Math.random() < 0.6, nm = par ? 'Parry' : blk && A.BlockHit ? 'BlockHit' : A.Hit ? 'Hit' : null;   // v16: Parry
++  if (hitNew) { const blk = n.blkT > 0, par = blk && A.Parry && D1RAND() < 0.6, nm = par ? 'Parry' : blk && A.BlockHit ? 'BlockHit' : A.Hit ? 'Hit' : null;   // v16: Parry
+     if (nm) { G.react = blk ? 0.75 : 0.5; grdPlay(G, nm, 0.08, { once: true, force: true, ts: par ? 1.3 : blk ? 1.6 : 1.3, t0: par ? 0 : blk ? 0.2 : 0 }); if (!blk) { G.atkLeft = 0; G.hitAt = 0; } } }
+   if (atkNew && G.atkLeft <= 0) grdStartAtk(n, G, 0);                    // ضربة لم تمر عبر grdStrike (الذئاب مثلاً)
+   if (G.px === null) { G.px = n.x; G.pz = n.z; }
+@@ -3577,8 +3577,8 @@ function pickPOI(n) {                             // نقطة اهتمام جد
+   const L = n.L, T = ENV.T, P = L.poi, wood = /حطّاب|نجّار|صيّاد/.test(n.job), work = L.big ? (n.farmer ? P.field : P.plaza) : (wood ? P.wood : P.field), W = [];
+   if (L.big) { const outd = Math.hypot(n.x - n.v.x, n.z - n.v.z);
+     if (n.farmer && T >= 17 && outd > 140) return { x: n.home.door[0], z: n.home.door[1], type: 'plaza' };           // الفلاحون يعودون مساءً
+-    if (n.farmer && T >= 7 && T < 17 && P.field.length) return P.field[(Math.random() * P.field.length) | 0];     // ويخرجون صباحاً إلى الحقول
+-    if (n.homeWork && T >= 7 && T < 17) return { x: n.home.door[0] + (Math.random() - 0.5) * 8, z: n.home.door[1] + (Math.random() - 0.5) * 8, type: 'wood' }; }   // أهل الحلقة ب يعملون عند بيوتهم
++    if (n.farmer && T >= 7 && T < 17 && P.field.length) return P.field[(D1RAND() * P.field.length) | 0];     // ويخرجون صباحاً إلى الحقول
++    if (n.homeWork && T >= 7 && T < 17) return { x: n.home.door[0] + (D1RAND() - 0.5) * 8, z: n.home.door[1] + (D1RAND() - 0.5) * 8, type: 'wood' }; }   // أهل الحلقة ب يعملون عند بيوتهم
+   const add = (w, a) => { if (L.big) a = a.filter(p => Math.hypot(p.x - n.x, p.z - n.z) < 130 && !(L.castle && Math.hypot(p.x - L.castle.x, p.z - L.castle.z) < L.castle.R + 3) && !(NPCK.on && NPCK.badGoal(p.x, p.z))); if (!a.length) return; for (const p of a) W.push([w / a.length, p]); };
+   if (T < 7) { add(3, P.plaza); add(3, P.well); add(1, P.cross); }
+   else if (T >= 12 && T < 13.5) { add(4, P.bench); add(3, P.plaza); add(1, P.well); }
+@@ -3586,17 +3586,17 @@ function pickPOI(n) {                             // نقطة اهتمام جد
+   else if (T < 19) { add(4, P.stall); add(2, P.plaza); add(1.5, P.bench); add(1.5, P.cross); add(1, P.well); add(1, work); }
+   else { add(3, P.plaza); add(3, P.bench); add(2, P.well); add(2, P.cross); add(1, P.stall); }
+   let tot = 0; for (const w of W) tot += w[0]; let best = null;
+-  for (let t = 0; t < 6; t++) { let q = Math.random() * tot, c = W[0] && W[0][1]; for (const w of W) { q -= w[0]; if (q <= 0) { c = w[1]; break; } }
++  for (let t = 0; t < 6; t++) { let q = D1RAND() * tot, c = W[0] && W[0][1]; for (const w of W) { q -= w[0]; if (q <= 0) { c = w[1]; break; } }
+     best = c; if (c && Math.hypot(c.x - n.x, c.z - n.z) > 5) break; }
+-  return best || { x: (L.big ? n.x : n.v.x) + (Math.random() - 0.5) * 12, z: (L.big ? n.z : n.v.z) + (Math.random() - 0.5) * 12, type: 'plaza' };
++  return best || { x: (L.big ? n.x : n.v.x) + (D1RAND() - 0.5) * 12, z: (L.big ? n.z : n.v.z) + (D1RAND() - 0.5) * 12, type: 'plaza' };
+ }
+ const FK37 = { R: 1.6, V: 1.2, W: 1.2 };   // v38 W: سرعة مشيه لبيته (م/ث) — مشية هادئة والخطوة متزامنة مع الأرض   // v37: نصف قطر الالتقاط عند الوصول للكاونتر
+ function npcGoal(n) {                             // الروتين اليومي: لا توقف طويل؛ تنقّل بين نقاط الاهتمام بـA*
+   const T = ENV.T, v = n.v, L = n.L, hd = n.home.door;
+   if (n.guard) {
+-    if (n.castleG) { if (n.stT <= 0) { n.sd = -n.sd; n.stT = 4 + Math.random() * 3; } return [n.post[0] + n.sd * 1.6, n.post[1], 'post', n.gface]; }   // حرس القصر: مواقع ثابتة
++    if (n.castleG) { if (n.stT <= 0) { n.sd = -n.sd; n.stT = 4 + D1RAND() * 3; } return [n.post[0] + n.sd * 1.6, n.post[1], 'post', n.gface]; }   // حرس القصر: مواقع ثابتة
+     if (n.gate && (n.shift === 0 ? (T >= 6 && T < 18) : (T < 6 || T >= 18))) {      // حارس البوابة: يتحرك على جانبي البوابة كل ٣-٦ ثوانٍ
+-      if (n.stT <= 0) { n.sd = -n.sd; n.stT = 3.5 + Math.random() * 2; }
++      if (n.stT <= 0) { n.sd = -n.sd; n.stT = 3.5 + D1RAND() * 2; }
+       const p = L.gatePos[n.slot % L.gatePos.length], k = n.sd > 0 ? 0 : 3.6, rx = (v.x - p[0]), rz = (v.z - p[1]), rl = Math.hypot(rx, rz) || 1;   // بين البوابة ونقطة أقرب للداخل
+       return [p[0] + rx / rl * k, p[1] + rz / rl * k, 'post', n.gface]; }
+     if (n.stT <= 0) { const rr = (L.patrol || [36, 18.5])[n.slot % 2]; n.pa += Math.min(0.5, 40 / rr); n.pt = [v.x + Math.cos(n.pa) * rr, v.z + Math.sin(n.pa) * rr]; for (let k = 0; k < 12 && PAL3D && v.city && (ANX50.inEst(n.pt[0], n.pt[1], 5) || (NPCK.on && NPCK.sd(n.pt[0], n.pt[1]) < 3)); k++) { n.pa += 0.2; n.pt = [v.x + Math.cos(n.pa) * rr, v.z + Math.sin(n.pa) * rr]; } n.stT = 5; }
+@@ -3608,10 +3608,10 @@ function npcGoal(n) {                             // الروتين اليومي
+     return op ? [k[0], k[1], 'post', n.shop.nf ?? n.shop.face] : [hd[0], hd[1], 'sleep']; }
+   if (T >= 22.5 || T < 5.5) return [hd[0], hd[1], 'sleep'];
+   if (ENV.rain > 0.4 && !n.shop) return [hd[0], hd[1], 'shelter'];
+-  if (n.shop) { if (T >= 7 && T < 19) { if (n.stT <= 0) { n.sd = -n.sd; n.stT = 3.5 + Math.random() * 2; }
++  if (n.shop) { if (T >= 7 && T < 19) { if (n.stT <= 0) { n.sd = -n.sd; n.stT = 3.5 + D1RAND() * 2; }
+       return [n.shop.keeper[0] + n.shop.lat[0] * n.sd * (n.shop.sway ?? 2.3), n.shop.keeper[1] + n.shop.lat[1] * n.sd * (n.shop.sway ?? 2.3), 'post', n.shop.nf ?? n.shop.face]; }
+     return n.shop.s20 ? [n.shop.keeper[0], n.shop.keeper[1], 'sleep'] : [hd[0], hd[1], 'sleep']; }
+-  if (!n.poi) { n.poi = pickPOI(n); n.tx = n.poi.x + (Math.random() - 0.5) * 2.4; n.tz = n.poi.z + (Math.random() - 0.5) * 2.4; n.atP = false; } if (NPCK.on && NPCK.badGoal(n.tx, n.tz)) NPCK.repick(n, pickPOI);   // npck v2: ولا وجهة على طريق القصر
++  if (!n.poi) { n.poi = pickPOI(n); n.tx = n.poi.x + (D1RAND() - 0.5) * 2.4; n.tz = n.poi.z + (D1RAND() - 0.5) * 2.4; n.atP = false; } if (NPCK.on && NPCK.badGoal(n.tx, n.tz)) NPCK.repick(n, pickPOI);   // npck v2: ولا وجهة على طريق القصر
+   if (L.big && n.farmer) { const din = Math.hypot(n.x - v.x, n.z - v.z), dtg = Math.hypot(n.tx - v.x, n.tz - v.z);       // العبور عبر أقرب بوابة
+     if ((din < 146) !== (dtg < 146)) { let g0 = L.gates[0], bd = 1e9; for (const gt of L.gates) { if (NPCK.on && NPCK.sd(gt.x, gt.z) < 0) continue; const q = Math.hypot(gt.x - n.x, gt.z - n.z); if (q < bd) { bd = q; g0 = gt; } }
+       const ar = g0.a * PI / 180, ux = Math.cos(ar), uz = -Math.sin(ar), rx = n.x - v.x, rz = n.z - v.z, rad = rx * ux + rz * uz, lat = Math.abs(rx * uz - rz * ux), inP = [v.x + ux * 140, v.z + uz * 140], outP = [v.x + ux * 160, v.z + uz * 160];
+@@ -3624,7 +3624,7 @@ const NPC_GAIT = { Walk: 1.25, WalkF: 1.15, Run: 3.3 };   // السرعة الط
+ function glbPlay(G, nm, fade) {
+   if (G.cur === nm) return G.acts[nm]; const a = G.acts[nm], o = G.cur ? G.acts[G.cur] : null; if (!a) return null;
+   a.reset(); a.enabled = true; a.setEffectiveWeight(1); a.play();
+-  if (o) a.crossFadeFrom(o, fade, false); else a.time = Math.random() * a.getClip().duration;   // طور عشوائي حتى لا يمشي الجميع بنفس الخطوة
++  if (o) a.crossFadeFrom(o, fade, false); else a.time = D1RAND() * a.getClip().duration;   // طور عشوائي حتى لا يمشي الجميع بنفس الخطوة
+   G.cur = nm; return a;
+ }
+ function glbAnim(n, dt, d) {                         // v13: أنيميشن المقاطع الحقيقية (Idle/Walk/Talk/Run) لأهل البلد
+@@ -3662,7 +3662,7 @@ function hitNPC(n, dmg, kx, kz) {
+   if (n.dead) return; if (window.FX42) window.FX42.sparks(n.x, n.z);
+   n.flash = 1;
+   if (n.guard) {                                       // الحرس أقوى: صدّ بالدرع أو تخفيف ضرر
+-    if (Math.random() < 0.35 && n.hitT <= 0 && n.atkT <= 0) { npcSay(n, 'shield'); n.blkT = 0.7; toast('صدّ الحارس ضربتك بدرعه'); dmg *= 0.15; kx *= 0.1; kz *= 0.1; }
++    if (D1RAND() < 0.35 && n.hitT <= 0 && n.atkT <= 0) { npcSay(n, 'shield'); n.blkT = 0.7; toast('صدّ الحارس ضربتك بدرعه'); dmg *= 0.15; kx *= 0.1; kz *= 0.1; }
+     else { dmg *= 0.55; kx *= 0.3; kz *= 0.3; } }
+   n.hp -= dmg; n.hitT = 0.4; n.x += kx; n.z += kz; n.mem.harmed++; n.talking = false; if (DLG.n === n) closeDlg();
+   const killed = n.hp <= 0; if (killed) { n.dead = true; n.deadT = 0; toast('قتلتَ ' + n.name); }
+@@ -3734,7 +3734,7 @@ function updateNPC(n, dt) {
+     n.st = 'fight'; npcSay(n, 'sword'); n.sleeping = false; faceTo(PL.x, PL.z);
+     const ri = CZ.resp.indexOf(n), a = Math.atan2(CZ.z - PL.z, CZ.x - PL.x) + (ri - (CZ.resp.length - 1) / 2) * 1.5, rr = d > 6 ? 0 : 1.7;   // تشكيل: كلٌّ من جهة
+     if (d > 2.2) npcWalk(n, PL.x + Math.cos(a) * rr, PL.z + Math.sin(a) * rr, 6.2, dt);
+-    else if (n.cool <= 0) { n.cool = 0.9 + Math.random() * 0.4; grdStrike(n, n.castleG || n.royal16 ? 21 : 14); } }
++    else if (n.cool <= 0) { n.cool = 0.9 + D1RAND() * 0.4; grdStrike(n, n.castleG || n.royal16 ? 21 : 14); } }
+   else if (n.guard && hostile && (!n.castleG || inChase) && Math.hypot(PL.x - v.x, PL.z - v.z) < (v.R || 62) + 13 && (sees || (d < 40 && losOK))) {          // الحرس: قتال منسّق + تكتيكات
+     n.st = 'fight'; npcSay(n, 'sword'); n.sleeping = false; n.searchT = SEARCH_T;
+     
+@@ -3744,11 +3744,11 @@ function updateNPC(n, dt) {
+       n.hp = Math.min(n.maxHp, n.hp + 8 * dt); npcSay(n, 'shield'); faceTo(PL.x, PL.z);
+       if (d < 14) npcWalk(n, n.x - dx / (d || 1) * 7, n.z - dz / (d || 1) * 7, 5.6, dt); }
+     else {
+-      n.strafe -= dt; if (n.strafe <= 0) { n.strafe = 1.1 + Math.random() * 1.7; n.strafeD = Math.random() < 0.5 ? 1 : -1; }
++      n.strafe -= dt; if (n.strafe <= 0) { n.strafe = 1.1 + D1RAND() * 1.7; n.strafeD = D1RAND() < 0.5 ? 1 : -1; }
+       const a = n.slot * 1.57 + 0.7 + (d < 6 ? n.strafeD * 0.9 : 0), rr = d > 7 ? 0 : 1.5 + (n.slot % 2) * 0.9;
+       faceTo(PL.x, PL.z);
+       if (d > 2.2) npcWalk(n, PL.x + Math.cos(a) * rr, PL.z + Math.sin(a) * rr, 6.5, dt);
+-      else if (n.cool <= 0) { n.cool = 0.8 + Math.random() * 0.4; grdStrike(n, n.castleG || n.royal16 ? 21 : 14); } } }
++      else if (n.cool <= 0) { n.cool = 0.8 + D1RAND() * 0.4; grdStrike(n, n.castleG || n.royal16 ? 21 : 14); } } }
+   else if (n.guard && wolf && wd < 14 && Math.hypot(wolf.x - v.x, wolf.z - v.z) < (v.R || 62) + 4) { n.st = 'fight'; npcSay(n, 'sword'); faceTo(wolf.x, wolf.z);
+     if (n.shoutT <= 0 && wd < 10) { n.shoutT = 9; shout(n, wolf.x, wolf.z); }
+     if (wd > 2.2) npcWalk(n, wolf.x, wolf.z, 6.5, dt); else if (n.cool <= 0) { n.cool = 0.9; n.atkT = 0.6; hitWolf(wolf, 30, (wolf.x - n.x) / wd, (wolf.z - n.z) / wd); } }
+@@ -3763,7 +3763,7 @@ function updateNPC(n, dt) {
+   else if (n.guard && n.lastSeen && n.searchT > 0 && n.angry) {                      // بحث حول آخر موقع مرئي
+     n.searchT -= dt; n.st = 'wander'; npcSay(n, 'eye');
+     if (npcWalk(n, n.lastSeen[0], n.lastSeen[1], 5.2, dt)) { n.pa += dt * 2.4; n.face += sn(n.pa) * dt * 3.2;
+-      if (Math.random() < dt * 0.45) n.lastSeen = [n.lastSeen[0] + (Math.random() - 0.5) * 16, n.lastSeen[1] + (Math.random() - 0.5) * 16]; }
++      if (D1RAND() < dt * 0.45) n.lastSeen = [n.lastSeen[0] + (D1RAND() - 0.5) * 16, n.lastSeen[1] + (D1RAND() - 0.5) * 16]; }
+     if (n.searchT <= 0) { n.lastSeen = null; n.searchDone = true; } }
+   else if (!n.guard && ((wolf && wd < 16) || (hostile && sees && d < 24))) {            // الأهالي: هروب ذكي (حارس أو بيت)
+     n.st = 'flee'; n.sleeping = false; npcSay(n, 'fear');
+@@ -3784,17 +3784,17 @@ function updateNPC(n, dt) {
+     if (!n.sleeping) {
+       if (!n.chat && n.fk37 !== 1 && n.chatCd <= 0 && n.stillT < 1.5 && ['wander', 'poi', 'shop', 'post'].includes(gl[2]))           // محادثة بين NPCs متجاورين
+         for (const m of L.npcs) { if (m === n || m.dead || m.sleeping || m.chat || m.chatCd > 0 || m.talking || m.fk37 === 1) continue;
+-          if (Math.hypot(m.x - n.x, m.z - n.z) < 5 && Math.random() < dt * 0.5) { const t = 3 + Math.random() * 2.5; n.chat = { w: m, t }; m.chat = { w: n, t }; break; } }
++          if (Math.hypot(m.x - n.x, m.z - n.z) < 5 && D1RAND() < dt * 0.5) { const t = 3 + D1RAND() * 2.5; n.chat = { w: m, t }; m.chat = { w: n, t }; break; } }
+       const arrived = npcWalk(n, gl[0], gl[1], n.fk37 ? FK37.W : (n.guard ? (n.gm && n.gm.grd ? 1.8 : 2.8) : 2.2) * (ENV.rain > 0.2 ? 1.35 : 1) * (U.uNight.value > 0.5 ? 0.92 : 1), dt);
+       if (rest && arrived) n.sleeping = true;
+-      if (gl[2] === 'poi') { if (arrived) { if (!n.atP) { n.atP = true; n.dwell = 2 + Math.random() * 3.5; } n.dwell -= dt; if (n.dwell <= 0) { n.poi = null; n.atP = false; } } else n.atP = false; }   // توقف قصير ثم وجهة جديدة
++      if (gl[2] === 'poi') { if (arrived) { if (!n.atP) { n.atP = true; n.dwell = 2 + D1RAND() * 3.5; } n.dwell -= dt; if (n.dwell <= 0) { n.poi = null; n.atP = false; } } else n.atP = false; }   // توقف قصير ثم وجهة جديدة
+       if (arrived && gl[3] !== undefined) n.face = aLerp(n.face, gl[3], Math.min(1, dt * 5));
+       n.st = arrived ? ((gl[2] === 'poi' && n.poi && (n.poi.type === 'field' || n.poi.type === 'wood')) ? 'work' : 'idle') : 'wander'; npcSay(n, arrived && gl[2] === 'poi' && n.poi && n.poi.type === 'stall' ? 'cart' : null);
+     }
+   }
+   // كشف الاحتجاز: أعد التخطيط إذا علق
+   if (n.mv) { const moved = Math.hypot(n.x - n.lx, n.z - n.lz);
+-    if (moved < 0.02) { n.stuckT += dt; if (n.stuckT > 1.1) { n.stuckT = 0; n.path = null; n.poi = null; n.atP = false; n.stT = 0; n.x += (Math.random() - 0.5) * 1.8; n.z += (Math.random() - 0.5) * 1.8; } }
++    if (moved < 0.02) { n.stuckT += dt; if (n.stuckT > 1.1) { n.stuckT = 0; n.path = null; n.poi = null; n.atP = false; n.stT = 0; n.x += (D1RAND() - 0.5) * 1.8; n.z += (D1RAND() - 0.5) * 1.8; } }
+     else n.stuckT = 0; }
+   n.lx = n.x; n.lz = n.z;
+   // تباعد بين الشخصيات كي لا تتداخل
+@@ -3802,7 +3802,7 @@ function updateNPC(n, dt) {
+     const sd = Math.hypot(sx, sz); if (sd < 1.1) { if (sd < 1e-3) { n.x += n.sd * 0.05; continue; } const k = Math.min((1.1 - sd) * 0.5, dt * 3.5); n.x += sx / sd * k; n.z += sz / sd * k; } }
+   if (d < NPC_R + PL_R && d > 1e-3 && !ST.dead) { const k = (NPC_R + PL_R - d); n.x -= dx / d * k; n.z -= dz / d * k; }   // لا عبور من خلال اللاعب
+   n.chkT += dt; if (n.chkT >= 8) { n.chkT = 0;                       // كشف التعثر: لم يتحرك أكثر من ١م خلال ٨ث ← هدف جديد
+-    if (!n.sleeping && !n.talking && Math.hypot(n.x - n.chkX, n.z - n.chkZ) < 1) { n.poi = null; n.path = null; n.atP = false; n.stT = 0; n.chat = null; n.x += (Math.random() - 0.5) * 2; n.z += (Math.random() - 0.5) * 2; }
++    if (!n.sleeping && !n.talking && Math.hypot(n.x - n.chkX, n.z - n.chkZ) < 1) { n.poi = null; n.path = null; n.atP = false; n.stT = 0; n.chat = null; n.x += (D1RAND() - 0.5) * 2; n.z += (D1RAND() - 0.5) * 2; }
+     n.chkX = n.x; n.chkZ = n.z; }
+   { const wx = n.x - v.x, wz = n.z - v.z, wr = Math.hypot(wx, wz);       // القرويون داخل السور (نصف القطر ٥٨م)
+     const WR = (v.R || 62) - 4.5; if (wr > WR && !(n.farmer && ENV.T >= 6.5 && ENV.T < 19.5)) { n.x = v.x + wx / wr * (WR - 0.5); n.z = v.z + wz / wr * (WR - 0.5); n.path = null; if (!n.guard) { n.poi = null; n.atP = false; } } }
+@@ -4916,12 +4916,12 @@ function banAmbushNear(x, z) {
+     if (d < 70 || d > 170 || banNearVillage(px, pz, BAN.VIL_KEEP) || LIB.height(px, pz) < 0.5) continue;
+     c.push([px, pz]);
+   }
+-  return c.length ? c[(Math.random() * c.length) | 0] : null;
++  return c.length ? c[(D1RAND() * c.length) | 0] : null;
+ }
+ // موقع مخيم جديد: قلب الغابة، بعيد عن القرى والمدينة والمخيمات الأخرى
+ function banFindCamp(exceptCamp, fromX, fromZ, minFrom) {
+   for (let t = 0; t < 600; t++) {
+-    const x = (Math.random() * 2 - 1) * (CFG.HW - 500), z = (Math.random() * 2 - 1) * (CFG.HH - 500);
++    const x = (D1RAND() * 2 - 1) * (CFG.HW - 500), z = (D1RAND() * 2 - 1) * (CFG.HH - 500);
+     if (fromX !== undefined && Math.hypot(x - fromX, z - fromZ) < minFrom) continue;
+     if (CAMPS.some(c => c !== exceptCamp && Math.hypot(c.x - x, c.z - z) < BAN.CAMP_GAP)) continue;
+     if (LIB.regionW(x, z)[1] < 0.9) continue;
+@@ -4989,13 +4989,13 @@ function banAnim36(b, dt, mode) {
+   const S = b.sk; b.piv.rotation.set(0, 0, 0); b.piv.position.set(0, 0, 0);
+   if (b.dead || mode === 'dead') banPlay36(b, 'Death', true, 0.15);
+   else if (b.hitT > 0.05 && S.cur !== 'Death') banPlay36(b, 'Hit', true, 0.08);
+-  else if (b.atkT > 0) { if (!/^Attack/.test(S.cur || '')) banPlay36(b, ['Attack1', 'Attack2', 'Attack3'][(Math.random() * 3) | 0], true, 0.08); }
++  else if (b.atkT > 0) { if (!/^Attack/.test(S.cur || '')) banPlay36(b, ['Attack1', 'Attack2', 'Attack3'][(D1RAND() * 3) | 0], true, 0.08); }
+   else if (b.mv) banPlay36(b, mode === 'chase' ? 'Run' : mode === 'hide' ? 'Sneak' : 'Walk', false);
+   else banPlay36(b, b.camp && b.camp.alert ? 'CombatIdle' : 'Idle', false, 0.3);
+   if (b.g.visible) S.mixer.update(dt);
+ }
+ function banMake(c, idx) {
+-  const kind = Math.random() < 0.5 ? 'viking' : 'berserk';
++  const kind = D1RAND() < 0.5 ? 'viking' : 'berserk';
+   const g = new THREE.Group(), piv = new THREE.Group(); g.add(piv); scene.add(g);
+   const M = MODELS[kind];
+   if (M && M.prop) { const m = new THREE.Mesh(M.geo, HM1); m.scale.setScalar(1.85 / ((M.bb.max.y - M.bb.min.y) || 1)); m.castShadow = false; piv.add(m); }
+@@ -5010,7 +5010,7 @@ function spawnBandits() {
+     if (!s) { console.warn('[قطاع الطرق] لم يُعثر على موقع مخيم'); continue; }
+     const c = { x: s.x, z: s.z, amb: s.amb, members: [], alert: false, robbed: false, lostT: 0, pendingMove: false, g: null };
+     CAMPS.push(c); banBuildCamp(c);
+-    const n = BAN.MIN + ((Math.random() * (BAN.MAX - BAN.MIN + 1)) | 0);
++    const n = BAN.MIN + ((D1RAND() * (BAN.MAX - BAN.MIN + 1)) | 0);
+     for (let k = 0; k < n; k++) banMake(c, k);
+     banLayout(c);
+     for (const b of c.members) { b.x = b.homeX; b.z = b.homeZ; }
+@@ -5030,7 +5030,7 @@ function banRob() {
+   const g = Math.min(ST.gold, Math.max(5, Math.floor(ST.gold * BAN.STEAL)));
+   if (g > 0) { ST.gold -= g; got.push(g + ' ذهب'); }
+   const have = bagList();
+-  if (have.length) { const id = have[(Math.random() * have.length) | 0]; BAG[id]--; got.push(ITEMS[id].name); renderBar(); }
++  if (have.length) { const id = have[(D1RAND() * have.length) | 0]; BAG[id]--; got.push(ITEMS[id].name); renderBar(); }
+   toast(got.length ? 'سرقوا منك: ' + got.join('، ') : 'قطاع الطرق هاجموك لكن ما عندك شي يتسرق');
+ }
+ function banHit(b, dmg, kx, kz) {
+diff --git a/v50g3/code/part-002.txt b/v50g3/code/part-002.txt
+index b8edf56..7cf306a 100644
+--- a/v50g3/code/part-002.txt
++++ b/v50g3/code/part-002.txt
+@@ -273,7 +273,7 @@ function solhMake(x, z, yaw, L, rider) {             // نسخة مستقلة: 
+   wrap.add(inst); scene.add(wrap);
+   const col = solidBox(x, z, 0.85, 2.3, yaw); col.top = LIB.height(x, z) + 1.7; col.solh = 1; L.solid.push(col);
+   const h = { g: wrap, mixer, acts, cur: null, x, z, yaw, y: LIB.height(x, z), col, rider: null, pat: null, vis: false };
+-  const a = acts.Idle; a.play(); a.time = Math.random() * M.clips.Idle.duration; h.cur = 'Idle';
++  const a = acts.Idle; a.play(); a.time = D1RAND() * M.clips.Idle.duration; h.cur = 'Idle';
+   if (rider) h.rider = solhRider(wrap);
+   SOLH.list.push(h); return h;
+ }
+@@ -602,7 +602,7 @@ window.V19 = V19;
+     g.traverse(o => { if (o.name === 'Seat') seat = o; else if (o.name === 'ReinL') rl = o; else if (o.name === 'ReinR') rr = o; if (o.isMesh) { if (o.name === 'Tack' || (o.parent && o.parent.name === 'Tack')) tack = o; o.castShadow = HQ; o.receiveShadow = false; } });
+     if (opts.bare && tack) tack.visible = false;
+     const m = { kind, coat, owned: !!opts.owned, sale: !!opts.sale, bare: !!opts.bare, lite: !!(T.lite && g0 === T.lite), x: opts.x, z: opts.z, h: opts.h || 0, y: 0, g, mixer, acts, cur: null, seat, rl, rr, tack,
+-      speed: 0, real: 0, mounted: false, called: false, idleT: 2 + Math.random() * 6, st: opts.bare ? 'Eat' : 'Idle', vis: false, px: opts.x, pz: opts.z, stuckT: 0, pitch: 0, sol: [[0, 0, 0.5], [0, 0, 0.5]] };
++      speed: 0, real: 0, mounted: false, called: false, idleT: 2 + D1RAND() * 6, st: opts.bare ? 'Eat' : 'Idle', vis: false, px: opts.x, pz: opts.z, stuckT: 0, pitch: 0, sol: [[0, 0, 0.5], [0, 0, 0.5]] };
+     for (const s of m.sol) s.tree = 1;
+     scene.add(g); H.list.push(m);
+     play(m, m.st, 0); return m;
+@@ -643,7 +643,7 @@ window.V19 = V19;
+   function populate() {
+     const cx = CITY.x, cz = CITY.z, sv = H.saved, owned = new Set(sv.owned.filter(k => DEF[k]));
+     SALE.forEach(([kind, bare], i) => { if (!bare && owned.has(kind)) return; const [ox, oz] = SLOTS[i];
+-      makeHorse(kind, { x: cx + ox, z: cz + oz, h: Math.PI / 2 + (Math.random() - 0.5) * 0.12, sale: !bare, bare, lite: !HQ }); });
++      makeHorse(kind, { x: cx + ox, z: cz + oz, h: Math.PI / 2 + (D1RAND() - 0.5) * 0.12, sale: !bare, bare, lite: !HQ }); });
+     for (const kind of owned) { const p = sv.pos[kind]; let x, z, h; if (p) [x, z, h] = p; else { [x, z] = [cx + OWN[0], cz + OWN[1]]; h = Math.PI / 2; }
+       const m = makeHorse(kind, { x, z, h, owned: true, lite: !HQ }); if (sv.active === kind) H.active = m; }
+     if (!H.active) H.active = H.list.find(m => m.owned) || null;
+@@ -895,7 +895,7 @@ function riderPose(m, dt) {                       // v22: وضعية الفار
+       let clip;
+       if (m.mounted || m.called || m.speed > 0.05) { const s = m.mounted ? Math.min(m.speed, m.real + 0.2) : m.speed; clip = s < (m.mounted ? 0.45 : 0.25) ? (Math.abs(m.turn || 0) > 0.3 && m.mounted ? (m.turn > 0 ? 'TurnL' : 'TurnR') : 'Idle') : s < 2.7 ? 'Walk' : s < 6.2 ? 'Trot' : 'Gallop';
+         if (clip !== 'Idle' && m.acts[clip] && CLIP[clip]) m.acts[clip].timeScale = Math.max(0.55, Math.min(1.7, s / CLIP[clip])); }
+-      else { m.idleT -= dt; if (m.idleT <= 0) { m.st = m.bare || Math.random() < 0.45 ? (m.st === 'Eat' && !m.bare ? 'Idle' : 'Eat') : 'Idle'; m.idleT = 5 + Math.random() * 8; } clip = m.st; }
++      else { m.idleT -= dt; if (m.idleT <= 0) { m.st = m.bare || D1RAND() < 0.45 ? (m.st === 'Eat' && !m.bare ? 'Idle' : 'Eat') : 'Idle'; m.idleT = 5 + D1RAND() * 8; } clip = m.st; }
+       play(m, clip, 0.35);
+       if (d < (HQ ? 90 : 60) || m.mounted) m.mixer.update(dt);
+       // ميلان مع الأرض
+@@ -1106,7 +1106,7 @@ function physicsAdvance(dt) {
+ const BLOODFX = (() => {
+   const F = { err: null, stats: { hits: 0, kills: 0, sparks: 0 } };
+   if (S.blood === undefined) S.blood = true;
+-  const R = (a, b) => a + Math.random() * (b - a);
++  const R = (a, b) => a + D1RAND() * (b - a);
+   const MOB = window.__QUALITY === 'mobile' || (window.matchMedia && matchMedia('(pointer:coarse)').matches) || Math.min(innerWidth, innerHeight) < 560;
+   const ND = MOB ? 120 : 200, NPOOL = MOB ? 6 : 10, NPUFF = 8, NEH = 4;
+   const UP = new THREE.Vector3(0, 1, 0), V1 = new THREE.Vector3(), M4 = new THREE.Matrix4(), QQ = new THREE.Quaternion(), QY = new THREE.Quaternion(), SC = new THREE.Vector3(), C1 = new THREE.Color();
+@@ -1167,7 +1167,7 @@ const BLOODFX = (() => {
+     const L = Math.hypot(dx, dz) || 1; dx /= L; dz /= L; const n = Math.round((MOB ? 7 : 10) + (MOB ? 9 : 14) * Math.min(2, k));
+     for (let i = 0; i < n; i++) { const sp = R(1.2, 3.6) * (0.7 + 0.4 * k);
+       drop(x + R(-.08, .08), y + R(-.12, .12), z + R(-.08, .08), dx * sp + R(-1.3, 1.3), R(0.6, 3.4) * (0.8 + 0.25 * k), dz * sp + R(-1.3, 1.3),
+-        R(0.016, 0.034) * (0.85 + 0.3 * Math.min(1.6, k)), R(0.7, 1.25), [0x4a0404, 0x620707, 0x7a0a0a, 0x560505][(Math.random() * 4) | 0]); }
++        R(0.016, 0.034) * (0.85 + 0.3 * Math.min(1.6, k)), R(0.7, 1.25), [0x4a0404, 0x620707, 0x7a0a0a, 0x560505][(D1RAND() * 4) | 0]); }
+     puff(x + dx * 0.15, y, z + dz * 0.15, 0.55 + 0.35 * Math.min(2, k)); if (k > 1.2) puff(x - dx * 0.1, y - 0.25, z - dz * 0.1, 0.5 + 0.3 * k);
+     F.stats.hits++;
+   }
+@@ -1330,11 +1330,11 @@ const FAUNA = (() => {
+     const T = TPL[k]; if (!T) return null;
+     const g = skClone(T.root); let mesh = null; g.traverse(o => { if (o.isSkinnedMesh && !mesh) mesh = o; });
+     const mixer = new THREE.AnimationMixer(g), acts = {}; for (const n in T.clips) acts[n] = mixer.clipAction(T.clips[n]);
+-    const a = { k, g, mesh, mixer, acts, cur: null, x, z, y: H(x, z), face: hash(x * 10, z * 10, 7) * 6.283, grp, state: 'idle', t: 0.5 + Math.random() * 3, tx: x, tz: z, spd: 0, fleeT: 0, acc: 0,
++    const a = { k, g, mesh, mixer, acts, cur: null, x, z, y: H(x, z), face: hash(x * 10, z * 10, 7) * 6.283, grp, state: 'idle', t: 0.5 + D1RAND() * 3, tx: x, tz: z, spd: 0, fleeT: 0, acc: 0,
+       kb: KB(k), sz: SIZE[KB(k)] || 0.8, ref: SPD[KB(k)] || 0.4, cref: ({ sheep: 1.17, ram: 1.17, woolsheep: 1.17 })[k],   /* v33: مشية الخراف الجديدة مصممة على 1.17 م/ث */ vis: false, d: 1e9, hx: x - grp.x, hz: z - grp.z };
+     g.visible = false; scene.add(g); play(a, 'Idle', 0); F.list.push(a); grp.mem.push(a); return a; }
+   function play(a, nm, fade) { if (!a.acts[nm]) nm = a.acts.Idle ? 'Idle' : Object.keys(a.acts)[0]; if (a.cur === nm) return; const n = a.acts[nm];
+-    n.reset(); n.setLoop(THREE.LoopRepeat, Infinity); n.timeScale = 1; if (!a.cur) n.time = Math.random() * n.getClip().duration; n.play();
++    n.reset(); n.setLoop(THREE.LoopRepeat, Infinity); n.timeScale = 1; if (!a.cur) n.time = D1RAND() * n.getClip().duration; n.play();
+     if (a.cur && a.acts[a.cur]) a.acts[a.cur].crossFadeTo(n, fade === undefined ? 0.35 : fade, false); a.cur = nm; }
+   // ── خرائط مساعدة: بعد الطرق، القرى، الماء، الانحدار، المباني ──
+   const RG = new Map(), RC = 96; let rgReady = false;
+@@ -1454,13 +1454,13 @@ const FAUNA = (() => {
+       need(kind, T => { if (!T || g.dead) return; const a = inst(kind, x, z, g); if (a) { a.face = hash(x, z, 51) * 6.283; } }); out.push(g); }
+     return out; }
+   function perchThink(a, dt) { a.t -= dt;
+-    if (a.hop > 0) { a.hop -= dt; a.hy = Math.sin(Math.PI * Math.min(1, 1 - a.hop / 2.4)) * 1.5; a.face += dt * 1.4; if (a.hop <= 0) { a.hop = 0; a.hy = 0; a.state = 'idle'; a.t = 3 + Math.random() * 3; } play(a, a.acts.Fly ? 'Fly' : 'Flap', 0.15); return; }
++    if (a.hop > 0) { a.hop -= dt; a.hy = Math.sin(Math.PI * Math.min(1, 1 - a.hop / 2.4)) * 1.5; a.face += dt * 1.4; if (a.hop <= 0) { a.hop = 0; a.hy = 0; a.state = 'idle'; a.t = 3 + D1RAND() * 3; } play(a, a.acts.Fly ? 'Fly' : 'Flap', 0.15); return; }
+     const dp = Math.hypot(a.x - PL.x, a.z - PL.z);
+-    if (a.t <= 0 || (dp < 5 && Math.random() < dt * 2)) { const q = Math.random(); if ((q < 0.16 || dp < 5) && (a.acts.Fly || a.acts.Flap)) { a.hop = 2.4; return; }
+-      a.state = q < 0.55 ? 'graze' : 'idle'; a.t = 2 + Math.random() * 4; if (Math.random() < 0.35) a.face += (Math.random() - 0.5) * 2.2; }
++    if (a.t <= 0 || (dp < 5 && D1RAND() < dt * 2)) { const q = D1RAND(); if ((q < 0.16 || dp < 5) && (a.acts.Fly || a.acts.Flap)) { a.hop = 2.4; return; }
++      a.state = q < 0.55 ? 'graze' : 'idle'; a.t = 2 + D1RAND() * 4; if (D1RAND() < 0.35) a.face += (D1RAND() - 0.5) * 2.2; }
+     if (a.state === 'graze') play(a, 'Peck', 0.3);
+     else if (a.extra && a.extraT > 0) { a.extraT -= dt; play(a, a.extra, 0.2); if (a.extraT <= 0) a.extra = null; }
+-    else { if (Math.random() < dt * 0.06 && a.acts.Flap) { a.extra = 'Flap'; a.extraT = a.acts.Flap.getClip().duration; } play(a, 'Idle', 0.3); } }
++    else { if (D1RAND() < dt * 0.06 && a.acts.Flap) { a.extra = 'Flap'; a.extraT = a.acts.Flap.getClip().duration; } play(a, 'Idle', 0.3); } }
+   function huntSite() { if (F.hunt0) return F.hunt0; const C = CITY;
+     for (const R of [CITY_ZONE_R + 140, CITY_ZONE_R + 200, CITY_ZONE_R + 260]) for (let t = 0; t < 36; t++) { const ang = 0.4 + t * 0.1745, x = C.x + Math.cos(ang) * R, z = C.z + Math.sin(ang) * R;
+       if (!dry(x, z) || roadD(x, z) < 30 || vilD(x, z) < 160 || LIB.coastDist(x, z) < 70 || Math.hypot(x - SPAWN.x, z - SPAWN.z) < 120) continue;
+@@ -1489,29 +1489,29 @@ const FAUNA = (() => {
+     const g = a.grp, dxp = a.x - PL.x, dzp = a.z - PL.z, dp = Math.hypot(dxp, dzp);
+     if (g.flee) { let th = null; if (dp < 12 || (dp < 22 && PL.speed > 6)) th = [PL.x, PL.z];
+       if (!th) for (const w of WOLVES) if (!w.dead && Math.abs(w.x - a.x) < 22 && Math.abs(w.z - a.z) < 22 && Math.hypot(w.x - a.x, w.z - a.z) < 20) { th = [w.x, w.z]; break; }
+-      if (th) for (const m of g.mem) { m.fleeT = 4 + Math.random(); m.thx = th[0]; m.thz = th[1]; } }
++      if (th) for (const m of g.mem) { m.fleeT = 4 + D1RAND(); m.thx = th[0]; m.thz = th[1]; } }
+     else if (dp < (a.sz < 0.6 ? 3.2 : 2.4) && a.state !== 'shy') { a.state = 'shy'; a.t = 1.6; const l = dp || 1; a.tx = a.x + dxp / l * 5; a.tz = a.z + dzp / l * 5; }
+-    if (a.fleeT > 0) { a.fleeT -= dt; if (a.fleeT <= 0) { a.state = 'idle'; a.t = 2 + Math.random() * 2; g.x += (a.x - g.x) * 0.5; g.z += (a.z - g.z) * 0.5; }
++    if (a.fleeT > 0) { a.fleeT -= dt; if (a.fleeT <= 0) { a.state = 'idle'; a.t = 2 + D1RAND() * 2; g.x += (a.x - g.x) * 0.5; g.z += (a.z - g.z) * 0.5; }
+       const fx = a.x - a.thx, fz = a.z - a.thz, l = Math.hypot(fx, fz) || 1; let want = Math.atan2(fx / l, fz / l) + (a.hx > 0 ? 0.25 : -0.25);
+       return step(a, dt, want, 4.6, 'Run', RUN[a.kb] || 3.6, true); }
+     a.t -= dt;
+     if (a.state === 'walk' || a.state === 'shy') { const dx = a.tx - a.x, dz = a.tz - a.z, l = Math.hypot(dx, dz);
+-      if (l < 0.5 || a.t < -14) { a.state = 'idle'; a.t = 1 + Math.random() * 3; } else return step(a, dt, Math.atan2(dx, dz), a.state === 'shy' ? a.ref * 2.4 : a.spd, 'Walk', a.cref || a.ref, false); }
+-    if (a.t <= 0) { const q = Math.random();
+-      if (q < 0.5) { a.state = 'graze'; a.t = 5 + Math.random() * 7; }
+-      else if (q < 0.72) { a.state = 'idle'; a.t = 3 + Math.random() * 4; }
+-      else { for (let k = 0; k < 5; k++) { const ang = Math.random() * TAU, rr = Math.sqrt(Math.random()) * g.rad, x = g.x + Math.cos(ang) * rr, z = g.z + Math.sin(ang) * rr;
+-          if (Math.hypot(x - a.x, z - a.z) > 1.5 && g.ok(x, z)) { a.state = 'walk'; a.tx = x; a.tz = z; a.t = 0; a.spd = a.ref * (1.05 + Math.random() * 0.3); break; } }
++      if (l < 0.5 || a.t < -14) { a.state = 'idle'; a.t = 1 + D1RAND() * 3; } else return step(a, dt, Math.atan2(dx, dz), a.state === 'shy' ? a.ref * 2.4 : a.spd, 'Walk', a.cref || a.ref, false); }
++    if (a.t <= 0) { const q = D1RAND();
++      if (q < 0.5) { a.state = 'graze'; a.t = 5 + D1RAND() * 7; }
++      else if (q < 0.72) { a.state = 'idle'; a.t = 3 + D1RAND() * 4; }
++      else { for (let k = 0; k < 5; k++) { const ang = D1RAND() * TAU, rr = Math.sqrt(D1RAND()) * g.rad, x = g.x + Math.cos(ang) * rr, z = g.z + Math.sin(ang) * rr;
++          if (Math.hypot(x - a.x, z - a.z) > 1.5 && g.ok(x, z)) { a.state = 'walk'; a.tx = x; a.tz = z; a.t = 0; a.spd = a.ref * (1.05 + D1RAND() * 0.3); break; } }
+         if (a.state !== 'walk') { a.state = 'idle'; a.t = 2; } } }
+     if (a.state === 'graze') play(a, GRAZE[a.kb], 0.7);   // v36: انتقال الرعي 0.7ث (ملاحظات المواشي)
+     else if (a.state === 'idle' && a.extra && a.extraT > 0) { a.extraT -= dt; play(a, a.extra, 0.3); if (a.extraT <= 0) a.extra = null; }
+-    else { if (a.state === 'idle' && !a.extra && Math.random() < dt * 0.04) { const ex = a.kb === 'peacock' ? 'Display' : /^(goose|chicken|raven|crow)$/.test(a.kb) ? 'Flap' : /^(sheep|ram|woolsheep)$/.test(a.kb) ? 'Bleat' : null;
++    else { if (a.state === 'idle' && !a.extra && D1RAND() < dt * 0.04) { const ex = a.kb === 'peacock' ? 'Display' : /^(goose|chicken|raven|crow)$/.test(a.kb) ? 'Flap' : /^(sheep|ram|woolsheep)$/.test(a.kb) ? 'Bleat' : null;
+         if (ex && a.acts[ex]) { a.extra = ex; a.extraT = a.acts[ex].getClip().duration * (ex === 'Display' ? 2 : 1); } } play(a, 'Idle', 0.45); }
+   }
+   function step(a, dt, want, sp, clip, ref, run) {
+     const df = angD(a.face, want); a.face = aLerp(a.face, want, Math.min(1, dt * (run ? 5 : 2.6)));
+     const v = sp * Math.max(0, Math.cos(Math.min(df, Math.PI / 2))) * (df > 1.2 ? 0.15 : 1), nx = a.x + Math.sin(a.face) * v * dt, nz = a.z + Math.cos(a.face) * v * dt;
+-    if (v > 0.01) { if (a.grp.ok(nx, nz) || (run && dry(nx, nz) && cityD(nx, nz) > CITY_WR + 20 && vilD(nx, nz) > 75)) { a.x = nx; a.z = nz; } else if (!run) { a.state = 'idle'; a.t = 1 + Math.random() * 2; } else a.fleeT = Math.min(a.fleeT, 0.3); }
++    if (v > 0.01) { if (a.grp.ok(nx, nz) || (run && dry(nx, nz) && cityD(nx, nz) > CITY_WR + 20 && vilD(nx, nz) > 75)) { a.x = nx; a.z = nz; } else if (!run) { a.state = 'idle'; a.t = 1 + D1RAND() * 2; } else a.fleeT = Math.min(a.fleeT, 0.3); }
+     play(a, clip, run ? 0.2 : 0.35); const ac = a.acts[a.cur]; if (ac) ac.timeScale = Math.max(0.35, Math.min(2.2, Math.max(v, sp * 0.4) / ref));
+   }
+   // ── الإطار ──
+@@ -1698,11 +1698,11 @@ const V20 = (() => { const ST = { t: 0, lodN: 0, err: 0 }, HQ = () => window.__Q
+     CW.ok = true; console.info('[v20] حياة المدينة', JSON.stringify(CW.stat)); }
+   const _m4 = new THREE.Matrix4(), _q = new THREE.Quaternion(), _p = new THREE.Vector3(), _s = new THREE.Vector3(), _up = new THREE.Vector3(0, 1, 0), _fw = new THREE.Vector3();
+   function stepW(w, dt, S, depth) { depth = depth || 0; if (w.kind === 'p') { if (w.wait > 0) { w.wait -= dt; return false; } const dx = w.tx - w.x, dz = w.tz - w.z, d = Math.hypot(dx, dz);
+-        if (d < 0.4) { w.wait = 2 + Math.random() * 6; const L = CW.L, V = L.v18; for (let t = 0; t < 8; t++) { const a = Math.random() * 6.283, rr = 14 + Math.random() * 46, X = V.cx + Math.cos(a) * rr, Z = V.cz - Math.sin(a) * rr; if (!V18.blk(L, X, Z) && Math.hypot(X - w.x, Z - w.z) < 30) { w.tx = X; w.tz = Z; break; } } return false; }
++        if (d < 0.4) { w.wait = 2 + D1RAND() * 6; const L = CW.L, V = L.v18; for (let t = 0; t < 8; t++) { const a = D1RAND() * 6.283, rr = 14 + D1RAND() * 46, X = V.cx + Math.cos(a) * rr, Z = V.cz - Math.sin(a) * rr; if (!V18.blk(L, X, Z) && Math.hypot(X - w.x, Z - w.z) < 30) { w.tx = X; w.tz = Z; break; } } return false; }
+         const st = Math.min(d, w.spd * w.slow * dt), nx = w.x + dx / d * st, nz = w.z + dz / d * st; if (V18.blk(CW.L, nx, nz)) { w.tx = w.x; w.tz = w.z; return false; } w.x = nx; w.z = nz; w.y = LIB.height(nx, nz); const ty = Math.atan2(dx, dz); w.yaw += Math.atan2(Math.sin(ty - w.yaw), Math.cos(ty - w.yaw)) * Math.min(1, dt * 6); return true; }
+       const s = S[w.si]; let mv = w.spd * w.slow * dt;
+       let guard = 0; while (mv > 0 && guard++ < 12) { const segI = Math.min(w.a, w.b), L0 = s.len[segI] || 0, left = L0 - w.u; if (mv < left) { w.u += mv; mv = 0; break; } mv -= Math.max(0, left); const B = w.b, cn = s.conn[B];
+-        if (cn.length && (Math.random() < 0.4 || B === 0 || B === s.pts.length - 1)) { const [sj, vj] = cn[(Math.random() * cn.length) | 0], s2 = S[sj], ok = []; if (vj + 1 < s2.pts.length) ok.push(1); if (vj - 1 >= 0) ok.push(-1); if (ok.length) { const d2 = ok[(Math.random() * ok.length) | 0]; w.si = sj; w.a = vj; w.b = vj + d2; w.u = 0; w.o = Math.min(w.o, s2.om); if (depth < 3) return stepW(w, Math.min(1, mv / Math.max(0.05, w.spd * w.slow)), S, depth + 1); break; } }
++        if (cn.length && (D1RAND() < 0.4 || B === 0 || B === s.pts.length - 1)) { const [sj, vj] = cn[(D1RAND() * cn.length) | 0], s2 = S[sj], ok = []; if (vj + 1 < s2.pts.length) ok.push(1); if (vj - 1 >= 0) ok.push(-1); if (ok.length) { const d2 = ok[(D1RAND() * ok.length) | 0]; w.si = sj; w.a = vj; w.b = vj + d2; w.u = 0; w.o = Math.min(w.o, s2.om); if (depth < 3) return stepW(w, Math.min(1, mv / Math.max(0.05, w.spd * w.slow)), S, depth + 1); break; } }
+         const dir = w.b - w.a, nb = B + dir; if (nb >= 0 && nb < s.pts.length) { w.a = B; w.b = nb; } else { w.a = B; w.b = B - dir; } w.u = 0; }
+       const A = s.pts[w.a], Bp = s.pts[w.b], segI = Math.min(w.a, w.b), L0 = s.len[segI] || 1, f = w.u / L0, ex = (Bp[0] - A[0]) / L0, ez = (Bp[1] - A[1]) / L0;
+       w.x = A[0] + (Bp[0] - A[0]) * f - ez * w.o; w.z = A[1] + (Bp[1] - A[1]) * f + ex * w.o; w.y = s.hs[w.a] + (s.hs[w.b] - s.hs[w.a]) * f; const ty = Math.atan2(ex, ez); w.yaw += Math.atan2(Math.sin(ty - w.yaw), Math.cos(ty - w.yaw)) * Math.min(1, dt * 5); w.ex = ex; w.ez = ez; return true; }
+@@ -1711,7 +1711,7 @@ const V20 = (() => { const ST = { t: 0, lodN: 0, err: 0 }, HQ = () => window.__Q
+     CW.t -= dt; if (CW.t <= 0) { CW.t = 0.25; dynTick20(camera.position.x - L.g.position.x, camera.position.z - L.g.position.z); CW.npcs = (L.npcs || []).filter(n => !n.dead && Math.abs(n.x - px) < 45 && Math.abs(n.z - pz) < 45).map(n => [n.x, n.z]); }
+     // حركة الماشيين + تجنّب بعض وتجنّب اللاعب والسكان
+     const ACT = 90 * 90, grid = new Map(), gk = (x, z) => ((x / 2) | 0) * 7919 + ((z / 2) | 0);
+-    for (const w of CW.W) { const d2 = (w.x - px) ** 2 + (w.z - pz) ** 2; if (d2 > ACT && w.x) { if (Math.random() < dt * 0.5) stepW(w, 0.8, CW.SG); continue; } w.mv = stepW(w, dt, CW.SG); const k = gk(w.x, w.z); let a = grid.get(k); if (!a) grid.set(k, a = []); a.push(w); }
++    for (const w of CW.W) { const d2 = (w.x - px) ** 2 + (w.z - pz) ** 2; if (d2 > ACT && w.x) { if (D1RAND() < dt * 0.5) stepW(w, 0.8, CW.SG); continue; } w.mv = stepW(w, dt, CW.SG); const k = gk(w.x, w.z); let a = grid.get(k); if (!a) grid.set(k, a = []); a.push(w); }
+     for (const w of CW.W) { if (!w.mv) continue; let slow = 1, push = 0; const k0x = (w.x / 2) | 0, k0z = (w.z / 2) | 0;
+       for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) { const a = grid.get((k0x + i) * 7919 + (k0z + j)); if (!a) continue; for (const o of a) { if (o === w) continue; const dx = o.x - w.x, dz = o.z - w.z, d = Math.hypot(dx, dz); if (d > 1.1 || d < 1e-3) continue;
+           const fw = (dx * Math.sin(w.yaw) + dz * Math.cos(w.yaw)) / d; if (fw > 0.3) slow = Math.min(slow, 0.35 + d * 0.5); const side = (dx * Math.cos(w.yaw) - dz * Math.sin(w.yaw)); push += side > 0 ? -1 : 1; } }
+@@ -1922,7 +1922,7 @@ const MAP20 = (() => {
+   }
+   function tdOld(tEnd) {
+     const O = M.TD.old;
+-    while (O.j <= O.j1) { for (let i = O.i0; i <= O.i1; i++) { const t = oldTree(i, O.j); if (t) tdAdd(t, 1, 0); } O.j++; if (now() > tEnd) return false; }
++    while (O.j <= O.j1) { for (let i = O.i0; i <= O.i1; i++) { const t = oldTree(i, O.j); if (t) tdAdd(t, 1, 0); } O.j++; if (DET1 || now() > tEnd) return false; }
+     O.done = true; return true;
+   }
+   // طبيعة v19: كل الخلايا قرب القرى والمدينة كاملة، والبرية خلية من كل أربع (وزن ٤). تعمل والخريطة مفتوحة فقط (اللعبة متوقفة) كي لا تزاحم ذاكرة خلايا الطبيعة أثناء اللعب
+@@ -2658,8 +2658,8 @@ const SHOP20 = (() => {
+       return Promise.all(PLAN.map(async ([f, spot], i) => { const mk = root.getObjectByName(spot); if (!mk) return null; const gl = await get(f), o = SU.clone(gl.scene); o.position.copy(mk.position); o.quaternion.copy(mk.quaternion); root.add(o);
+         o.traverse(c => { if (c.isMesh) { c.castShadow = false; c.frustumCulled = true; if (c.isSkinnedMesh) { if (!c.boundingSphere) c.computeBoundingSphere(); c.boundingSphere.radius *= 1.6; } } });
+         const mx = new THREE.AnimationMixer(o), cl = n => gl.animations.find(a => a.name === n || a.name.endsWith('|' + n)), A = [cl('Graze'), cl('Idle')].filter(Boolean); let cur = 0;
+-        if (!A.length) return { mx, o }; let a = mx.clipAction(A[(i % 2) % A.length]); a.play(); a.time = Math.random() * a.getClip().duration; mx.timeScale = 0.9 + Math.random() * 0.2; cur = (i % 2) % A.length;
+-        let t = 6 + Math.random() * 8; const step = dt => { t -= dt; if (t <= 0 && A.length > 1) { t = 7 + Math.random() * 9; cur = 1 - cur; const b = mx.clipAction(A[cur]); b.reset(); b.play(); a.crossFadeTo(b, 0.7, false); a = b; } };
++        if (!A.length) return { mx, o }; let a = mx.clipAction(A[(i % 2) % A.length]); a.play(); a.time = D1RAND() * a.getClip().duration; mx.timeScale = 0.9 + D1RAND() * 0.2; cur = (i % 2) % A.length;
++        let t = 6 + D1RAND() * 8; const step = dt => { t -= dt; if (t <= 0 && A.length > 1) { t = 7 + D1RAND() * 9; cur = 1 - cur; const b = mx.clipAction(A[cur]); b.reset(); b.play(); a.crossFadeTo(b, 0.7, false); a = b; } };
+         return { mx, o, step }; })); }).then(list => { const L = list.filter(Boolean), P = new THREE.Vector3();
+         LIVE37.push({ grp, upd: (dt, cam) => { grp.getWorldPosition(P); if (cam && P.distanceToSquared(cam.position) > 60 * 60) return; for (const x of L) { if (x.step) x.step(dt); x.mx.update(dt); } } }); ST.beasts37 = L.length; })
+       .catch(e => { console.warn('[v37] barn animals: ' + (e && e.message || e)); ST.beastsErr = String(e); }); }
+@@ -2919,11 +2919,11 @@ const SHOP20 = (() => {
+     for (const nm in Mt.clips) acts[nm] = mixer.clipAction(Mt.clips[nm]);
+     const dur = nm => acts[nm] ? acts[nm].getClip().duration : 3, has = nm => !!acts[nm];
+     const gest = T0.gest.filter(has), talk = T0.talk.filter(has);
+-    const G = { inst, mat, mixer, acts, cur: null, acc: 0, seller: shop.type, gT: 3 + Math.random() * 5, gNm: null, gLeft: 0, tI: 0, tLeft: 0 };
++    const G = { inst, mat, mixer, acts, cur: null, acc: 0, seller: shop.type, gT: 3 + D1RAND() * 5, gNm: null, gLeft: 0, tI: 0, tLeft: 0 };
+     if (T0.selY) inst.position.y = T0.selY; if (T0.sc) inst.scale.setScalar(T0.sc); if (T0.ry && !T0.nf) inst.rotation.y = T0.ry;   /* v35 — v38: النموذج لا يُدار (كان يمشي بالعكس)، الوقفة عند المحل تستعمل stall.nf */ if (T0.gait) G.gait = T0.gait;
+     G.idleNm = (n, dt) => { if (n.mv) { G.gNm = null; return 'Idle'; }
+-      if (G.gNm) { G.gLeft -= dt; if (G.gLeft > 0) return G.gNm; G.gNm = null; G.gT = 6 + Math.random() * 7; return 'Idle'; }
+-      G.gT -= dt; if (G.gT <= 0 && gest.length) { G.gNm = gest[(Math.random() * gest.length) | 0]; G.gLeft = dur(G.gNm) * (G.gNm === 'Grind' ? 2 : 1); return G.gNm; } return 'Idle'; };
++      if (G.gNm) { G.gLeft -= dt; if (G.gLeft > 0) return G.gNm; G.gNm = null; G.gT = 6 + D1RAND() * 7; return 'Idle'; }
++      G.gT -= dt; if (G.gT <= 0 && gest.length) { G.gNm = gest[(D1RAND() * gest.length) | 0]; G.gLeft = dur(G.gNm) * (G.gNm === 'Grind' ? 2 : 1); return G.gNm; } return 'Idle'; };
+     G.talkNm = dt => { if (!talk.length) return 'Talk'; G.tLeft -= dt; if (G.tLeft <= 0) { G.tI = (G.tI + 1) % talk.length; G.tLeft = dur(talk[G.tI]); } return talk[G.tI]; };
+     return G;
+   }
+@@ -3068,7 +3068,7 @@ const PERF46 = (() => {
+   const oRender = R.render.bind(R);
+   const nProg = () => (R.info.programs ? R.info.programs.length : 0);
+   function work(cam) { const t0 = RN(), budget = loadDone ? (mob ? 4 : 3) : 100, maxNew = loadDone ? (mob ? 1 : 2) : 1e9; let n = 0, made = 0, flip = 0;
+-    while (made < maxNew && RN() - t0 < budget) { n++;
++    while (made < maxNew && (DET1 ? n < 2 : RN() - t0 < budget)) { n++;
+       const useTpl = tplQ.length && tplQ[0].f <= frameN && (!objQ.length || (flip++ & 1));
+       let o = null, isTpl = false;
+       if (useTpl) { o = tplQ.shift().o; isTpl = true; let nw = false; o.traverse(x => { if (x.isMesh) for (const m of [].concat(x.material || [])) { envFix(m); if (m && !P.get(m).currentProgram) nw = true; } }); if (!nw) continue; }
+@@ -3303,7 +3303,7 @@ const MERGE48 = (() => {
+         for (let i = 0; i < B.meshes.length; i++) { const x = changed(B.snap[i]); if (x) { const o = B.meshes[i];
+             if (x === o) { const r = B.snap[i].refs; if (o.geometry !== r[1] || o.material !== r[2] || !inScene(o)) SKIP.add(o); else DYN.add(o); } note('un ' + lastF + ':' + (x.name || x.type).slice(0, 20)); unmerge(B, x === o && SKIP.has(o) ? null : x); break; } } }
+       const tb = RN();
+-      if (job) { try { while (RN() - tb < BUDGET) { const r = job.it.next(); if (r.done) { ST.buildMs += RN() - job.t0; ST.builds++; swapIn(job.J); job = null; break; } } ST.maxSliceMs = Math.max(ST.maxSliceMs, RN() - tb); }
++      if (job) { try { let detItems = 0; while (DET1 ? detItems++ < 2 : RN() - tb < BUDGET) { const r = job.it.next(); if (r.done) { ST.buildMs += RN() - job.t0; ST.builds++; swapIn(job.J); job = null; break; } } ST.maxSliceMs = Math.max(ST.maxSliceMs, RN() - tb); }
+         catch (e) { ST.err++; if (ST.err < 5) console.warn('[MERGE48] build', e); if (job) disposeOut(job.J); job = null; } }
+       else if (jobs.length) { const J = jobs.shift(); job = { J, it: build(J), t0: RN() }; }
+       else if (frameN % SCAN_EVERY === 0) scan();
+@@ -3493,7 +3493,7 @@ const G50 = (() => {
+       if (ph === 'warm') { st.p = 0.85 + 0.1 * (items.length ? ki / items.length : 1); st.step = 'رفع المدينة لكرت الشاشة ' + Math.round(100 * ki / Math.max(1, items.length)) + '%';
+         if (ki < items.length && !(RN() - tPh > 240000 && (st.timeouts.push('warm'), true))) return false;
+         items = null; const s = new Set(); for (const r of (tpl || [])) texOf(r, s); texList = [...s]; ti = 0; st.tex.tot = texList.length; phase('tex', 'رفع صور الحيوانات والشخصيات'); return false; }
+-      if (ph === 'tex') { const t0 = RN(); while (ti < texList.length && RN() - t0 < 12) { try { renderer.initTexture(texList[ti]); } catch (e) {} ti++; } st.tex.n = ti; st.p = 0.95 + 0.05 * (texList.length ? ti / texList.length : 1);
++      if (ph === 'tex') { const t0 = RN(), detTexEnd = ti + 1; while (ti < texList.length && (DET1 ? ti < Math.min(texList.length, detTexEnd) : RN() - t0 < 12)) { try { renderer.initTexture(texList[ti]); } catch (e) {} ti++; } st.tex.n = ti; st.p = 0.95 + 0.05 * (texList.length ? ti / texList.length : 1);
+         if (ti < texList.length) return false;
+         texList = null; if (QS.get('g50visit') === '1' && window.EST50 && EST50.st && EST50.st.on && EST50.st.X) { VS = { k: -1, fr: 0, t: 0, home: { x: PL.x, z: PL.z, face: PL.face, yaw: CAM.yaw, pitch: CAM.pitch }, pts: [[EST50.st.X, EST50.st.Z + 40], [EST50.st.X + 45, EST50.st.Z - 30], [EST50.st.X - 45, EST50.st.Z - 30]] }; phase('visit', 'جولة بالقصر والحديقة لتجهيز الرسوم'); return false; }
+         return finish(); }
+@@ -3610,7 +3610,7 @@ const MIX5 = new Set(); MIX5.flush = () => {};
+     if (r && r.isObject3D) { for (let p = r; p; p = p.parent) { if (!p.visible) { vis = false; break; } if (p === scene) break; } const e = r.matrixWorld.elements; d = Math.hypot(e[12] - cp.x, e[13] - cp.y, e[14] - cp.z); }
+     this.__a4 = (this.__a4 || 0) + dt;
+     if (!vis) { if (PP1('mix') && PP1LOW()) { this.__a4 = 0; MIX5.delete(this); st.mixSkip++; return this; } if (FRAME4.vl) this.__a4 = Math.min(this.__a4, 0.6); else MIX5.add(this); st.mixSkip++; return this; }   // pp1 0b98fca: hidden time discarded (very-low/low)
+-    let k = FRAME4.vl ? (d < 14 ? 1 : d < 30 ? 2 : 4) : FRAME4.lw ? (d < 20 ? 1 : d < 40 ? 2 : 4) : 1; if (FRAME4.lw && window.__G50ON === true && G50.a6) k = G50.a6(this, d, k); if (!this.__h4) this.__h4 = 1 + ((Math.random() * 7) | 0);
++    let k = FRAME4.vl ? (d < 14 ? 1 : d < 30 ? 2 : 4) : FRAME4.lw ? (d < 20 ? 1 : d < 40 ? 2 : 4) : 1; if (FRAME4.lw && window.__G50ON === true && G50.a6) k = G50.a6(this, d, k); if (!this.__h4) this.__h4 = 1 + ((D1RAND() * 7) | 0);
+     if (k > 1 && (FRAME4.n + this.__h4) % k) { st.mixSkip++; return this; }
+     const a = this.__a4; this.__a4 = 0; st.mixUpd++; return o.call(this, a); };
+   MIX5.flush = () => { if (!MIX5.size) return; for (const m of MIX5) { const r = m.getRoot(); let vis = !!(r && r.isObject3D); if (vis) for (let p = r; p; p = p.parent) { if (!p.visible) { vis = false; break; } if (p === scene) break; } if (vis) { MIX5.delete(m); const a = m.__a4 || 0; m.__a4 = 0; if (a > 0) { st.mixUpd++; o.call(m, a); } } else if (!r || !r.parent) MIX5.delete(m); } }; })();
+@@ -3645,8 +3645,8 @@ const PRF = (() => { const on = /[?&]prof=1\b/.test(location.search), now = perf
+ let FCAP_T = 0; const FCAP_ON = !/[?&]fcap=0\b/.test(location.search);
+ function frame(rafTime) {
+   requestAnimationFrame(frame);
+-  { const fc5 = window.__G50ON === true ? (window.__G50FC | 0) : 0, cap5 = fc5 ? (fc5 < 50 ? 25 : 12) : (S.preset === 'vlow' ? 25 : 0); if (FCAP_ON && cap5) { const tn = performance.now(); if (tn - FCAP_T < cap5) return; FCAP_T = tn; } }   // v50d3 + v50g: حد الإطارات من الإعدادات (تلقائي = منخفضة جدا ٣٠ متل قبل)   // v50d3: «منخفضة جدا» = ٣٠ إطار ثابتة (أنعم من ٣٥–٥٠ متقلّبة وأبرد عالجهاز)
+-  const rawDt = clock.getDelta(), dt = uiLock() ? 0 : Math.min(0.05, rawDt);
++  { const fc5 = window.__G50ON === true ? (window.__G50FC | 0) : 0, cap5 = fc5 ? (fc5 < 50 ? 25 : 12) : (S.preset === 'vlow' ? 25 : 0); if (!DET1 && FCAP_ON && cap5) { const tn = performance.now(); if (tn - FCAP_T < cap5) return; FCAP_T = tn; } }   // v50d3 + v50g: حد الإطارات من الإعدادات (تلقائي = منخفضة جدا ٣٠ متل قبل)   // v50d3: «منخفضة جدا» = ٣٠ إطار ثابتة (أنعم من ٣٥–٥٠ متقلّبة وأبرد عالجهاز)
++  const rawDt = DET1 ? DET1.dt : clock.getDelta(), dt = uiLock() ? 0 : Math.min(0.05, rawDt);
+   let frameMs = rawDt * 1000; if (PP1FPS) { const stamp = Number.isFinite(rafTime) ? rafTime : performance.now(); frameMs = perfStamp === null ? 0 : stamp - perfStamp; perfStamp = stamp;
+     if (frameMs > 0) { fpsRA += frameMs; fpsRN++; if (fpsRA >= 400) { fpsReal = Math.round(1000 * fpsRN / fpsRA); fpsRA = fpsRN = 0; } } perfRead(frameMs); }
+   else if (HUDFIX) { fpsRA += rawDt; fpsRN++; if (fpsRA >= 1) { fpsReal = Math.round(fpsRN / fpsRA); fpsRA = fpsRN = 0; } }   // v50g2: FPS حقيقي (الـ dt المقصوص ٠٫٠٥ كان يوقّف العدّاد عند ~٢٠)
+@@ -3945,7 +3945,7 @@ window.V40 = (() => {
+   function step(i, sp) {
+     A.n++; st.steps = A.n; const surf = A.surf = surfAt(); if (!A.on || !A.howl) return;
+     const run = sp > 2.6, vol = Math.min(0.85, 0.18 + sp * (run ? 0.07 : 0.11)) * (surf === 'grass' ? 0.85 : 1);
+-    const id = A.howl.play(surf + ((Math.random() * 4) | 0)); A.howl.volume(vol, id); A.howl.rate(0.92 + Math.random() * 0.16 + (run ? 0.04 : 0), id);
++    const id = A.howl.play(surf + ((D1RAND() * 4) | 0)); A.howl.volume(vol, id); A.howl.rate(0.92 + D1RAND() * 0.16 + (run ? 0.04 : 0), id);
+   }
+   function sndTick(dt) {
+     const M = MODELS.plSw; const moving = M && M.player && (M.cur === 'Walk' || M.cur === 'Run') && PL.ground && !PL.swim && !MNT.on && !ST.dead && PL.speed > 0.5;
+@@ -4252,7 +4252,7 @@ const PHYS42 = (() => { const on = /[?&]phys=rapier/.test(location.search) || ((
+     world.createCollider(kind === 'box' ? R.ColliderDesc.cuboid(0.4, 0.4, 0.4).setDensity(0.6).setFriction(0.8) : R.ColliderDesc.cylinder(0.45, 0.38).setDensity(0.5).setFriction(0.5).setRestitution(0.1), b);
+     objs.push({ m, b }); ST.bodies = objs.length; if (objs.length > 40) { const o = objs.shift(); scene.remove(o.m); world.removeRigidBody(o.b); } return b; }
+   function throwOne() { if (!ST.ok) return; const fx = -Math.sin(PL.face), fz = -Math.cos(PL.face), y = LIB.height(PL.x, PL.z) + 1.6;
+-    spawn(Math.random() < 0.5 ? 'box' : 'barrel', PL.x + fx * 1.2, y, PL.z + fz * 1.2, fx * 9, 3.5, fz * 9); ST.thrown++; }
++    spawn(D1RAND() < 0.5 ? 'box' : 'barrel', PL.x + fx * 1.2, y, PL.z + fz * 1.2, fx * 9, 3.5, fz * 9); ST.thrown++; }
+   function scatter() { for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2, r = 4 + (i % 3); const x = PL.x + Math.cos(a) * r, z = PL.z + Math.sin(a) * r; spawn(i % 2 ? 'barrel' : 'box', x, LIB.height(x, z) + 1.5 + i * 0.3, z); } }
+   (window.__RAP42 || (window.__RAP42 = import('./vendor/rapier/rapier.es.js').then(async M => { await (M.init || M.default.init)(); return M; }))).then(async M => { R = M; world = new R.World({ x: 0, y: -9.81, z: 0 });
+     ply = world.createRigidBody(R.RigidBodyDesc.kinematicPositionBased().setTranslation(PL.x, PL.y + 0.9, PL.z)); world.createCollider(R.ColliderDesc.capsule(0.5, 0.35), ply);
+@@ -4317,14 +4317,14 @@ const SFX42 = (() => { const on = /[?&]sfx=howler/.test(location.search) || (()
+       const un = () => { SS.unlocked = !!(window.Howler && Howler.ctx && Howler.ctx.state === 'running'); }; setInterval(un, 2000); } catch (e) { SS.err = String(e).slice(0, 200); } };
+   sc.onerror = () => { SS.err = 'howler script failed'; }; document.head.appendChild(sc);
+   function play(k, vol, rate) { const a = S[k]; if (!a || !a.length) return; const now = performance.now(); if (last[k] && now - last[k] < 35) return; last[k] = now;
+-    try { const h = a[(Math.random() * a.length) | 0]; const id = h.play(); h.volume(Math.max(0, Math.min(1, (vol == null ? 1 : vol) * VOL[k])), id); h.rate(rate || (0.92 + Math.random() * 0.16), id); SS.played[k]++; } catch (e) { SS.err = String(e).slice(0, 200); } }
++    try { const h = a[(D1RAND() * a.length) | 0]; const id = h.play(); h.volume(Math.max(0, Math.min(1, (vol == null ? 1 : vol) * VOL[k])), id); h.rate(rate || (0.92 + D1RAND() * 0.16), id); SS.played[k]++; } catch (e) { SS.err = String(e).slice(0, 200); } }
+   const fall = (x, z) => { if (x == null || typeof PL === 'undefined') return 1; const d = Math.hypot(x - PL.x, z - PL.z); return Math.max(0, 1 - d / 32); };
+   function tick(dt) { if (!SS.ok || typeof PL === 'undefined' || !(dt > 0)) return; if (px == null) { px = PL.x; pz = PL.z; return; }
+     const d = Math.hypot(PL.x - px, PL.z - pz); px = PL.x; pz = PL.z; if (d > 15) return; const sp = d / Math.max(dt, 1e-3);
+     const mounted = typeof MNT !== 'undefined' && !!MNT.on;
+     if (mounted) { stepAcc = 0; if (sp > 0.4) { const gal = sp > 7; const iv = gal ? [0.07, 0.07, 0.07, 0.24] : [0.18, 0.22, 0.18, 0.22]; hoofAcc += dt * Math.min(1.6, Math.max(0.6, sp / (gal ? 10 : 4)));
+         if (hoofAcc >= iv[hoofI % 4]) { hoofAcc = 0; hoofI++; play('hoof', gal ? (hoofI % 4 === 0 ? 1 : 0.8) : 0.75); } }
+-      snortT -= dt; if (snortT <= 0) { snortT = 10 + Math.random() * 14; play('snort', 0.9); } return; }
++      snortT -= dt; if (snortT <= 0) { snortT = 10 + D1RAND() * 14; play('snort', 0.9); } return; }
+     const air = typeof ST !== 'undefined' && ST && (ST.cur === 'jump' || ST.cur === 'fall');
+     if (sp > 0.6 && !air) { stepAcc += dt; const iv = Math.max(0.26, Math.min(0.6, 0.95 / Math.sqrt(sp))); if (stepAcc >= iv) { stepAcc = 0;
+         const city = typeof CITYV !== 'undefined' && Math.hypot(PL.x - CITYV.x, PL.z - CITYV.z) < (CITYV.R || 0) + CITY_DR; play(city ? 'stone' : 'grass', Math.min(1, 0.6 + sp / 12)); } } else stepAcc = 0.2; }
+@@ -4362,7 +4362,7 @@ const HIT42 = (() => { const on = /[?&]combat=rapier/.test(location.search) || (
+   function selftest() { const alive = NPCS.filter(n => !n.dead && !n.sleeping); if (!alive.length) return { err: 'no npc' };
+     alive.sort((a, b) => Math.hypot(a.x - PL.x, a.z - PL.z) - Math.hypot(b.x - PL.x, b.z - PL.z)); const n = alive[0], out = {};
+     for (const [name, dist, flip] of [['front1.6', 1.6, 0], ['back1.6', 1.6, 1], ['front3.6', 3.6, 0], ['front2.4', 2.4, 0]]) {
+-      const ang = Math.random() * Math.PI * 2, ox = n.x + Math.sin(ang) * dist, oz = n.z + Math.cos(ang) * dist;   // stand at ox,oz; face toward n (forward = -sin,-cos)
++      const ang = D1RAND() * Math.PI * 2, ox = n.x + Math.sin(ang) * dist, oz = n.z + Math.cos(ang) * dist;   // stand at ox,oz; face toward n (forward = -sin,-cos)
+       const face = Math.atan2(ox - n.x, oz - n.z) + (flip ? Math.PI : 0); const hs = query(face, ox, oz); out[name] = hs.some(h => h.o === n); }
+     return { npcAt: +Math.hypot(n.x - PL.x, n.z - PL.z).toFixed(1), res: out, pass: out['front1.6'] && !out['back1.6'] && !out['front3.6'], maxMs: HS.maxMs }; }
+   window.HIT42 = { ST: HS, tick, query, swing, selftest }; return window.HIT42; })();
+@@ -4380,3 +4380,34 @@ const LATE42 = (() => { const ST = { swapped: 0, byKind: {}, last: null, ticks:
+       if (!n.gm) { const gm = n.guard ? (n._o42 ? grdGlbInstance(n._o42) : null) : npcGlbInstance(n.kind); if (gm) swap(n, gm); }
+       else if (n.guard && n.gm.grd && n._o42 && n.gm.key !== 'grdSp' && n.gm.key !== 'grdSw' && false) {} } } catch (e) { if (!ST.err) { ST.err = String(e && e.stack || e).slice(0, 300); console.warn('[v42] late swap', e); } } }
+   setInterval(tick, 1500); window.__late42 = { ST, tick }; return { ST, tick }; })();
++
++/* Test-only readout; no visible strings or production allocations when disabled. */
++if (DET1 && (S.preset === 'vlow' || S.preset === 'low')) {
++  const scalar = o => { const out = {}; for (const k of Object.keys(o || {}).sort()) {
++    const v = o[k]; if (v === null || ['number','string','boolean'].includes(typeof v)) out[k] = v;
++  } return out; };
++  const vec = v => v ? [v.x, v.y, v.z] : null;
++  const entity = (o,i) => ({index:i,values:scalar(o),
++    goal:o.goal && (Array.isArray(o.goal)?o.goal:scalar(o.goal)),
++    path:o.path && o.path.map(p=>Array.isArray(p)?p:scalar(p)),
++    poi:o.poi && (Array.isArray(o.poi)?o.poi:scalar(o.poi)),
++    chat:o.chat && scalar(o.chat),
++    home:o.home && scalar(o.home),village:o.v && {x:o.v.x,z:o.v.z,name:o.v.name},
++    position:o.g && vec(o.g.position),rotation:o.g && vec(o.g.rotation)});
++  window.__DET_GAME = {
++    version:1,
++    snapshot() { return {schema:1,preset:S.preset,player:scalar(PL),playerState:scalar(ST),camera:{...scalar(CAM),position:vec(camera.position),rotation:vec(camera.rotation)},
++      env:scalar(ENV),input:scalar(IN),npc:NPCS.map(entity),wolf:WOLVES.map(entity),animal:ANIMALS.map(entity),
++      fauna:FAUNA.list.map(entity),bandit:BANDITS.map(entity),vehicle:MNT.list.map(entity),
++      camp:CAMPS.map(scalar),frame:FRAME4.n,rng:DET1.entropy()}; },
++    anchors() { return {village:VILLAGES.map(v=>({x:v.x,z:v.z,name:v.name})),city:{x:CITY.x,z:CITY.z},
++      wild:CAMPS.map(c=>({x:c.x,z:c.z})),spawn:{x:SPAWN.x,z:SPAWN.z}}; },
++    start(x,z) { if (!Number.isFinite(x)||!Number.isFinite(z)) throw Error('invalid scenario location');
++      S.auto=false; ENV.T=9; ENV.auto=false; ENV.wType='clear'; ENV.cloud=.25; ENV.rain=ENV.storm=ENV.flash=0;
++      PL.vx=PL.vz=PL.vy=0; PL.face=0; CAM.yaw=0; CAM.pitch=.2; CAM.dist=5;
++      window.__dbg.tp(x,z); updateChunks(); this.input({}); },
++    input(input) { for(const k of Object.keys(keys))delete keys[k];
++      IN.f=0;IN.s=0;IN.run=false;IN.jump=false;IN.look[0]=IN.look[1]=0;
++      for(const k of Object.keys(input)) keys[k]=input[k]; }
++  };
++}

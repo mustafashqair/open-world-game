@@ -1,0 +1,1 @@
+PASS: 1e-6 mutation located, hashes differ, empty and zero-NPC traces rejected, missing wild coverage rejected, -0/NaN preserved.
