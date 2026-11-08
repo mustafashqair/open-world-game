@@ -1130,7 +1130,7 @@ if (DEV) {
     const gh = LIB.height(PL.x, PL.z);
     if (PL.y < gh + 0.5) PL.y = gh + 0.5;                                      // الحد الأدنى: التضاريس + ٠٫٥م
     if (PL.y > 400) PL.y = 400;                                                // الحد الأقصى ٤٠٠م
-    PL.vx = tx; PL.vz = tz; PL.vy = ty; PL.speed = Math.hypot(tx, tz); PL.ground = false; PL.swim = false;
+    PL.vx = tx; PL.vz = tz; PL.vy = ty; PL.speed = Math.hypot(tx, tz); PL.ground = false; PL.swim = true;   // DEV الطيران: هيئة سباحة هادئة (idle/walk) بدل «السقوط» — اختيار الحالة عند part-001 يتخطى jump/fall إذا كان اللاعب يسبح
     if (PL.speed > 0.4) { const t = Math.atan2(-PL.vx, -PL.vz); let d = t - PL.face; d = Math.atan2(Math.sin(d), Math.cos(d)); PL.face += d * (1 - Math.exp(-dt * 12)); }
     PL.cx = Math.floor(PL.x / CFG.CH); PL.cz = Math.floor(PL.z / CFG.CH);
     if (Math.abs(PL.x - ORG.x) > 400 || Math.abs(PL.z - ORG.z) > 400) recenter();   // التوسيط وتدفق القطع يبقيان شغّالين بالطيران السريع
@@ -1146,10 +1146,13 @@ if (DEV) {
   const touch = document.getElementById('touch');
   if (touch) {
     const st = document.createElement('style');
-    st.textContent = '#flyPad{position:fixed;right:14px;bottom:calc(200px + var(--safeB));z-index:3;display:flex;flex-direction:column;gap:7px;align-items:center}' +
+    st.textContent = '#flyPad{position:fixed;right:14px;top:calc(150px + env(safe-area-inset-top,0px));z-index:3;display:flex;flex-direction:row;gap:7px;align-items:center}' +
       '#flyPad button{width:56px;height:44px;border-radius:12px;border:1px solid rgba(230,182,90,.5);color:#f2ecdc;background:radial-gradient(circle at 50% 35%,rgba(58,70,86,.9),rgba(14,19,27,.94));font:700 12px "Noto Naskh Arabic",Cairo,Tahoma,sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 8px 20px rgba(0,0,0,.45)}' +
       '#flyPad button.on{background:radial-gradient(circle at 50% 35%,#f3cd7a,#b7812c);border-color:#fff3cf;color:#1c1305}' +
-      '#flyPad button:active{transform:scale(.94)}';
+      '#flyPad button:active{transform:scale(.94)}' +
+      '@media (orientation:portrait){#flyPad{top:auto;bottom:calc(200px + var(--safeB))}}' +
+      '@media (orientation:landscape) and (min-height:501px){#flyPad{top:auto;bottom:calc(200px + var(--safeB))}}' +
+      '@media (orientation:landscape) and (max-height:387px){#flyPad{left:14px;right:auto}}';
     document.head.appendChild(st);
     flyPad = document.createElement('div'); flyPad.id = 'flyPad';
     const mk = (lbl, hold) => { const b = document.createElement('button'); b.textContent = lbl; b.setAttribute('aria-label', lbl);
@@ -1157,7 +1160,7 @@ if (DEV) {
       if (hold) { const off = () => { FLY[hold] = false; b.classList.remove('on'); }; b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); }
       return b; };
     bUp = mk('فوق', 'up'); bFly = mk('طيران', null); bDn = mk('تحت', 'down');
-    flyPad.appendChild(bUp); flyPad.appendChild(bFly); flyPad.appendChild(bDn); touch.appendChild(flyPad); flyUiSync();
+    flyPad.appendChild(bFly); flyPad.appendChild(bUp); flyPad.appendChild(bDn); touch.appendChild(flyPad); flyUiSync();
   }
   window.__DEV50 = { DEV, FLY, flyToggle };   // للفحص من الكونسول
 }
@@ -2463,7 +2466,7 @@ window.MAP20 = MAP20; window.mapRelief = (x, z) => MAP20.relief(x, z);
 /* ═══ dev50: انتقال من خريطة العالم — زر «انتقال» ← نقرة واحدة على الخريطة ← علامة وتأكيد «انتقل هنا؟» — DEV فقط ═══ */
 if (DEV) {
   const TP = { arm: false, last: null, mark: null, box: null, x: 0, z: 0 };
-  const tpOK = (x, z) => { if (LIB.height(x, z) < -1.0) return false; SOL.length = 0; gatherSolids(x, z, 1, SOL); return !SOL.length; };   // ماء/بحر أو داخل جدار أو بناء: مرفوض
+  const tpOK = (x, z) => { if (LIB.height(x, z) < CFG.SEA + 0.2) return false; SOL.length = 0; gatherSolids(x, z, 1, SOL); return !SOL.length; };   // ماء/بحر أو داخل جدار أو بناء: مرفوض
   const tpSpot = (x, z) => {              // أقرب بقعة صالحة (بحث حلزوني حتى ١٢٠م) بدل نقطة الماء أو داخل الجدران
     if (tpOK(x, z)) return [x, z];
     for (let r = 2; r <= 120; r += 2) { const n = Math.max(8, Math.round(Math.PI * r / 3));
@@ -2473,6 +2476,7 @@ if (DEV) {
   };
   const tpClear = () => { if (TP.mark) { TP.mark.remove(); TP.mark = null; } if (TP.box) { TP.box.remove(); TP.box = null; } };
   const tpGo = () => {
+    if (!isFinite(TP.x) || !isFinite(TP.z) || Math.abs(TP.x) > CFG.HW - 120 || Math.abs(TP.z) > CFG.HH - 120) { tpClear(); TP.arm = false; if (tpBtn) tpBtn.classList.remove('on'); toast('لا يمكن الانتقال إلى هنا'); return; }   // إحداثيات فاسدة أو خارج حدود العالم
     const sp = tpSpot(TP.x, TP.z); tpClear(); TP.arm = false; if (tpBtn) tpBtn.classList.remove('on');
     if (!sp) { toast('لا يمكن الانتقال إلى هنا — ماء أو داخل بناء'); return; }
     closeWM();
