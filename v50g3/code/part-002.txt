@@ -2972,18 +2972,19 @@ const Q6 = (() => {
   const QQ = new URLSearchParams(location.search), ON = !/[?&]q6=0\b/.test(location.search) && !/[?&]v50g5=0\b/.test(location.search);
   const LOW = () => S.preset === 'low' || S.preset === 'vlow', FLG = k => ON && LOW() && QQ.get('q6' + k) !== '0';
   const UG = { value: 0 }, UD = { value: 0 }, UR = { value: 0 }, UT = { value: 0 }, URES = { value: new THREE.Vector2(1, 1) };
-  const GL_G = '\nuniform float uQ6G; uniform float uQ6D; uniform vec2 uQ6Sz;\n{ vec3 q6s = clamp(gl_FragColor.rgb, 0.0, 1.0);\n  vec3 q6w = q6s * q6s * (3.0 - 2.0 * q6s); q6s = mix(q6s, q6w, 0.10 * uQ6G);\n  float q6l = dot(q6s, vec3(0.2126, 0.7152, 0.0722)); q6s = mix(vec3(q6l), q6s, 1.0 + 0.06 * uQ6G);\n  q6s *= mix(vec3(1.0), vec3(1.025, 1.0, 0.965), uQ6G);\n  q6s += vec3(0.012, 0.006, 0.0) * (1.0 - q6l) * uQ6G;\n  vec2 q6q = gl_FragCoord.xy / uQ6Sz - 0.5; q6s *= 1.0 - 0.12 * uQ6G * 1.6 * dot(q6q, q6q);\n  gl_FragColor.rgb = mix(gl_FragColor.rgb, q6s, uQ6G);\n  gl_FragColor.rgb += (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) * (uQ6D / 255.0); }';
+  const GL_G = '\n{ vec3 q6s = clamp(gl_FragColor.rgb, 0.0, 1.0);\n  vec3 q6w = q6s * q6s * (3.0 - 2.0 * q6s); q6s = mix(q6s, q6w, 0.10 * uQ6G);\n  float q6l = dot(q6s, vec3(0.2126, 0.7152, 0.0722)); q6s = mix(vec3(q6l), q6s, 1.0 + 0.06 * uQ6G);\n  q6s *= mix(vec3(1.0), vec3(1.025, 1.0, 0.965), uQ6G);\n  q6s += vec3(0.012, 0.006, 0.0) * (1.0 - q6l) * uQ6G;\n  vec2 q6q = gl_FragCoord.xy / uQ6Sz - 0.5; q6s *= 1.0 - 0.12 * uQ6G * 1.6 * dot(q6q, q6q);\n  gl_FragColor.rgb = mix(gl_FragColor.rgb, q6s, uQ6G);\n  gl_FragColor.rgb += (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) * (uQ6D / 255.0); }';
   const GL_R = '\n  { vec3 q6v = normalize(vViewPosition); float q6r = pow(clamp(1.0 - abs(dot(q6v, normal)), 0.0, 1.0), 2.6); reflectedLight.directDiffuse += diffuseColor.rgb * vec3(0.30, 0.38, 0.52) * q6r * uQ6R; }';
   const GL_T = '\n  { float q6tn = tN(wq * 0.013); diffuseColor.rgb *= mix(vec3(1.0), mix(vec3(0.94, 0.905, 0.87), vec3(1.05, 1.03, 1.0), q6tn), uQ6T); }';
   const st = { wrap: 0, grade: 0, rim: 0, tint: 0, sweeps: 0 };
+  const DECL = (sh, d) => { const i = sh.fragmentShader.indexOf('void main()'); if (i >= 0) sh.fragmentShader = sh.fragmentShader.slice(0, i) + d + '\n' + sh.fragmentShader.slice(i); };   /* Tab fix: uniforms must be declared at file scope, not inside main() */
   function hook(m, sh) {
     const fs = sh.fragmentShader;
     if (fs.indexOf('uQ6G') < 0) { const AN = '#include <fog_fragment>', AL = '#include <colorspace_fragment>', at = fs.indexOf(AN) >= 0 ? AN : fs.indexOf(AL) >= 0 ? AL : '';
-      if (at) { sh.uniforms.uQ6G = UG; sh.uniforms.uQ6D = UD; sh.uniforms.uQ6Sz = URES; sh.fragmentShader = fs.replace(at, at + GL_G); st.grade++; } }
+      if (at) { sh.uniforms.uQ6G = UG; sh.uniforms.uQ6D = UD; sh.uniforms.uQ6Sz = URES; sh.fragmentShader = fs.replace(at, at + GL_G); DECL(sh, 'uniform float uQ6G; uniform float uQ6D; uniform vec2 uQ6Sz;'); st.grade++; } }
     if (sh.fragmentShader.indexOf('uQ6R') < 0 && sh.fragmentShader.indexOf('#include <lights_fragment_end>') >= 0 && sh.fragmentShader.indexOf('vViewPosition') >= 0) {
-      sh.uniforms.uQ6R = UR; sh.fragmentShader = sh.fragmentShader.replace('#include <lights_fragment_end>', '#include <lights_fragment_end>' + GL_R); st.rim++; }
+      sh.uniforms.uQ6R = UR; sh.fragmentShader = sh.fragmentShader.replace('#include <lights_fragment_end>', '#include <lights_fragment_end>' + GL_R); DECL(sh, 'uniform float uQ6R;'); st.rim++; }
     if (m === terrainMat && sh.fragmentShader.indexOf('uQ6T') < 0 && sh.fragmentShader.indexOf('diffuseColor.rgb *= 0.72 + 0.56*dn;') >= 0) {
-      sh.uniforms.uQ6T = UT; sh.fragmentShader = sh.fragmentShader.replace('diffuseColor.rgb *= 0.72 + 0.56*dn;', 'diffuseColor.rgb *= 0.72 + 0.56*dn;' + GL_T); st.tint++; }
+      sh.uniforms.uQ6T = UT; sh.fragmentShader = sh.fragmentShader.replace('diffuseColor.rgb *= 0.72 + 0.56*dn;', 'diffuseColor.rgb *= 0.72 + 0.56*dn;' + GL_T); DECL(sh, 'uniform float uQ6T;'); st.tint++; }
   }
   function wrap(m) { if (!m || !m.onBeforeCompile || m.userData.q6w) return; const pv = m.onBeforeCompile, ck = m.customProgramCacheKey;
     m.onBeforeCompile = function (sh, rd) { pv.call(this, sh, rd); try { hook(m, sh); } catch (e) {} };
