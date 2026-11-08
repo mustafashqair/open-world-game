@@ -1,0 +1,22 @@
+[
+  {
+    "file": "index.html",
+    "base_md5": "0d9acd3cffc43c1a26a5187fca2fb3b6",
+    "instrumented_md5": "e3d1f5f2b99c2f3863c90d68cb91f38b"
+  },
+  {
+    "file": "v50g3/code/part-000.txt",
+    "base_md5": "d9ad223aeaa77b6100239abad6048778",
+    "instrumented_md5": "84f76ceb630befeec7d09180b78e2d1d"
+  },
+  {
+    "file": "v50g3/code/part-001.txt",
+    "base_md5": "497e4de566b5e0afdef655512a5c9107",
+    "instrumented_md5": "ee03efb55d37ccc13d3cb5dcc4ee23b2"
+  },
+  {
+    "file": "v50g3/code/part-002.txt",
+    "base_md5": "88acf35786cc04f1955e66b50fb6ebeb",
+    "instrumented_md5": "cee8348ccf24a84127eb9efa57714c55"
+  }
+]

@@ -1,0 +1,737 @@
+{
+  "status": "loading",
+  "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/158.0.8127.18 Safari/537.36",
+  "sw": "initial-run: allowed",
+  "marks": [
+    {
+      "name": "navigation-start",
+      "time": 0,
+      "detail": {
+        "timeOrigin": 1794118321537.8
+      }
+    },
+    {
+      "name": "code-part-0-fetched",
+      "time": 933
+    },
+    {
+      "name": "code-part-1-fetched",
+      "time": 1000.8999999994412
+    },
+    {
+      "name": "code-part-2-fetched",
+      "time": 1152.2999999998137
+    },
+    {
+      "name": "module-body-start",
+      "time": 7672.5
+    },
+    {
+      "name": "EMB42-start",
+      "time": 16792.799999999814
+    },
+    {
+      "name": "G50-created",
+      "time": 18900
+    },
+    {
+      "name": "TREESET-ready",
+      "time": 19051.099999999627
+    },
+    {
+      "name": "EMB42-network-end",
+      "time": 92468.09999999963
+    },
+    {
+      "name": "EMB42-join-end",
+      "time": 92519.09999999963
+    },
+    {
+      "name": "EMB42-decode-start",
+      "time": 92519.19999999925
+    },
+    {
+      "name": "EMB42-decode-end",
+      "time": 105967.39999999944
+    },
+    {
+      "name": "cityReady-first-observed",
+      "time": 197288.19999999925
+    },
+    {
+      "name": "MODELS-ready",
+      "time": 247429.09999999963
+    }
+  ],
+  "phaseCompletionBytes": {
+    "pre-module": {
+      "cdpCompletedRequests": 0,
+      "cdpCompletionBytes": 0,
+      "resourceCompleted": 27,
+      "resourceTransferSize": 4057656,
+      "resourceEncodedBodySize": 4149316,
+      "resourceDecodedBodySize": 4149316
+    },
+    "module-body-start": {
+      "cdpCompletedRequests": 0,
+      "cdpCompletionBytes": 0,
+      "resourceCompleted": 15,
+      "resourceTransferSize": 0,
+      "resourceEncodedBodySize": 10537581,
+      "resourceDecodedBodySize": 10537581
+    },
+    "G50-created": {
+      "cdpCompletedRequests": 0,
+      "cdpCompletionBytes": 0,
+      "resourceCompleted": 124,
+      "resourceTransferSize": 0,
+      "resourceEncodedBodySize": 70655385,
+      "resourceDecodedBodySize": 70655385
+    }
+  },
+  "crossing": [
+    {
+      "url": "http://127.0.0.1:8868/vendor/fonts/notonaskharabic-RrQKbpV-9Dd1b1OAGA6M9PkyDuVBeN2GHV0.woff2",
+      "start": 18810,
+      "end": 18949.599999999627,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/npcs/npc-male-rigged-lite.glb",
+      "start": 16931.699999999255,
+      "end": 89189.09999999963,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/npcs/npc-female-rigged-lite.glb",
+      "start": 16941.89999999944,
+      "end": 89208.09999999963,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/npcs/player-v3-lite.glb.0",
+      "start": 16946,
+      "end": 89241.79999999981,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/npcs/player-v3-lite.glb.1",
+      "start": 16948.299999999814,
+      "end": 89276.39999999944,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/npcs/player-v3-lite.glb.2",
+      "start": 16952.599999999627,
+      "end": 89288.89999999944,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4b/guard/guard-sword-lite.glb",
+      "start": 16955.299999999814,
+      "end": 89355.5,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4b/guard/guard-spear-lite.glb",
+      "start": 16959.799999999814,
+      "end": 89432.5,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4b/royal-guard/royal-guard-v2-lite.glb",
+      "start": 16971.099999999627,
+      "end": 89543.59999999963,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4b/royal-guard/royal-swordsman-lite.glb",
+      "start": 16971.599999999627,
+      "end": 90089,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4b/royal-guard/royal-archer-lite.glb",
+      "start": 16991,
+      "end": 90167.79999999981,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/houses/house-1.glb.0",
+      "start": 16991.799999999814,
+      "end": 90281.79999999981,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/houses/house-1.glb.1",
+      "start": 16992.299999999814,
+      "end": 90300.09999999963,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/houses/house-1.glb.2",
+      "start": 16992.599999999627,
+      "end": 90322.5,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/houses/house-2.glb.0",
+      "start": 16993,
+      "end": 90335,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/houses/house-2.glb.1",
+      "start": 17003.799999999814,
+      "end": 90404.39999999944,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/houses/house-2.glb.2",
+      "start": 17004,
+      "end": 90416.5,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/houses/house-4.glb.0",
+      "start": 17004.39999999944,
+      "end": 90461.19999999925,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/houses/house-4.glb.1",
+      "start": 17004.599999999627,
+      "end": 90522.19999999925,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/houses/house-4.glb.2",
+      "start": 17004.699999999255,
+      "end": 90564.39999999944,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/houses/house-5.glb.0",
+      "start": 17015.199999999255,
+      "end": 90697.59999999963,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/houses/house-5.glb.1",
+      "start": 17024.299999999814,
+      "end": 90736.59999999963,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/houses/house-5.glb.2",
+      "start": 17029.199999999255,
+      "end": 90752.5,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/shops/blacksmith.glb.0",
+      "start": 17031.5,
+      "end": 90791.69999999925,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/shops/blacksmith.glb.1",
+      "start": 17033.699999999255,
+      "end": 90835.09999999963,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/shops/blacksmith.glb.2",
+      "start": 17036.099999999627,
+      "end": 90846.29999999981,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/shops/food-shop.glb.0",
+      "start": 17036.799999999814,
+      "end": 90879.79999999981,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/shops/food-shop.glb.1",
+      "start": 17039.599999999627,
+      "end": 90916.19999999925,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/shops/food-shop.glb.2",
+      "start": 17040.5,
+      "end": 90930.79999999981,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4/village/village-house-1-lite-v3b.glb",
+      "start": 18324.699999999255,
+      "end": 90968.69999999925,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4/village/village-house-3-lite-v3b.glb",
+      "start": 18331.39999999944,
+      "end": 90992.79999999981,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4/village/village-fence-1-lite-v3b.glb",
+      "start": 18333.799999999814,
+      "end": 91022.79999999981,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4/village/v4/village-props-v4-lite.glb",
+      "start": 18457.799999999814,
+      "end": 91084.29999999981,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4/village/v4/road-props-lite.glb",
+      "start": 18463.599999999627,
+      "end": 91115.79999999981,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/trees33/oak-large-mid.glb?k=oak3",
+      "start": 18465.599999999627,
+      "end": 91124,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/nature/nature-plants-lite.glb",
+      "start": 18467.799999999814,
+      "end": 91168.89999999944,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4/village/v4/gate-v5-lite.glb",
+      "start": 18476.299999999814,
+      "end": 91178.19999999925,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4/village/v4/house-w1-lite.glb",
+      "start": 18488.599999999627,
+      "end": 91185.09999999963,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4/village/v4/house-w3-lite.glb",
+      "start": 18491.599999999627,
+      "end": 91215.69999999925,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4/village/v4/house-w4-lite.glb",
+      "start": 18503.099999999627,
+      "end": 91225.19999999925,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4/village/village-kiosk-1-v5-lite.glb",
+      "start": 18657.799999999814,
+      "end": 91240.79999999981,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4/village/village-kiosk-2-v5-lite.glb",
+      "start": 18670.699999999255,
+      "end": 91280.29999999981,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4/village/village-kiosk-3-v5-lite.glb",
+      "start": 18673.599999999627,
+      "end": 91341.09999999963,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4/village/village-kiosk-4-v5-lite.glb",
+      "start": 18673.799999999814,
+      "end": 91407.79999999981,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/horse.glb",
+      "start": 18728.299999999814,
+      "end": 91432.39999999944,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/shops/supply-shop-lite.glb.0",
+      "start": 18825.199999999255,
+      "end": 91474.79999999981,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/shops/supply-shop-lite.glb.1",
+      "start": 18836.099999999627,
+      "end": 91483.19999999925,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/shops/potion-shop-lite.glb.0",
+      "start": 18838.599999999627,
+      "end": 91499,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/shops/potion-shop-lite.glb.1",
+      "start": 18839.299999999814,
+      "end": 91558.69999999925,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4/shops/food-v5-lite.glb",
+      "start": 18843.599999999627,
+      "end": 91594.09999999963,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4/shops/stable-v6-lite.glb",
+      "start": 18849.199999999255,
+      "end": 91614.39999999944,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4/shops/blacksmith-v7-lite.glb",
+      "start": 18851.799999999814,
+      "end": 91627.79999999981,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4/shops/barn-v41-lite.glb",
+      "start": 18858.299999999814,
+      "end": 91644.5,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4b/shops/stable-keeper-lite.glb",
+      "start": 18868.39999999944,
+      "end": 91658.79999999981,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4b/shops/supply-seller-lite.glb",
+      "start": 18873.099999999627,
+      "end": 91719.59999999963,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4b/shops/potion-seller-lite.glb",
+      "start": 18878.599999999627,
+      "end": 91766.19999999925,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4b/shops/blacksmith-npc-lite.glb",
+      "start": 18883.39999999944,
+      "end": 91823.59999999963,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/vlow4b/shops/food-vendor-lite.glb",
+      "start": 18885.39999999944,
+      "end": 91848.39999999944,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/wagon/merchant-wagon-lite.glb.0",
+      "start": 18887.199999999255,
+      "end": 91896.89999999944,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/wagon/merchant-wagon-lite.glb.1",
+      "start": 18897.799999999814,
+      "end": 91906.09999999963,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/shops/stable.glb.0",
+      "start": 17045.39999999944,
+      "end": 95575.19999999925,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/shops/stable.glb.1",
+      "start": 17046,
+      "end": 95588.29999999981,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    },
+    {
+      "url": "http://127.0.0.1:8868/shops/stable.glb.2",
+      "start": 17047.39999999944,
+      "end": 95594.5,
+      "startPhase": "module-body-start",
+      "completionPhase": "G50-created"
+    }
+  ],
+  "unmappedCDPCount": 587,
+  "longTasks": {
+    "count": 140,
+    "totalMs": 230116,
+    "maxMs": 77277,
+    "largest": [
+      {
+        "start": 7636.399999999441,
+        "duration": 77277,
+        "attribution": [
+          {
+            "name": "unknown",
+            "type": "taskattribution",
+            "containerType": "window",
+            "containerSrc": "",
+            "containerId": "",
+            "containerName": ""
+          }
+        ]
+      },
+      {
+        "start": 142271.5,
+        "duration": 54588,
+        "attribution": [
+          {
+            "name": "unknown",
+            "type": "taskattribution",
+            "containerType": "window",
+            "containerSrc": "",
+            "containerId": "",
+            "containerName": ""
+          }
+        ]
+      },
+      {
+        "start": 200285.7999999998,
+        "duration": 28914,
+        "attribution": [
+          {
+            "name": "unknown",
+            "type": "taskattribution",
+            "containerType": "window",
+            "containerSrc": "",
+            "containerId": "",
+            "containerName": ""
+          }
+        ]
+      },
+      {
+        "start": 117527.29999999981,
+        "duration": 15863,
+        "attribution": [
+          {
+            "name": "unknown",
+            "type": "taskattribution",
+            "containerType": "window",
+            "containerSrc": "",
+            "containerId": "",
+            "containerName": ""
+          }
+        ]
+      },
+      {
+        "start": 232958.59999999963,
+        "duration": 14278,
+        "attribution": [
+          {
+            "name": "unknown",
+            "type": "taskattribution",
+            "containerType": "window",
+            "containerSrc": "",
+            "containerId": "",
+            "containerName": ""
+          }
+        ]
+      },
+      {
+        "start": 133390.69999999925,
+        "duration": 8608,
+        "attribution": [
+          {
+            "name": "unknown",
+            "type": "taskattribution",
+            "containerType": "window",
+            "containerSrc": "",
+            "containerId": "",
+            "containerName": ""
+          }
+        ]
+      },
+      {
+        "start": 229343.59999999963,
+        "duration": 3614,
+        "attribution": [
+          {
+            "name": "unknown",
+            "type": "taskattribution",
+            "containerType": "window",
+            "containerSrc": "",
+            "containerId": "",
+            "containerName": ""
+          }
+        ]
+      },
+      {
+        "start": 92467.89999999944,
+        "duration": 2440,
+        "attribution": [
+          {
+            "name": "unknown",
+            "type": "taskattribution",
+            "containerType": "window",
+            "containerSrc": "",
+            "containerId": "",
+            "containerName": ""
+          }
+        ]
+      },
+      {
+        "start": 85142.39999999944,
+        "duration": 1649,
+        "attribution": [
+          {
+            "name": "unknown",
+            "type": "taskattribution",
+            "containerType": "window",
+            "containerSrc": "",
+            "containerId": "",
+            "containerName": ""
+          }
+        ]
+      },
+      {
+        "start": 104379.09999999963,
+        "duration": 1571,
+        "attribution": [
+          {
+            "name": "unknown",
+            "type": "taskattribution",
+            "containerType": "window",
+            "containerSrc": "",
+            "containerId": "",
+            "containerName": ""
+          }
+        ]
+      }
+    ]
+  },
+  "firstGameplayRAF": {
+    "count": 0,
+    "maxGapMs": null
+  },
+  "snapshot": {
+    "on": true,
+    "phase": "base",
+    "p": 0.4058333333333333,
+    "step": "بناء الأرض",
+    "ready": false,
+    "played": false,
+    "idle": false,
+    "forcePal": false,
+    "forceVW": false,
+    "t0": 18900,
+    "tBase": 0,
+    "tReady": 0,
+    "waits": {},
+    "timeouts": [],
+    "compileMs": 0,
+    "warm": {
+      "n": 0,
+      "tot": 0,
+      "frames": 0,
+      "ms": 0,
+      "verts": 0
+    },
+    "tex": {
+      "n": 0,
+      "tot": 0
+    },
+    "pre": {
+      "n": 0,
+      "ok": 0,
+      "fail": 0
+    },
+    "err": "",
+    "a6": {
+      "on": true,
+      "f": 26,
+      "cur": [
+        6.766360755309374,
+        6.766360755309374
+      ],
+      "thr": null,
+      "full": 93,
+      "cut": 1
+    }
+  },
+  "limitations": [
+    "Bytes are charged to completion phase, not split by wire-time phase. Cross-boundary ResourceTiming entries are listed separately.",
+    "Service-worker-allowed CDP page target excludes some worker traffic; opaque/cached ResourceTiming fields can be zero. No count is physical total traffic without coverage checks.",
+    "An absent milestone/frame list is unobserved, never zero duration or a passing gameplay test."
+  ]
+}
