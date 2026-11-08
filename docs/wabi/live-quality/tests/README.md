@@ -22,3 +22,8 @@ PLAYWRIGHT_MODULE=/absolute/tools/node_modules/playwright node /path/to/tests/gp
 full-game.cjs assumes the assembled repository is ../runtime relative to the working repository, and ../deliverables is output. Adapt these explicit paths when relocating. Its current attempt timed out, and it does not constitute the requested full matrix. Every Playwright run should have an outer wall-clock timeout and retain partial data before evaluating a possibly stalled page.
 
 Additional diagnostic: run `gpu-timing-split.cjs` exactly like gpu-fresh.cjs. It retains hooks/render submission/readback/hash durations separately; it is not an actual game frame benchmark. Run `node /absolute/path/to/tests/shadow-release.mjs` for the additional optional shadow-release object test. Its default patch is the sibling `../05-shadow-release.patch`; set SHADOW_PATCH to override.
+
+
+## Async terrain generation candidate
+
+On a clean worktree at exact #42 head `953902c76948d371b842fb1f9dccf711290f6ad8`, apply `integration/async-terrain-pr-42.patch` (see `../integration/README.md`), then run `node /path/to/tests/async-terrain-generation.cjs` from this docs folder. The test asserts source guards and models stale results across successive generations; it is not an execution of the game worker. Full-game rapid-switch, moving-camera and terrain-readiness tests remain required.
