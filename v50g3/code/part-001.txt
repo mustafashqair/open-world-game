@@ -4362,7 +4362,7 @@ function applySettings() {
   if (applySettings.lastVeg !== undefined && applySettings.lastVeg !== S.veg) {   // تغيّر الكثافة: إعادة بناء كل القطع
     for (const c of chunks.values()) killChunk(c); chunks.clear(); pending.clear(); queue = []; }
   applySettings.lastVeg = S.veg;
-  terrainMat.needsUpdate = true; updateChunks(); saveSettings();
+  terrainMat.needsUpdate = true; updateChunks(); saveSettings(); LIVEPRESET.notify();
 }
 window.__G50G = { preset: () => S.preset, setPreset: p => { setPreset(p); saveSettings(); }, view: () => S.view, setView: v => { S.view = Math.max(3, Math.min(13, +v || S.view)); saveSettings(); }, fps: () => !!S.fps, setFps: v => { S.fps = !!v; saveSettings(); try { buildPanel(); } catch (e) {} }, hud: v => { if (window.__g50hud) window.__g50hud(v); }, panel: v => togglePanel(v) };   // v50g
 function fillRange(el) { const p = (el.value - el.min) / (el.max - el.min) * 100; el.style.setProperty('--fill', p + '%'); }
