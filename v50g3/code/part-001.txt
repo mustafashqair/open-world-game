@@ -3655,7 +3655,7 @@ function npcGoal(n) {                             // الروتين اليومي
     if (Math.hypot(PL.x - n.x, PL.z - n.z) > 150) { n.lock37 = false; n.rt37 = null; }   // بعيد عن اللاعب: حركة مبسّطة مباشرة
     else if (op && n.shop.r37 && !n.lock37 && !n.rt37 && Math.hypot(k[0] - n.x, k[1] - n.z) > 0.6) { const e = n.shop.r37[0]; return [e[0], e[1], 'post', n.shop.nf ?? n.shop.face]; }   // يدخل المحل من فتحة الكاونتر ثم ينزلق لنقطته
     return op ? [k[0], k[1], 'post', n.shop.nf ?? n.shop.face] : [hd[0], hd[1], 'sleep']; }
-  if (n.shop && n.shop.s20 && NPCFIX) { const k = n.shop.keeper; if (T >= 5.5 && T < 21) { n.__npcfixHomeCheckT = 0; return [k[0], k[1], 'post', n.shop.nf ?? n.shop.face]; } if (Math.hypot(hd[0] - k[0], hd[1] - k[1]) > 40) return [k[0], k[1], 's20fade', n.shop.nf ?? n.shop.face]; // أبعد من مدى A* المحلي: يبقى عند المحل حتى يخرج اللاعب عن الرؤية return npcFixHomeDoorReachable(n) ? [hd[0], hd[1], 's20home'] : [k[0], k[1], 'post', n.shop.nf ?? n.shop.face]; }
+  if (n.shop && n.shop.s20 && NPCFIX) { const k = n.shop.keeper; if (T >= 5.5 && T < 21) { n.__npcfixHomeCheckT = 0; return [k[0], k[1], 'post', n.shop.nf ?? n.shop.face]; } if (Math.hypot(hd[0] - k[0], hd[1] - k[1]) > 40) return [k[0], k[1], 's20fade', n.shop.nf ?? n.shop.face]; return npcFixHomeDoorReachable(n) ? [hd[0], hd[1], 's20home'] : [k[0], k[1], 'post', n.shop.nf ?? n.shop.face]; } // أبعد من مدى A* المحلي: يبقى عند المحل حتى يخرج اللاعب عن الرؤية
   if (T >= 22.5 || T < 5.5) return [hd[0], hd[1], 'sleep'];
   if (ENV.rain > 0.4 && !n.shop) return [hd[0], hd[1], 'shelter'];
   if (n.shop) { if (T >= 7 && T < 19) { if (n.stT <= 0) { n.sd = -n.sd; n.stT = 3.5 + Math.random() * 2; }
