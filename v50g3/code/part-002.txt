@@ -2954,19 +2954,59 @@ const LAM = (() => { const tw = new Map(), st = { n: 0, skip: 0 }; let t = 0, on
         if (o3) { st.n3 = (st.n3 || 0) + 1; { const hk = m.onBeforeCompile !== dflt ? m.onBeforeCompile : null, ck = m.customProgramCacheKey, ckD = ck === THREE.Material.prototype.customProgramCacheKey, ei = m.envMapIntensity == null ? 1 : m.envMapIntensity; w.onBeforeCompile = function (sh, r) { if (hk) hk.call(this, sh, r); L3AMB.inject(sh, ei * L3AMB.k, !!m.envMap); }; w.customProgramCacheKey = function () { return (hk ? (ckD ? hk.toString() : ck.call(m)) : '') + '|lam3a'; }; if (hk) st.h3 = (st.h3 || 0) + 1; }
           if (m.envMap && !m.emissiveMap && m.envMapIntensity > 0) w.emissive.add(m.color.clone().multiplyScalar(Math.min(0.15, 0.25 * m.envMapIntensity)));   /* بدل إضاءة البيئة: ضو ثابت خفيف */
           if (m.normalMap) { w.normalMap = m.normalMap; w.normalMapType = m.normalMapType; if (m.normalScale) w.normalScale.copy(m.normalScale); }   /* hooks that read normalMap need it declared on the twin too */
-          w.userData.lam3 = 1; } } catch (e) { w = null; } }
+          w.userData.lam3 = 1; } if (window.__Q6 && __Q6.wrap) { try { __Q6.wrap(w); } catch (e) {} } } catch (e) { w = null; } }
     else st.skip++;
-    tw.set(m, w); return w; }
+    tw.set(m, w); if (window.__Q6 && __Q6.wrap && !w) { try { __Q6.wrap(m); } catch (e) {} } return w; }
   function sweep() { scene.traverse(o => { if (!o.isMesh || !o.material || o.userData.noLam) return; if (L3 && o.isSkinnedMesh) for (const mm of (Array.isArray(o.material) ? o.material : [o.material])) if (mm && mm.userData && tw.get(mm) === undefined) mm.userData.sk3 = 1;
       if (Array.isArray(o.material)) { let ch = false; const a = o.material.map(mm => { const w = twin(mm); if (w) { ch = true; return w; } return mm; }); if (ch) o.material = a; }
       else { const w = twin(o.material); if (w) o.material = w; } }); }
   function tick(dt) { if (!on || S.preset !== 'vlow' || window.__QUALITY === 'high') return; t -= dt; if (t > 0) return; t = (st.sw = (st.sw || 0) + 1) > 4 ? 10 : 2; try { sweep(); if (L3) check3(); } catch (e) { on = false; console.warn('[lam]', e); } }
   function apply(root) { if (!on || S.preset !== 'vlow' || window.__QUALITY === 'high') return; root.traverse(o => { if (!o.isMesh || !o.material || o.userData.noLam) return; if (L3 && o.isSkinnedMesh) for (const mm of (Array.isArray(o.material) ? o.material : [o.material])) if (mm && mm.userData && tw.get(mm) === undefined) mm.userData.sk3 = 1; if (Array.isArray(o.material)) { let ch = false; const a = o.material.map(mm => { const w = twin(mm); if (w) { ch = true; return w; } return mm; }); if (ch) o.material = a; } else { const w = twin(o.material); if (w) o.material = w; } }); }
   /* v50g3: إذا الشيدر المبسط ما اشتغل (خطأ ترجمة) منرجّع المادة الأصلية */
-  function check3() { if (!L3) return 0; let k = 0; scene.traverse(o => { if (!o.isMesh || !o.material) return; const fix = mm => { if (!mm || !mm.userData || !mm.userData.lam3) return mm; const p = renderer.properties.get(mm), pr = p && p.currentProgram; if (pr && pr.diagnostics && pr.diagnostics.runnable === false) { const m0 = mm.userData.lamOf; tw.set(m0, null); k++; return m0; } return mm; }; if (Array.isArray(o.material)) o.material = o.material.map(fix); else o.material = fix(o.material); }); st.bad3 = (st.bad3 || 0) + k; return k; }
+  function check3() { if (!L3) return 0; let k = 0; scene.traverse(o => { if (!o.isMesh || !o.material) return; const fix = mm => { if (!mm || !mm.userData || !mm.userData.lam3) return mm; const p = renderer.properties.get(mm), pr = p && p.currentProgram; if (pr && pr.diagnostics && pr.diagnostics.runnable === false) { const m0 = mm.userData.lamOf; tw.set(m0, null); if (window.__Q6 && __Q6.wrap) { try { __Q6.wrap(m0); } catch (e) {} } k++; return m0; } return mm; }; if (Array.isArray(o.material)) o.material = o.material.map(fix); else o.material = fix(o.material); }); st.bad3 = (st.bad3 || 0) + k; return k; }
   function pend(m) { if (!on || S.preset !== 'vlow' || window.__QUALITY === 'high' || !m) return false; if (m.type !== 'MeshStandardMaterial' && m.type !== 'MeshPhysicalMaterial') return false; return tw.get(m) !== null; }
   return { tick, st, apply, check3, L3, pend }; })();
 window.__LAM = LAM;
+/* ═══ v50g5 Q6: قفزة بصرية على «منخفض/منخفضة جدا» بلا أي مرحلة رسم إضافية — تدرّج الصورة (منحنى «متوسط» نفسه: تباين، تشبّع، دفء، ظلال دافئة، تظليل أطراف) مطوي داخل خامات المشهد نفسها بعد الضباب، حافة باردة خفيفة على المواد المضاءة (تُبرز الشخصيات)، ضباب يبدأ أقرب فتبدو المسافات أعمق، موجتان للماء بدل موجة، تنقيط نصف LSB ضد تعرّق السماء/الضباب، وتنويع حرارة واسع للتراب. ‏?q6=0 أو ?v50g5=0 = مطفّي بالكامل؛ ‏?q6a=0 ?q6b=0 ?q6c=0 ?q6d=0 ?q6e=0 ?q6f=0 كل وحدة لحالها؛ «متوسط/عالي»: كل القيم صفر ← نفس مخرجات الأساس بالبايت ═══ */
+const Q6 = (() => {
+  const QQ = new URLSearchParams(location.search), ON = !/[?&]q6=0\b/.test(location.search) && !/[?&]v50g5=0\b/.test(location.search);
+  const LOW = () => S.preset === 'low' || S.preset === 'vlow', FLG = k => ON && LOW() && QQ.get('q6' + k) !== '0';
+  const UG = { value: 0 }, UD = { value: 0 }, UR = { value: 0 }, UT = { value: 0 }, URES = { value: new THREE.Vector2(1, 1) };
+  const GL_G = '\n{ vec3 q6s = clamp(gl_FragColor.rgb, 0.0, 1.0);\n  vec3 q6w = q6s * q6s * (3.0 - 2.0 * q6s); q6s = mix(q6s, q6w, 0.10 * uQ6G);\n  float q6l = dot(q6s, vec3(0.2126, 0.7152, 0.0722)); q6s = mix(vec3(q6l), q6s, 1.0 + 0.06 * uQ6G);\n  q6s *= mix(vec3(1.0), vec3(1.025, 1.0, 0.965), uQ6G);\n  q6s += vec3(0.012, 0.006, 0.0) * (1.0 - q6l) * uQ6G;\n  vec2 q6q = gl_FragCoord.xy / uQ6Sz - 0.5; q6s *= 1.0 - 0.12 * uQ6G * 1.6 * dot(q6q, q6q);\n  gl_FragColor.rgb = mix(gl_FragColor.rgb, q6s, uQ6G);\n  gl_FragColor.rgb += (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) * (uQ6D / 255.0); }';
+  const GL_R = '\n  { vec3 q6v = normalize(vViewPosition); float q6r = pow(clamp(1.0 - abs(dot(q6v, normal)), 0.0, 1.0), 2.6); reflectedLight.directDiffuse += diffuseColor.rgb * vec3(0.30, 0.38, 0.52) * q6r * uQ6R; }';
+  const GL_T = '\n  { float q6tn = tN(wq * 0.013); diffuseColor.rgb *= mix(vec3(1.0), mix(vec3(0.94, 0.905, 0.87), vec3(1.05, 1.03, 1.0), q6tn), uQ6T); }';
+  const st = { wrap: 0, grade: 0, rim: 0, tint: 0, sweeps: 0 };
+  const DECL = (sh, d) => { const i = sh.fragmentShader.indexOf('void main()'); if (i >= 0) sh.fragmentShader = sh.fragmentShader.slice(0, i) + d + '\n' + sh.fragmentShader.slice(i); };   /* Tab fix: uniforms must be declared at file scope, not inside main() */
+  function hook(m, sh) {
+    const fs = sh.fragmentShader;
+    if (fs.indexOf('uQ6G') < 0) { const AN = '#include <fog_fragment>', AL = '#include <colorspace_fragment>', at = fs.indexOf(AN) >= 0 ? AN : fs.indexOf(AL) >= 0 ? AL : '';
+      if (at) { sh.uniforms.uQ6G = UG; sh.uniforms.uQ6D = UD; sh.uniforms.uQ6Sz = URES; sh.fragmentShader = fs.replace(at, at + GL_G); DECL(sh, 'uniform float uQ6G; uniform float uQ6D; uniform vec2 uQ6Sz;'); st.grade++; } }
+    if (sh.fragmentShader.indexOf('uQ6R') < 0 && sh.fragmentShader.indexOf('#include <lights_fragment_end>') >= 0 && /vViewPosition|<lights_lambert_pars_fragment>/.test(sh.fragmentShader)) {
+      sh.uniforms.uQ6R = UR; sh.fragmentShader = sh.fragmentShader.replace('#include <lights_fragment_end>', '#include <lights_fragment_end>' + GL_R); DECL(sh, 'uniform float uQ6R;'); st.rim++; }
+    if ((m === terrainMat || (m.userData && m.userData.lamOf === terrainMat)) && sh.fragmentShader.indexOf('uQ6T') < 0 && sh.fragmentShader.indexOf('diffuseColor.rgb *= 0.72 + 0.56*dn;') >= 0) {
+      sh.uniforms.uQ6T = UT; sh.fragmentShader = sh.fragmentShader.replace('diffuseColor.rgb *= 0.72 + 0.56*dn;', 'diffuseColor.rgb *= 0.72 + 0.56*dn;' + GL_T); DECL(sh, 'uniform float uQ6T;'); st.tint++; }
+  }
+  function wrap(m) { if (!ON || !LOW() || !m || !m.onBeforeCompile || m.onBeforeCompile.__q6) return; if (LAM.pend && LAM.pend(m)) return; const pv = m.onBeforeCompile, ck = m.customProgramCacheKey;
+    m.onBeforeCompile = function (sh, rd) { pv.call(this, sh, rd); try { hook(m, sh); } catch (e) {} };
+    m.customProgramCacheKey = ck ? function () { return ck.call(this) + '|q6'; } : function () { return 'q6|' + pv.toString(); };
+    m.onBeforeCompile.__q6 = 1; m.userData.q6w = 1; m.needsUpdate = true; st.wrap++; }
+  function sweep() { if (!ON) return; st.sweeps++; scene.traverse(o => { if (!o.material) return; if (Array.isArray(o.material)) { for (const mm of o.material) wrap(mm); } else wrap(o.material); }); }
+  const _add = GLB_MAT.add.bind(GLB_MAT);
+  GLB_MAT.add = function (m) { if (ON) { try { wrap(m); } catch (e) {} } return _add(m); };
+  const _srt = renderer.setRenderTarget.bind(renderer), _rs = new THREE.Vector2();
+  renderer.setRenderTarget = function () { const r = _srt.apply(this, arguments); if (arguments[0]) { UG.value = 0; UD.value = 0; UR.value = 0; } else { UG.value = api.g; UD.value = api.d; UR.value = api.r; if (api.g) { renderer.getDrawingBufferSize(_rs); if (_rs.x !== URES.value.x || _rs.y !== URES.value.y) URES.value.set(_rs.x, _rs.y); } } return r; };
+  function apply() { const low = LOW(), on = ON && low;
+    api.fn = !!(on && QQ.get('q6c') !== '0'); api.g = on && QQ.get('q6a') !== '0' ? 1 : 0; api.d = on && QQ.get('q6e') !== '0' ? 1 : 0; api.r = on && QQ.get('q6b') !== '0' ? 0.32 : 0; UT.value = on && QQ.get('q6f') !== '0' ? 1 : 0;
+    if (low) { if (ON && QQ.get('q6d') !== '0' && U.uWaves.value < 2) U.uWaves.value = 2; } else U.uWaves.value = S.wq;
+    UG.value = api.g; UD.value = api.d; UR.value = api.r;
+    if (on) sweep(); }
+  const api = { ON, LOW, FLG, UG, UD, UR, UT, URES, st, wrap, apply, sweep };
+  window.__Q6 = api;
+  try { if (ON) { wrap(terrainMat); wrap(sky.material); wrap(water.material); sweep(); } } catch (e) {}
+  apply();
+  setInterval(() => { if (ON && LOW()) sweep(); }, 7000);
+  return api;
+})();
 /* v50g2 G2L: على «منخفضة جدا» عدد أضواء النقطة بالمشهد ثابت (أقرب ٤ حقيقية، والناقص أضواء وهمية شدتها صفر) → نفس الشيدرات بكل مكان، ولا بناء شيدر جديد لما تتغير الأضواء (القرية ٤، المدينة ٩). ?g2pre=0 يطفيه، ?g2pl=N العدد */
 const G2L = (() => { const L3 = G3V('lights'), on = G2V('pre') || L3, N = L3 ? 0 : Math.max(1, Math.min(9, +(Q4.get('g2pl') || 4))),   /* v50g3: بلا أضواء نقطية حية على «منخفضة جدا» */ set = new Set(), dum = [], hid = [], vis = [], v3 = new THREE.Vector3(); const api = { on, N, L3, set, pre() {}, post() {}, st: { real: 0, hid: 0, dum: 0 } }; window.G2L = api; if (!on) return api;
   try { const PP = THREE.PointLight.prototype; Object.defineProperty(PP, 'visible', { configurable: true, get() { return this._g2v; }, set(v) { this._g2v = v; if (!this._g2r) { this._g2r = 1; set.add(this); } } }); } catch (e) { console.warn('[v50g2] lights', e); }
